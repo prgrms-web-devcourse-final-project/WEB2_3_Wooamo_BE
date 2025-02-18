@@ -1,0 +1,122 @@
+spring:
+  application:
+    name: stuv
+  profiles:
+    active: local
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_EMAIL}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  config:
+    import: optional:file:.env[.properties]
+server:
+  shutdown: graceful
+  servlet:
+    session:
+      timeout: 0
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource: # MariaDB
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: ${MARIA_URL}
+    username: ${MARIA_USER}
+    password: ${MARIA_PASSWORD}
+  kafka:
+    bootstrap-servers: ${KAFKA_URL}
+    consumer:
+      group-id: ${KAFKA_GROUP}
+      auto-offset-reset: earliest
+    producer:
+      retries: 3
+      acks: all
+  jpa:
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+  data:
+    redis:
+      port: ${REDIS_PORT}
+      host: ${REDIS_HOST}
+    mongodb:
+      uri: ${MONGO_URI}
+      auto-index-creation: true
+cloud:
+  aws:
+    s3:
+      bucket: ${AWS_S3_BUCKET}
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+    region:
+      static: ap-northeast-2
+payment:
+  toss:
+    test_secret_api_key: ${TOSS_TEST_SECRET_KEY}
+---
+spring:
+  config:
+    activate:
+      on-profile: test
+  datasource: # H2DB
+    driver-class-name: org.h2.Driver
+    url: ${H2_URL}
+    username: ${H2_USER}
+    password: ${H2_PASSWORD}
+  kafka:
+    bootstrap-servers: ${KAFKA_URL}
+    consumer:
+      group-id: ${KAFKA_GROUP}
+      auto-offset-reset: earliest
+    producer:
+      retries: 3
+      acks: all
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+  data:
+    redis:
+      port: ${REDIS_PORT}
+      host: ${REDIS_HOST}
+    mongodb:
+      uri: ${MONGO_URI}
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+cloud:
+  aws:
+    s3:
+      bucket: test
+    credentials:
+      access-key: test
+      secret-key: test
+    region:
+      static: ap-northeast-2
+
+payment:
+  toss:
+    test_secret_api_key: ${TOSS_TEST_SECRET_KEY}
+---
