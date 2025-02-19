@@ -1,4 +1,4 @@
-package com.api.stuv.global.dto;
+package com.api.stuv.global.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
