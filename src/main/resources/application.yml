@@ -75,13 +75,13 @@ spring:
       on-profile: test
   datasource: # H2DB
     driver-class-name: org.h2.Driver
-    url: ${H2_URL}
-    username: ${H2_USER}
-    password: ${H2_PASSWORD}
+    url: jdbc:h2:mem:stuv;MODE=MySQL
+    username: sa
+    password:
   kafka:
-    bootstrap-servers: ${KAFKA_URL}
+    bootstrap-servers: localhost:9092
     consumer:
-      group-id: ${KAFKA_GROUP}
+      group-id: test-group
       auto-offset-reset: earliest
     producer:
       retries: 3
@@ -98,10 +98,10 @@ spring:
     open-in-view: false
   data:
     redis:
-      port: ${REDIS_PORT}
-      host: ${REDIS_HOST}
+      port: 6379
+      host: localhost
     mongodb:
-      uri: ${MONGO_URI}
+      uri: mongodb://localhost:27017/test
   h2:
     console:
       enabled: true
