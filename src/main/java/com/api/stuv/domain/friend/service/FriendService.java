@@ -18,13 +18,13 @@ public class FriendService {
     private final FriendRepository friendRepository;
 
     @Transactional
-    public RequestFriend requestFriend(Long userId, Long friendId) {
+    public FriendRequestResponse requestFriend(Long userId, Long friendId) {
         // 두 유저가 존재하지 않을 경우
         if ( userRepository.isDuplicateIds(Arrays.asList(userId, friendId)) != 2 ) throw new IllegalArgumentException("존재하지 않는 유저입니다."); // 나중에 Error Code 수정
 
         // 이미 친구 요청을 보냈을 경우
         if (friendRepository.isFriendshipDuplicate(userId, friendId) > 0) throw new IllegalArgumentException("이미 친구 요청을 보냈습니다."); // 나중에 Error Code 수정
 
-        return RequestFriend.from(friendRepository.save(Friend.create(userId, friendId)));
+        return FriendRequestResponse.from(friendRepository.save(Friend.create(userId, friendId)));
     }
 }

@@ -18,7 +18,7 @@ public class FriendController {
 
     @Operation(summary = "친구 요청 API", description = "특정 유저에게 친구 요청을 합니다.")
     @PostMapping("/request/{friendId}") // Security 적용 되서 userId는 AuthenticationPrincipal로 받아올 수 있을 때까지 임시로 적용
-    public ResponseEntity<RequestFriend> requestFriend(@RequestBody Long userId, @PathVariable Long friendId) {
+    public ResponseEntity<FriendRequestResponse> requestFriend(@RequestBody Long userId, @PathVariable Long friendId) {
         return ResponseEntity.ok()
                 .body(friendService.requestFriend(userId, friendId));
     }
