@@ -6,10 +6,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
@@ -20,8 +17,8 @@ public class FriendController {
     private final FriendService friendService;
 
     @Operation(summary = "친구 요청 API", description = "특정 유저에게 친구 요청을 합니다.")
-    @PostMapping("/request/{friendId}/{userId}") // Security 적용 되서 userId는 AuthenticationPrincipal로 받아올 수 있을 때까지 임시로 적용
-    public ResponseEntity<RequestFriend> requestFriend(@PathVariable Long userId, @PathVariable Long friendId) {
+    @PostMapping("/request/{friendId}") // Security 적용 되서 userId는 AuthenticationPrincipal로 받아올 수 있을 때까지 임시로 적용
+    public ResponseEntity<RequestFriend> requestFriend(@RequestBody Long userId, @PathVariable Long friendId) {
         return ResponseEntity.ok()
                 .body(friendService.requestFriend(userId, friendId));
     }
