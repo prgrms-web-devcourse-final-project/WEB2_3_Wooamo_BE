@@ -4,11 +4,12 @@ import com.api.stuv.domain.friend.entity.Friend;
 
 public record FriendResponse() {
     public record RequestFriend(
-            Long userId,
-            Long friendId
+            Long friendId,
+            Long senderId,
+            Long receiverId
     ) {
         public static RequestFriend from(Friend friend) {
-            return new RequestFriend(friend.getUserId(), friend.getFriendId());
+            return new RequestFriend(friend.getFriendId(), friend.getUserId(), friend.getFriendId());
         }
     }
 }
