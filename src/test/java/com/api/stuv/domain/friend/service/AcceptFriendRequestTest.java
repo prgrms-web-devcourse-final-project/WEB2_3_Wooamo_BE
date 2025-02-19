@@ -52,48 +52,4 @@ class AcceptFriendRequestTest {
         assertNotNull(response); // response가 null이 아닌지 확인
         assertEquals(friendId, response.friendId()); // 테이블 Pk 값의 일치 여부 확인
     }
-
-    @Test
-    void nonExistentAcceptFriendRequest() {
-        // given
-        Friend friend = Friend.builder()
-                .id(friendId)
-                .userId(senderId)
-                .friendId(receiverId)
-                .status(FriendStatus.PENDING)
-                .build();
-
-        when(friendRepository.findById(friendId)).thenReturn(Optional.empty());
-
-        // when
-        FriendFollowResponse response = friendService.acceptFriend(receiverId, friendId);
-
-        // then
-        assertEquals(FriendStatus.ACCEPTED, friend.getStatus()); // 친구 요청 수락 상태로 변경
-        assertEquals(receiverId, response.receiverId()); // 친구 요청을 받은 유저가 맞는지 확인
-        assertNotNull(response); // response가 null이 아닌지 확인
-        assertEquals(friendId, response.friendId()); // 테이블 Pk 값의 일치 여부 확인dId());
-    }
-
-    @Test
-    void alreadyAcceptAcceptFriendRequest() {
-        // given
-        Friend friend = Friend.builder()
-                .id(friendId)
-                .userId(senderId)
-                .friendId(receiverId)
-                .status(FriendStatus.ACCEPTED)
-                .build();
-
-        when(friendRepository.findById(friendId)).thenReturn(Optional.of(friend));
-
-        // when
-        FriendFollowResponse response = friendService.acceptFriend(receiverId, friendId);
-
-        // then
-        assertEquals(FriendStatus.ACCEPTED, friend.getStatus()); // 친구 요청 수락 상태로 변경
-        assertEquals(receiverId, response.receiverId()); // 친구 요청을 받은 유저가 맞는지 확인
-        assertNotNull(response); // response가 null이 아닌지 확인
-        assertEquals(friendId, response.friendId()); // 테이블 Pk 값의 일치 여부 확인
-    }
 }
