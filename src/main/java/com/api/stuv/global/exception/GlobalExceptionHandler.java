@@ -10,16 +10,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-    // 비즈니스 서비스
-    @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ErrorResponse> handleCustomException(BusinessException e) {
-        ErrorCode error = e.getErrorCode();
-        return ResponseEntity
-                .status(error.getStatus())
-                .body(new ErrorResponse(error.getMessage(), error.getStatus().toString()));
-    }
-
     // DB 관련 예외
     @ExceptionHandler(DataAccessException.class)
     protected ResponseEntity<ErrorResponse> handleDataAccessException(DataAccessException e) {
