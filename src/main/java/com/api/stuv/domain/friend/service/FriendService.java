@@ -2,6 +2,7 @@ package com.api.stuv.domain.friend.service;
 
 import com.api.stuv.domain.friend.dto.*;
 import com.api.stuv.domain.friend.entity.Friend;
+import com.api.stuv.domain.friend.entity.FriendStatus;
 import com.api.stuv.domain.friend.repository.FriendRepository;
 import com.api.stuv.domain.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -17,6 +18,7 @@ public class FriendService {
     private final UserRepository userRepository;
     private final FriendRepository friendRepository;
 
+    // TODO: 알림 기능 추가시 알림 생성 로직 추가
     @Transactional
     public FriendFollowResponse requestFriend(Long userId, Long friendId) {
         // 두 유저가 존재하지 않을 경우
@@ -26,5 +28,18 @@ public class FriendService {
         if (friendRepository.isFriendshipDuplicate(userId, friendId) > 0) throw new IllegalArgumentException("이미 친구 요청을 보냈습니다."); // 나중에 Error Code 수정
 
         return FriendFollowResponse.from(friendRepository.save(Friend.create(userId, friendId)));
+    }
+
+    // TODO: 유저 인증 기능 추가시, 현재 유저에 대한 친구 요청인지 확인하는 로직 추가
+    @Transactional
+    public FriendFollowResponse acceptFriend(Long userId, Long friendId) {
+        Friend friend = friendRepository.findById(friendId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 친구 요청입니다.")); // 나중에 Error Code 수정
+
+        if ( !friend.getFriendId().equals(userId) ) throw new IllegalArgumentException("해당 친구 요청에 대한 권한이 없습니다."); // 나중에 Error Code 수정
+        if ( friend.getStatus().equals(FriendStatus.ACCEPTED) ) throw new IllegalArgumentException("이미 수락된 친구요청입니다."); // 나중에 Error Code 수정
+
+        friend.accept(); // 친구 요청 수락
+
+        return FriendFollowResponse.from(friend);
     }
 }
