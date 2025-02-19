@@ -30,6 +30,7 @@ public class FriendService {
         return FriendFollowResponse.from(friendRepository.save(Friend.create(userId, friendId)));
     }
 
+    // TODO: 유저 인증 기능 추가시, 현재 유저에 대한 친구 요청인지 확인하는 로직 추가
     @Transactional
     public FriendFollowResponse acceptFriend(Long friendId) {
         Friend friend = friendRepository.findById(friendId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 친구 요청입니다.")); // 나중에 Error Code 수정
