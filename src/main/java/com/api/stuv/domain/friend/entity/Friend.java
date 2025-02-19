@@ -1,4 +1,4 @@
-package com.api.stuv.domain.user.entity;
+package com.api.stuv.domain.friend.entity;
 
 import com.api.stuv.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;

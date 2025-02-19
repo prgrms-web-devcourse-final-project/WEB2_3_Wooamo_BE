@@ -28,12 +28,17 @@ public class PartyGroup extends BaseTimeEntity {
 
     private Long usersCount;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PartyStatus status;
+
     @Builder
-    public PartyGroup(Long managerId, String name, String context, BigDecimal bettingPoint, Long usersCount) {
+    public PartyGroup(Long managerId, String name, String context, BigDecimal bettingPoint, Long usersCount, PartyStatus status) {
         this.managerId = managerId;
         this.name = name;
         this.context = context;
         this.bettingPoint = bettingPoint;
         this.usersCount = usersCount;
+        this.status = status;
     }
 }

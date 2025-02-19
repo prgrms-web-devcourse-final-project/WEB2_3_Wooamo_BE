@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PageResponse<T> {
-    private final List<T> content;
+    private final List<T> contents;
     private final int currentPage;
     private final int size;
     private final long totalElements;
@@ -17,7 +17,7 @@ public class PageResponse<T> {
     private final boolean hasNext;
 
     public PageResponse(Page<T> page) {
-        this.content = page.getContent();
+        this.contents = page.getContent();
         this.currentPage = page.getNumber() + 1;
         this.size = page.getSize();
         this.totalElements = page.getTotalElements();

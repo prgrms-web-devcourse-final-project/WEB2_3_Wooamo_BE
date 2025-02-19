@@ -1,4 +1,4 @@
-package com.api.stuv.domain.user.entity;
+package com.api.stuv.domain.timer.entity;
 
 
 import jakarta.persistence.*;

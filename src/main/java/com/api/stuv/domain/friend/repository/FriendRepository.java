@@ -1,6 +1,6 @@
-package com.api.stuv.domain.user.repository;
+package com.api.stuv.domain.friend.repository;
 
-import com.api.stuv.domain.user.entity.Friend;
+import com.api.stuv.domain.friend.entity.Friend;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
