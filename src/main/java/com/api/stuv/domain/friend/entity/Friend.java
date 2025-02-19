@@ -23,7 +23,8 @@ public class Friend extends BaseTimeEntity {
     private FriendStatus status;
 
     @Builder
-    public Friend(Long userId, Long friendId, FriendStatus status) {
+    public Friend(Long id, Long userId, Long friendId, FriendStatus status) {
+        this.id = id;
         this.userId = userId;
         this.friendId = friendId;
         this.status = status;

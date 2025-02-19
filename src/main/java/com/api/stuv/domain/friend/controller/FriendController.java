@@ -25,8 +25,8 @@ public class FriendController {
 
     @Operation(summary = "친구 수락 API", description = "특정 친구 요청을 수락 합니다.")
     @PatchMapping("/{friendId}") // Security 적용 되서 userId는 AuthenticationPrincipal로 받아올 수 있을 때까지 임시로 적용
-    public ResponseEntity<FriendFollowResponse> acceptFriend(@PathVariable Long friendId) {
+    public ResponseEntity<FriendFollowResponse> acceptFriend(@RequestBody Long userId, @PathVariable Long friendId) {
         return ResponseEntity.ok()
-                .body(friendService.acceptFriend(friendId));
+                .body(friendService.acceptFriend(userId, friendId));
     }
 }
