@@ -9,7 +9,7 @@ public record FriendResponse() {
             Long receiverId
     ) {
         public static RequestFriend from(Friend friend) {
-            return new RequestFriend(friend.getFriendId(), friend.getUserId(), friend.getFriendId());
+            return new RequestFriend(friend.getId(), friend.getUserId(), friend.getFriendId());
         }
     }
 }
