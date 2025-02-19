@@ -36,4 +36,6 @@ public class Friend extends BaseTimeEntity {
             .status(FriendStatus.PENDING)
             .build();
     }
+
+    public void accept() { this.status = FriendStatus.ACCEPTED; }
 }

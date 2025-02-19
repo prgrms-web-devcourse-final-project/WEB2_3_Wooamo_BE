@@ -22,4 +22,11 @@ public class FriendController {
         return ResponseEntity.ok()
                 .body(friendService.requestFriend(userId, friendId));
     }
+
+    @Operation(summary = "친구 수락 API", description = "특정 친구 요청을 수락 합니다.")
+    @PatchMapping("/{friendId}") // Security 적용 되서 userId는 AuthenticationPrincipal로 받아올 수 있을 때까지 임시로 적용
+    public ResponseEntity<FriendFollowResponse> acceptFriend(@PathVariable Long friendId) {
+        return ResponseEntity.ok()
+                .body(friendService.acceptFriend(friendId));
+    }
 }
