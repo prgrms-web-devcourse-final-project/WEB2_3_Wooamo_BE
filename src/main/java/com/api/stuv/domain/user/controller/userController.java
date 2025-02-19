@@ -1,6 +1,6 @@
 package com.api.stuv.domain.user.controller;
 
-import com.api.stuv.domain.user.dto.userDTO;
+import com.api.stuv.domain.user.dto.request.UserRequest;
 import com.api.stuv.domain.user.service.userService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -17,9 +17,9 @@ public class userController {
     private final userService userservice;
 
     @PostMapping("/register")
-    private String registerUser(@RequestBody userDTO userDTO){
-        System.out.println(userDTO.getEmail());
-        userservice.registerUser(userDTO);
+    private String registerUser(@RequestBody UserRequest userRequest){
+        System.out.println(userRequest.email());
+        userservice.registerUser(userRequest);
 
         return "success";
     }

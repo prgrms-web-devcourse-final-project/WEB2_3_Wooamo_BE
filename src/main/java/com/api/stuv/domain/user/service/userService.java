@@ -1,6 +1,6 @@
 package com.api.stuv.domain.user.service;
 
-import com.api.stuv.domain.user.dto.userDTO;
+import com.api.stuv.domain.user.dto.request.UserRequest;
 import com.api.stuv.domain.user.entity.RoleType;
 import com.api.stuv.domain.user.entity.User;
 import com.api.stuv.domain.user.repository.UserRepository;
@@ -14,10 +14,10 @@ public class userService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public void registerUser(userDTO userDTO){
-        String email = userDTO.getEmail();
-        String password = userDTO.getPassword();
-        String nickname = userDTO.getNickname();
+    public void registerUser(UserRequest userRequest) {
+        String email = userRequest.email();
+        String password = userRequest.password();
+        String nickname = userRequest.nickname();
 
         Boolean isExist = userRepository.existsByEmail(email);
 
