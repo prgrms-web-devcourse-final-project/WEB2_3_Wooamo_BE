@@ -1,5 +1,6 @@
 package com.api.stuv.domain.user.service;
 
+import com.api.stuv.domain.user.dto.request.EmailCertificationRequest;
 import com.api.stuv.domain.user.dto.request.UserRequest;
 import com.api.stuv.domain.user.entity.RoleType;
 import com.api.stuv.domain.user.entity.User;
@@ -71,7 +72,10 @@ public class userService {
     }
 
     @Transactional
-    public boolean checkCertificateEmail(String email, String userCode){
+    public boolean checkCertificateEmail(EmailCertificationRequest emailCertificationRequest){
+        String userCode = emailCertificationRequest.code();
+        String email = emailCertificationRequest.email();
+
         String code = redisService.find(email, String.class);
 
         if(code == null){

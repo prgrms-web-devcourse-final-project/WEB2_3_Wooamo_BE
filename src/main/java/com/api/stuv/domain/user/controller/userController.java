@@ -1,7 +1,9 @@
 package com.api.stuv.domain.user.controller;
 
+import com.api.stuv.domain.user.dto.request.EmailCertificationRequest;
 import com.api.stuv.domain.user.dto.request.UserRequest;
 import com.api.stuv.domain.user.service.userService;
+import com.api.stuv.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,28 +17,29 @@ public class userController {
     private final userService userservice;
 
     @PostMapping("/register")
-    private String registerUser(@RequestBody UserRequest userRequest){
+    private ResponseEntity<ApiResponse<Void>> registerUser(@RequestBody UserRequest userRequest){
         System.out.println(userRequest.email());
         userservice.registerUser(userRequest);
 
-        return "success";
+        return ResponseEntity.ok()
+                .body(ApiResponse.success());
     }
 
     @PostMapping("/auth/send")
-    public String sendCertificateEmail(@RequestBody UserRequest userRequest){
+    public ResponseEntity<ApiResponse<Void>> sendCertificateEmail(@RequestBody UserRequest userRequest){
         userservice.sendCertificateEmail(userRequest.email());
 
-        return "send certificate email";
+        return ResponseEntity.ok()
+                .body(ApiResponse.success());
     }
 
     @PostMapping("/auth/check/{userCode}")
-    public String checkCertificateEmail(
-            @RequestBody UserRequest userRequest,
-            @PathVariable String userCode
+    public ResponseEntity<ApiResponse<Void>> checkCertificateEmail(
+            @RequestBody EmailCertificationRequest emailCertificationRequest
     ){
-        System.out.println(userCode);
-        userservice.checkCertificateEmail(userRequest.email(), userCode);
+        userservice.checkCertificateEmail(emailCertificationRequest);
 
-        return "check certificate email success";
+        return ResponseEntity.ok()
+                .body(ApiResponse.success());
     }
 }
