@@ -17,8 +17,6 @@ public class ImageFile extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long entityId; // Entity(costume, post, confirm, party) id 연결
-
     private Long userId;
 
     @Column(nullable = false)
@@ -32,8 +30,7 @@ public class ImageFile extends BaseTimeEntity {
     private ImageType category;
 
     @Builder
-    public ImageFile(Long entityId, Long userId, String originFilename, String newFilename, ImageType category) {
-        this.entityId = entityId;
+    public ImageFile(Long userId, String originFilename, String newFilename, ImageType category) {
         this.userId = userId;
         this.originFilename = originFilename;
         this.newFilename = newFilename;
