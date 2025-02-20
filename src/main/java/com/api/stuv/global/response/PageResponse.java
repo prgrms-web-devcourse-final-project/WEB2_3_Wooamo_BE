@@ -1,5 +1,7 @@
 package com.api.stuv.global.response;
 
+import com.api.stuv.global.exception.BadRequestException;
+import com.api.stuv.global.exception.ErrorCode;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import org.springframework.data.domain.Page;
@@ -26,6 +28,7 @@ public class PageResponse<T> {
     }
 
     public static <T> PageResponse<T> of(Page<T> page) {
+        if ( page.getNumber() + 1 > page.getTotalPages() ) throw new BadRequestException(ErrorCode.INVALID_PAGE_NUMBER);
         return new PageResponse<>(page);
     }
 }
