@@ -18,7 +18,6 @@ public class userController {
 
     @PostMapping("/register")
     private ResponseEntity<ApiResponse<Void>> registerUser(@RequestBody UserRequest userRequest){
-        System.out.println(userRequest.email());
         userservice.registerUser(userRequest);
 
         return ResponseEntity.ok()
@@ -33,7 +32,7 @@ public class userController {
                 .body(ApiResponse.success());
     }
 
-    @PostMapping("/auth/check/{userCode}")
+    @PostMapping("/auth/check")
     public ResponseEntity<ApiResponse<Void>> checkCertificateEmail(
             @RequestBody EmailCertificationRequest emailCertificationRequest
     ){

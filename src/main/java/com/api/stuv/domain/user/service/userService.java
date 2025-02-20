@@ -6,6 +6,8 @@ import com.api.stuv.domain.user.entity.RoleType;
 import com.api.stuv.domain.user.entity.User;
 import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.domain.user.response.GenerateNicknameResponse;
+import com.api.stuv.global.exception.ErrorCode;
+import com.api.stuv.global.exception.NotFoundException;
 import com.api.stuv.global.service.RedisService;
 import com.api.stuv.global.util.email.RandomCode;
 import com.api.stuv.global.util.email.provider.EmailProvider;
@@ -36,13 +38,6 @@ public class userService {
         String password = userRequest.password();
         String nickname = userRequest.nickname() != null? userRequest.nickname() : randomName();
 
-        Boolean isExist = userRepository.existsByEmail(email);
-
-        if(isExist){
-            System.out.println("이미 회원가입된 이메일 입니다.");
-            return;
-        }
-
         User user = User.builder()
                 .email(email)
                 .password(bCryptPasswordEncoder.encode(password))
@@ -67,29 +62,32 @@ public class userService {
     }
 
     public void sendCertificateEmail(String email){
+        Boolean isExist = userRepository.existsByEmail(email);
+
+        if(isExist){
+            throw new NotFoundException(ErrorCode.USER_ALREADY_EXIST);
+        }
+
         String verificationCode = RandomCode.getRandomCode();
         emailProvider.sendMail(email, verificationCode);
     }
 
     @Transactional
-    public boolean checkCertificateEmail(EmailCertificationRequest emailCertificationRequest){
+    public void checkCertificateEmail(EmailCertificationRequest emailCertificationRequest){
         String userCode = emailCertificationRequest.code();
         String email = emailCertificationRequest.email();
 
         String code = redisService.find(email, String.class);
 
         if(code == null){
-            System.out.println("코드 만료");
-            return false;
+            //코드 만료
+            throw new NotFoundException(ErrorCode.CODE_EXPIRED);
+            //return false;
         }
-
         if(code.equals(userCode)){
-            System.out.println("인증 성공");
             redisService.delete(email);
-            return true;
         } else {
-            System.out.println("인증 실패");
-            return false;
+            throw new NotFoundException(ErrorCode.WRONG_VERITIFICATION_CODE);
         }
 
     }
