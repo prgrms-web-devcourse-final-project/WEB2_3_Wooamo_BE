@@ -3,7 +3,9 @@ package com.api.stuv.domain.admin.service;
 import com.api.stuv.domain.admin.dto.CreateCostumeRequest;
 import com.api.stuv.domain.image.entity.ImageFile;
 import com.api.stuv.domain.image.entity.ImageType;
+import com.api.stuv.domain.image.exception.InvalidImageFileFormat;
 import com.api.stuv.domain.image.repository.ImageFileRepository;
+import com.api.stuv.domain.image.service.ImageService;
 import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.domain.image.util.FileUtils;
 import com.api.stuv.domain.shop.entity.Costume;
@@ -20,6 +22,7 @@ public class AdminService {
     private final CostumeRepository costumeRepository;
     private final ImageFileRepository imageFileRepository;
     private final S3ImageService s3ImageService;
+    private final ImageService imageService;
 
     @Transactional
     public void createCostume(CreateCostumeRequest request, MultipartFile file) {
@@ -32,8 +35,9 @@ public class AdminService {
     }
 
     public void handleImage(Costume costume, MultipartFile file) {
-        String newFileName = FileUtils.generateNewFilename();
         String extension = FileUtils.getExtension(file);
+        if(!imageService.isValidImageExtension(extension)) {throw new InvalidImageFileFormat();}
+        String newFileName = FileUtils.generateNewFilename();
         String fullFileName = newFileName + "." + extension;
         s3ImageService.uploadImageFile(file, ImageType.COSTUME, costume.getId(), fullFileName);
 
