@@ -4,6 +4,7 @@ import com.api.stuv.domain.user.dto.request.UserRequest;
 import com.api.stuv.domain.user.service.userService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,5 +23,12 @@ public class userController {
         userservice.registerUser(userRequest);
 
         return "success";
+    }
+
+    @PostMapping("/auth/send")
+    public String sendCertificateEmail(@RequestBody UserRequest userRequest){
+        userservice.sendCertificateEmail(userRequest.email());
+
+        return "send certificate email";
     }
 }

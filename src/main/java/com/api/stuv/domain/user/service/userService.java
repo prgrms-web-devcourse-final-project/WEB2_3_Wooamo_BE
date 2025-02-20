@@ -5,9 +5,13 @@ import com.api.stuv.domain.user.entity.RoleType;
 import com.api.stuv.domain.user.entity.User;
 import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.domain.user.response.GenerateNicknameResponse;
+import com.api.stuv.global.util.email.RandomCode;
+import com.api.stuv.global.util.email.provider.EmailProvider;
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -19,6 +23,8 @@ public class userService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final WebClient webClient;
+    private final EmailProvider  emailProvider;
+
     private static final String NICKNAME_GENERATOR_URI = "https://nickname.hwanmoo.kr/?format=json";
 
     public void registerUser(UserRequest userRequest) {
@@ -55,4 +61,11 @@ public class userService {
         String randomNickname = String.join("", response.getWords());
         return randomNickname;
     }
+
+    public void sendCertificateEmail(String email){
+        String verificationCode = RandomCode.getRandomCode();
+        emailProvider.sendMail(email, verificationCode);
+    }
+
+
 }
