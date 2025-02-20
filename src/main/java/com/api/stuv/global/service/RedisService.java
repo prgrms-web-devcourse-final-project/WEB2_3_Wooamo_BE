@@ -29,6 +29,4 @@ public class RedisService {
     public void delete(String key) {
         template.delete(key);
     }
-
-
 }
