@@ -27,13 +27,13 @@ public class ImageFile extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ImageType category;
+    private ImageType imageType;
 
     @Builder
-    public ImageFile(Long userId, String originFilename, String newFilename, ImageType category) {
+    public ImageFile(Long userId, String originFilename, String newFilename, ImageType imageType) {
         this.userId = userId;
         this.originFilename = originFilename;
         this.newFilename = newFilename;
-        this.category = category;
+        this.imageType = imageType;
     }
 }

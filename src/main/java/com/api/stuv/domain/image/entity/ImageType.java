@@ -1,13 +1,17 @@
 package com.api.stuv.domain.image.entity;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+@Getter
 @RequiredArgsConstructor
 public enum ImageType {
-    BOARD("게시글"),
-    EVENT("이벤트"),
-    COSTUME("아이템"),
-    CONFIRM("인증");
+    BOARD("게시글","board"),
+    EVENT("이벤트","event"),
+    CONFIRM("인증","confirm"),
+    COSTUME("코스튬","costume/costume");
 
     private final String text;
+    private final String path;
+
 }

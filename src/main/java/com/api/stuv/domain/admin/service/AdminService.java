@@ -4,6 +4,7 @@ import com.api.stuv.domain.admin.dto.CreateCostumeRequest;
 import com.api.stuv.domain.image.entity.ImageFile;
 import com.api.stuv.domain.image.entity.ImageType;
 import com.api.stuv.domain.image.repository.ImageFileRepository;
+import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.domain.image.util.FileUtils;
 import com.api.stuv.domain.shop.entity.Costume;
 import com.api.stuv.domain.shop.repository.CostumeRepository;
@@ -18,6 +19,7 @@ public class AdminService {
 
     private final CostumeRepository costumeRepository;
     private final ImageFileRepository imageFileRepository;
+    private final S3ImageService s3ImageService;
 
     @Transactional
     public void createCostume(CreateCostumeRequest request, MultipartFile file) {
@@ -33,9 +35,10 @@ public class AdminService {
         String newFileName = FileUtils.generateNewFilename();
         String extension = FileUtils.getExtension(file);
         String fullFileName = newFileName + "." + extension;
+        s3ImageService.uploadImageFile(file, ImageType.COSTUME, costume.getId(), fullFileName);
 
         ImageFile imageFile = ImageFile.builder()
-                .category(ImageType.COSTUME)
+                .imageType(ImageType.COSTUME)
                 .originFilename(file.getOriginalFilename())
                 .newFilename(fullFileName)
                 .build();
