@@ -5,6 +5,7 @@ import com.api.stuv.domain.user.dto.request.UserRequest;
 import com.api.stuv.domain.user.service.userService;
 import com.api.stuv.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,14 +17,6 @@ import org.springframework.web.bind.annotation.*;
 public class userController {
     private final userService userservice;
 
-    @PostMapping("/register")
-    private ResponseEntity<ApiResponse<Void>> registerUser(@RequestBody UserRequest userRequest){
-        userservice.registerUser(userRequest);
-
-        return ResponseEntity.ok()
-                .body(ApiResponse.success());
-    }
-
     @PostMapping("/auth/send")
     public ResponseEntity<ApiResponse<Void>> sendCertificateEmail(@RequestBody UserRequest userRequest){
         userservice.sendCertificateEmail(userRequest.email());
@@ -33,12 +26,19 @@ public class userController {
     }
 
     @PostMapping("/auth/check")
-    public ResponseEntity<ApiResponse<Void>> checkCertificateEmail(
-            @RequestBody EmailCertificationRequest emailCertificationRequest
-    ){
+    public ResponseEntity<ApiResponse<Void>> checkCertificateEmail(@RequestBody @Valid EmailCertificationRequest emailCertificationRequest){
         userservice.checkCertificateEmail(emailCertificationRequest);
 
         return ResponseEntity.ok()
                 .body(ApiResponse.success());
     }
+
+    @PostMapping("/register")
+    private ResponseEntity<ApiResponse<Void>> registerUser(@RequestBody UserRequest userRequest){
+        userservice.registerUser(userRequest);
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.success());
+    }
+
 }

@@ -6,17 +6,16 @@ import com.api.stuv.domain.user.entity.RoleType;
 import com.api.stuv.domain.user.entity.User;
 import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.domain.user.response.GenerateNicknameResponse;
+import com.api.stuv.global.exception.BadRequestException;
 import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
 import com.api.stuv.global.service.RedisService;
 import com.api.stuv.global.util.email.RandomCode;
 import com.api.stuv.global.util.email.provider.EmailProvider;
-import jakarta.mail.internet.MimeMessage;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -37,6 +36,10 @@ public class userService {
         String email = userRequest.email();
         String password = userRequest.password();
         String nickname = userRequest.nickname() != null? userRequest.nickname() : randomName();
+
+        if(!redisService.find(email, String.class).equals("Verified")){
+            throw new BadRequestException(ErrorCode.NOT_VERIFICATION_EMAIL);
+        }
 
         User user = User.builder()
                 .email(email)
@@ -86,10 +89,10 @@ public class userService {
         }
         if(code.equals(userCode)){
             redisService.delete(email);
+            redisService.save(email, "Verified", 600000L);
         } else {
-            throw new NotFoundException(ErrorCode.WRONG_VERITIFICATION_CODE);
+            throw new NotFoundException(ErrorCode.WRONG_VERIFICATION_CODE);
         }
-
     }
 
 }

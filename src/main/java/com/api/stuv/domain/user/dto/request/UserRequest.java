@@ -4,6 +4,6 @@ public record UserRequest(
         String email,
         String password,
         String nickname,
-        Boolean isVerified
+        boolean verified
 ) {
 }
