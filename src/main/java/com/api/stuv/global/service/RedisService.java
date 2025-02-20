@@ -18,6 +18,9 @@ public class RedisService {
     public void save(String key, Object value, Duration timeout) {
         template.opsForValue().set(key, value, timeout);
     }
+    public void saveToken(String email, String refreshToken, Duration timeout) {
+        template.opsForValue().set(refreshToken, email, timeout);
+    }
 
     public <T> T find(String key, Class<T> clazz) {
         Object rawData = template.opsForValue().get(key);

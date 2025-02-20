@@ -59,7 +59,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication){
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
 
-        String username = customUserDetails.getUsername();
+        String email = customUserDetails.getUsername();
+        Long userId = customUserDetails.getUserId();
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
@@ -84,11 +85,11 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         }
 
         //토큰 생성
-        String access = jwtUtil.createJwt("access", username, role, 600000L);
-        String refresh = jwtUtil.createJwt("refresh", username, role, 86400000L);
+        String access = jwtUtil.createJwt("access", userId, email, role, 600000L);
+        String refresh = jwtUtil.createJwt("refresh", userId, email, role, 86400000L);
 
         //refresh 토큰 저장
-        redisService.save(username, refresh, Duration.ofDays(1));
+        redisService.saveToken(email, refresh, Duration.ofDays(1));
 
         //응답 설정
         response.setHeader("access", access);
