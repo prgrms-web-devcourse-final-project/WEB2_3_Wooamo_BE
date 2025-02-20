@@ -42,6 +42,7 @@ public class AdminService {
         s3ImageService.uploadImageFile(file, ImageType.COSTUME, costume.getId(), fullFileName);
 
         ImageFile imageFile = ImageFile.builder()
+                // todo : 현재 로그인한 userId 에 대한 정보 필요
                 .imageType(ImageType.COSTUME)
                 .originFilename(file.getOriginalFilename())
                 .newFilename(fullFileName)
