@@ -20,6 +20,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.time.Duration;
+
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +41,10 @@ public class userService {
 
         if(!redisService.find(email, String.class).equals("Verified") || redisService.find(email, String.class) == null){
             throw new BadRequestException(ErrorCode.NOT_VERIFICATION_EMAIL);
+        }
+
+        if(userRepository.existsByNickname(nickname)){
+            throw new BadRequestException(ErrorCode.NICKNAME_ALREADY_EXIST);
         }
 
         User user = User.builder()
@@ -89,7 +95,7 @@ public class userService {
         }
         if(code.equals(userCode)){
             redisService.delete(email);
-            redisService.save(email, "Verified", 600000L);
+            redisService.save(email, "Verified", Duration.ofMinutes(10));
         } else {
             throw new NotFoundException(ErrorCode.WRONG_VERIFICATION_CODE);
         }

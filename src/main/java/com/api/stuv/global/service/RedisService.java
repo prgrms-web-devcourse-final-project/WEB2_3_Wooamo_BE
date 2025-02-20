@@ -15,8 +15,8 @@ public class RedisService {
     private final RedisTemplate<String, Object> template;
     private final ObjectMapper objectMapper;
 
-    public void save(String key, Object value, Long timeout) {
-        template.opsForValue().set(key, value, timeout, TimeUnit.MILLISECONDS);
+    public void save(String key, Object value, Duration timeout) {
+        template.opsForValue().set(key, value, timeout);
     }
 
     public <T> T find(String key, Class<T> clazz) {

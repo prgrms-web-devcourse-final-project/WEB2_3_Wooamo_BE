@@ -8,6 +8,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
+
 @Component
 @RequiredArgsConstructor
 public class EmailProvider {
@@ -19,7 +21,7 @@ public class EmailProvider {
 
     public boolean sendMail(String email, String verificationCode) {
         try{
-            redisService.save(email, verificationCode, 600000L);
+            redisService.save(email, verificationCode, Duration.ofMinutes(10));
 
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
