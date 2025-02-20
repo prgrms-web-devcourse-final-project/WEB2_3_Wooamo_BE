@@ -8,7 +8,11 @@ import lombok.RequiredArgsConstructor;
 public enum ErrorCode {
     // USER
     USER_ALREADY_EXIST(400, -1001, "해당 이메일이 이미 존재합니다."),
+    NICKNAME_ALREADY_EXIST(400, -1001, "해당 닉네임이 이미 존재합니다."),
+    CODE_EXPIRED(400, -1001, "인증 코드가 만료되었습니다."),
     WRONG_SIGNUP(400, -1002, "올바르지 않은 회원가입입니다."),
+    WRONG_VERIFICATION_CODE(400, -1002, "인증번호가 올바르지 않습니다."),
+    NOT_VERIFICATION_EMAIL(400, -1002, "인증되지 않은 이메일입니다."),
     INVALID_PASSWORD(400, -1003, "비빌번호가 올바르지 않습니다."),
     USER_NOT_FOUND(404, -1004, "존재하지 않는 사용자입니다."),
 

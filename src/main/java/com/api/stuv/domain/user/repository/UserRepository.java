@@ -11,6 +11,10 @@ import java.util.List;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
+    Boolean existsByEmail(String email);
+
+    Boolean existsByNickname(String nickname);
+
     @Query("SELECT COUNT(*) FROM User u WHERE u.id IN :idList")
     int isDuplicateIds(@Param("idList") List<Long> idList);
 }
