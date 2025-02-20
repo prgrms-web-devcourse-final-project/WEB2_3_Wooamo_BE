@@ -4,11 +4,10 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum ImageType {
-    POST("게시글"),
+    BOARD("게시글"),
     EVENT("이벤트"),
     COSTUME("아이템"),
     CONFIRM("인증");
 
     private final String text;
-
 }
