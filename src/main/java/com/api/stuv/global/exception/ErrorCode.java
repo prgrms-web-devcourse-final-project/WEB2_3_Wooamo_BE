@@ -6,13 +6,13 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum ErrorCode {
-    //-1000: USER
+    // USER
     USER_ALREADY_EXIST(400, -1001, "해당 이메일이 이미 존재합니다."),
     WRONG_SIGNUP(400, -1002, "올바르지 않은 회원가입입니다."),
     INVALID_PASSWORD(400, -1003, "비빌번호가 올바르지 않습니다."),
     USER_NOT_FOUND(404, -1004, "존재하지 않는 사용자입니다."),
 
-    //-2000: JWT
+    // TOKEN
     EMPTY_JWT_TOKEN(400, -2000, "JWT 토큰이 없습니다."),
     INVALID_ACCESS_TOKEN(400, -2001, "유효하지 않은 토큰입니다."),
     EXPIRED_ACCESS_TOKEN(400, -2002, "어세스 토큰이 만료되었습니다."),
@@ -20,7 +20,7 @@ public enum ErrorCode {
     INVALID_REFRESH_TOKEN(400, -2004, "잘못된 리프레시 토큰입니다."),
     INVALID_AUTHORITY_TOKEN(400, -2005, "권한 정보가 없는 토큰입니다."),
 
-    //-3000: COMMON
+    // COMMON
     NOT_FOUND(404, -3000, "잘못된 경로입니다."),
     BAD_REQUEST(400, -3001, "유효하지 않은 요청입니다."),
     INVALID_REQUEST_BODY(400, -3002, "전달된 데이터가 올바르지 않습니다."),

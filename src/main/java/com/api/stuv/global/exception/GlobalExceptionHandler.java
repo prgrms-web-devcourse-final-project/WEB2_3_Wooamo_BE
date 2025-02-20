@@ -1,5 +1,6 @@
 package com.api.stuv.global.exception;
 
+import com.api.stuv.global.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -12,10 +13,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
     // DB 관련 예외
     @ExceptionHandler(DataAccessException.class)
-    protected ResponseEntity<ErrorResponse> handleDataAccessException(DataAccessException e) {
+    protected ResponseEntity<ApiResponse<Void>> handleDataAccessException(DataAccessException e) {
+        ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
+        log.error("[ERROR] handleDataAccessException - {}", e.getMessage());
         return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse("데이터베이스 오류가 발생했습니다."
-                        , HttpStatus.INTERNAL_SERVER_ERROR.toString()));
+                .status(errorCode.getStatus())
+                .body(ApiResponse.error(errorCode.getMessage()));
     }
 }
