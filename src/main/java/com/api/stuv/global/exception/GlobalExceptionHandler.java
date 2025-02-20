@@ -1,6 +1,7 @@
 package com.api.stuv.global.exception;
 
 import com.api.stuv.global.response.ApiResponse;
+import com.querydsl.core.types.ExpressionException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,15 @@ public class GlobalExceptionHandler {
     protected ResponseEntity<ApiResponse<Void>> handleDataAccessException(DataAccessException e) {
         ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
         log.error("[ERROR] handleDataAccessException - {}", e.getMessage());
+        return ResponseEntity
+                .status(errorCode.getStatus())
+                .body(ApiResponse.error(errorCode.getMessage()));
+    }
+
+    @ExceptionHandler(ExpressionException.class)
+    protected ResponseEntity<ApiResponse<Void>> handleExpressionException(ExpressionException e) {
+        ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
+        log.error("[ERROR] handleExpressionException - {}", e.getMessage());
         return ResponseEntity
                 .status(errorCode.getStatus())
                 .body(ApiResponse.error(errorCode.getMessage()));
