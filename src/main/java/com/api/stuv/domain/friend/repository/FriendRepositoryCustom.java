@@ -5,5 +5,5 @@ import com.api.stuv.global.response.PageResponse;
 import org.springframework.data.domain.Pageable;
 
 public interface FriendRepositoryCustom {
-    PageResponse<FriendRequestListResponse> getFriendRequestList(Long receiverId, Pageable pageable);
+    PageResponse<FriendRequestListResponse> getFriendRequestList(Long receiverId, Pageable pageable, String imageUrl);
 }
