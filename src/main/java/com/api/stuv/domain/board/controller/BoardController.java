@@ -22,7 +22,7 @@ public class BoardController {
     private final BoardService boardService;
 
     @Operation(summary = "게시판 목록 조회 API", description = "게시판 목록을 조회 합니다.")
-    @GetMapping("/board")
+    @GetMapping("")
     public ResponseEntity<ApiResponse<PageResponse<BoardResponse>>> getBoardList(@RequestParam(required = false, defaultValue = "") String title,
                                                                     @RequestParam(required = false, defaultValue = "0") Integer page,
                                                                     @RequestParam(required = false, defaultValue = "10") Integer size) {
