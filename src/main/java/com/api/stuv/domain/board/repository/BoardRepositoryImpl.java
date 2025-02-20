@@ -6,7 +6,6 @@ import com.api.stuv.domain.board.entity.QComment;
 import com.api.stuv.global.response.PageResponse;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.*;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -23,11 +22,14 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
     private final QComment c = QComment.comment;
 
     public PageResponse<BoardResponse> getBoardList(String title, Pageable pageable, String imageUrl) {
-        BooleanExpression isConfirm = JPAExpressions.selectOne().from(c)
-                .where(c.boardId.eq(b.id).and(c.isConfirm.eq(true))).exists();
-
         JPAQuery<BoardResponse> query = jpaQueryFactory
-                .select(Projections.constructor(BoardResponse.class, b.id.as("boardId"), b.title, b.boardType, isConfirm, timeFormater(b.createdAt), getImageUrl(imageUrl, b.id).as("image")))
+                .select(Projections.constructor(BoardResponse.class,
+                        b.id.as("boardId"),
+                        b.title,
+                        b.boardType,
+                        b.confirmedCommentId.isNotNull(),
+                        timeFormater(b.createdAt),
+                        getImageUrl(imageUrl, b.id).as("image")))
                 .from(b)
                 .where(b.title.contains(title));
 

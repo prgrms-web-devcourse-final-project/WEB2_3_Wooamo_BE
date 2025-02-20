@@ -14,11 +14,11 @@ public record BoardResponse (
             Long boardId,
             String title,
             BoardType boardType,
-            boolean isConfirm,
+            boolean confirmedCommentId,
             String createdAt,
             String image
     ) {
-        this(boardId, title, boardType.toString(), isConfirm, createdAt, image);
+        this(boardId, title, boardType.toString(), confirmedCommentId, createdAt, image);
     }
 }
 
