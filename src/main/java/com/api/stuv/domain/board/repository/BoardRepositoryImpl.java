@@ -34,7 +34,7 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
                 .from(b)
                 .where(b.title.contains(title));
 
-        return applyPage(query, pageable, getBoardCount(title));
+        return applyPage(query, pageable, getTotalPage(title));
     }
 
     private <T> PageResponse<T> applyPage(JPAQuery<T> query, Pageable pageable, Long count) {
@@ -42,7 +42,7 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
         return PageResponse.of(new PageImpl<>(content, pageable, count));
     }
 
-    private Long getBoardCount(String title) {
+    private Long getTotalPage(String title) {
         return jpaQueryFactory.select(b.count()).from(b).where(b.title.contains(title)).fetchOne();
     }
 
