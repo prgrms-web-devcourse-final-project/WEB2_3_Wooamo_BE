@@ -17,4 +17,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT COUNT(*) FROM User u WHERE u.id IN :idList")
     int isDuplicateIds(@Param("idList") List<Long> idList);
+
+    User findByEmail(String email);
 }
