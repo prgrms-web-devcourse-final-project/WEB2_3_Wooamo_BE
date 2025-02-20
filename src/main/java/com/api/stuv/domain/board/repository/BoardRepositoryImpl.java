@@ -21,6 +21,7 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
     private final QBoard b = QBoard.board;
     private final QComment c = QComment.comment;
 
+    @Override
     public PageResponse<BoardResponse> getBoardList(String title, Pageable pageable, String imageUrl) {
         JPAQuery<BoardResponse> query = jpaQueryFactory
                 .select(Projections.constructor(BoardResponse.class,
@@ -36,20 +37,20 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
         return applyPage(query, pageable, getBoardCount(title));
     }
 
-    public <T> PageResponse<T> applyPage(JPAQuery<T> query, Pageable pageable, Long count) {
+    private <T> PageResponse<T> applyPage(JPAQuery<T> query, Pageable pageable, Long count) {
         List<T> content = query.offset(pageable.getOffset()).limit(pageable.getPageSize()).fetch();
         return PageResponse.of(new PageImpl<>(content, pageable, count));
     }
 
-    public Long getBoardCount(String title) {
+    private Long getBoardCount(String title) {
         return jpaQueryFactory.select(b.count()).from(b).where(b.title.contains(title)).fetchOne();
     }
 
-    public StringTemplate timeFormater(DateTimePath<LocalDateTime> dateTimePath) {
+    private StringTemplate timeFormater(DateTimePath<LocalDateTime> dateTimePath) {
         return Expressions.stringTemplate("DATE_FORMAT({0}, '%Y-%m-%d %H:%i:%s')", dateTimePath);
     }
 
-    public StringTemplate getImageUrl(String imageUrl, NumberPath<Long> id) {
+    private StringTemplate getImageUrl(String imageUrl, NumberPath<Long> id) {
         return Expressions.stringTemplate("CONCAT({0}, {1})", imageUrl, id);
     }
 }
