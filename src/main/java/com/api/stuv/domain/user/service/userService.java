@@ -37,7 +37,7 @@ public class userService {
         String password = userRequest.password();
         String nickname = userRequest.nickname() != null? userRequest.nickname() : randomName();
 
-        if(!redisService.find(email, String.class).equals("Verified")){
+        if(!redisService.find(email, String.class).equals("Verified") || redisService.find(email, String.class) == null){
             throw new BadRequestException(ErrorCode.NOT_VERIFICATION_EMAIL);
         }
 
