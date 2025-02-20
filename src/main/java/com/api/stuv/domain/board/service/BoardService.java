@@ -54,8 +54,6 @@ public class BoardService {
 
         Long pageCount = jpaQueryFactory.select(b.count()).from(b).where(b.title.contains(title)).fetchOne();
 
-        if ( pageCount == null || pageCount < pageable.getPageNumber() ) throw new BadRequestException(ErrorCode.INVALID_PAGE_NUMBER);
-
         return PageResponse.of(new PageImpl<>(content, pageable, pageCount));
     }
 }
