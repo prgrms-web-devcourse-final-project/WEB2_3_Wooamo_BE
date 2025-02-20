@@ -5,9 +5,11 @@ import com.api.stuv.domain.user.entity.RoleType;
 import com.api.stuv.domain.user.entity.User;
 import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.domain.user.response.GenerateNicknameResponse;
+import com.api.stuv.global.service.RedisService;
 import com.api.stuv.global.util.email.RandomCode;
 import com.api.stuv.global.util.email.provider.EmailProvider;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -26,6 +28,7 @@ public class userService {
     private final EmailProvider  emailProvider;
 
     private static final String NICKNAME_GENERATOR_URI = "https://nickname.hwanmoo.kr/?format=json";
+    private final RedisService redisService;
 
     public void registerUser(UserRequest userRequest) {
         String email = userRequest.email();
@@ -67,5 +70,24 @@ public class userService {
         emailProvider.sendMail(email, verificationCode);
     }
 
+    @Transactional
+    public boolean checkCertificateEmail(String email, String userCode){
+        String code = redisService.find(email, String.class);
+
+        if(code == null){
+            System.out.println("코드 만료");
+            return false;
+        }
+
+        if(code.equals(userCode)){
+            System.out.println("인증 성공");
+            redisService.delete(email);
+            return true;
+        } else {
+            System.out.println("인증 실패");
+            return false;
+        }
+
+    }
 
 }

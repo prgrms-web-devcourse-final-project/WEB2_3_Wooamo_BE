@@ -1,5 +1,6 @@
 package com.api.stuv.global.util.email.provider;
 
+import com.api.stuv.global.service.RedisService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -14,9 +15,12 @@ public class EmailProvider {
     private final JavaMailSender mailSender;
     private final String SUBJECT ="[STUV] 인증메일입니다.";
     private final JavaMailSender javaMailSender;
+    private final RedisService redisService;
 
     public boolean sendMail(String email, String verificationCode) {
         try{
+            redisService.save(email, verificationCode, 600000L);
+
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
@@ -46,4 +50,5 @@ public class EmailProvider {
         return certificationMessage;
 
     }
+
 }
