@@ -7,7 +7,7 @@ import com.api.stuv.domain.friend.repository.FriendRepository;
 import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.*;
 import com.api.stuv.global.response.PageResponse;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -46,7 +46,7 @@ public class FriendService {
     }
 
     // TODO: profile image 경로 맞는지 확인
-    @Transactional
+    @Transactional(readOnly = true)
     public PageResponse<FriendFollowListResponse> getFriendFollowList(Long userId, Pageable pageable) {
         return friendRepository.getFriendFollowList(userId, pageable, "http://localhost:8080/api/v1/costume/");
     }
