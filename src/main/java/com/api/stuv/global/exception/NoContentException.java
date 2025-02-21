@@ -1,11 +1,14 @@
 package com.api.stuv.global.exception;
 
-public class NoContentException extends RuntimeException {
-  // ErrorCode 반환
-  private final ErrorCode errorCode;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
+@Slf4j
+@ResponseStatus(value = HttpStatus.NO_CONTENT)
+public class NoContentException extends RuntimeException {
   public NoContentException(ErrorCode errorCode) {
     super(errorCode.getMessage());
-    this.errorCode = errorCode;
+    log.info("[NoContentException] message: {}", errorCode.getMessage());
   }
 }
