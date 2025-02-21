@@ -33,6 +33,9 @@ public enum ErrorCode {
     UNAUTHORIZED(401, -3005, "토큰 정보가 만료되었거나 존재하지 않습니다."),
     FORBIDDEN(403, -3006, "접근 권한이 없습니다."),
     INVALID_SORT_TYPE(400, -3007, "올바르지 않은 정렬 타입입니다."),
+    INVALID_PAGE_SIZE(400, -3008, "올바르지 않은 페이지 사이즈입니다."),
+    INVALID_PAGE_NUMBER(400, -3009, "올바르지 않은 페이지 번호입니다."),
+    NO_CONTENT(204, -3010, "조회 결과가 존재하지 않습니다."),
 
     // FRIEND
     FRIEND_NOT_FOUND(404, -4000, "해당 친구를 찾을 수 없습니다."),
@@ -40,6 +43,13 @@ public enum ErrorCode {
     FRIEND_REQUEST_ALREADY_EXIST(400, -4003, "이미 친구 요청을 보냈습니다."),
     FRIEND_REQUEST_NOT_AUTHORIZED(403, -4004, "해당 친구 요청에 대한 수락 권한이 없습니다."),
     FRIEND_REQUEST_ALREADY_ACCEPTED(400, -4005, "이미 친구 요청을 수락했습니다."),
+
+    // BOARD
+    BOARD_NOT_FOUND(404, -5000, "해당 게시글을 찾을 수 없습니다."),
+
+    // COMMENT
+    COMMENT_NOT_FOUND(404, -6000, "해당 댓글을 찾을 수 없습니다."),
+    COMMENT_ALREADY_CONFIRM(400, -6001, "이미 채택된 댓글이 있습니다."),
     ;
 
     private final int status;
