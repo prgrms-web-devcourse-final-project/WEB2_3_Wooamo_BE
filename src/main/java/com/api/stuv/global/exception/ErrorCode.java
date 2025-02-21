@@ -49,6 +49,7 @@ public enum ErrorCode {
     // COMMENT
     COMMENT_NOT_FOUND(404, -6000, "해당 댓글을 찾을 수 없습니다."),
     COMMENT_ALREADY_CONFIRM(400, -6001, "이미 채택된 댓글이 있습니다."),
+    COMMENT_NOT_AUTHORIZED(403, -6002, "해당 댓글에 대한 권한이 없습니다."),
     ;
 
     private final int status;

@@ -42,4 +42,14 @@ public class BoardController {
         return ResponseEntity.ok()
                 .body(ApiResponse.success(boardService.getCommentList(boardId, PageRequest.of(page, size))));
     }
+
+    @Operation(summary = "댓글 삭제 API", description = "댓글을 삭제합니다.")
+    @DeleteMapping("/comment/{commentId}")
+    public ResponseEntity<ApiResponse<Void>> deleteComment(
+            @PathVariable Long commentId
+    ) {
+        boardService.deleteComment(1L, commentId);
+        return ResponseEntity.ok().body(ApiResponse.success());
+    }
+
 }
