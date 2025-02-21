@@ -55,10 +55,14 @@ public class JWTFilter extends OncePerRequestFilter {
 
         String username = jwtUtil.getUsername(accessToken);
         String role = jwtUtil.getRole(accessToken);
+        RoleType type = RoleType.fromText(role);
+        Long  id = jwtUtil.getUserId(accessToken);
+
 
         User user = User.builder()
+                .id(id)
                 .email(username)
-                .role(RoleType.valueOf(role))
+                .role(type)
                 .build();
         CustomUserDetails customUserDetails = new CustomUserDetails(user);
 
