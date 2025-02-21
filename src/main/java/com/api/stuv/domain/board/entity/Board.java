@@ -19,6 +19,8 @@ public class Board extends BaseTimeEntity {
 
     private Long userId;
 
+    private Long confirmedCommentId;
+
     @Column(nullable = false)
     private String title;
 
@@ -28,6 +30,7 @@ public class Board extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private BoardType boardType;
+
 
     @Builder
     public Board(Long userId, String title, String context, BoardType boardType) {

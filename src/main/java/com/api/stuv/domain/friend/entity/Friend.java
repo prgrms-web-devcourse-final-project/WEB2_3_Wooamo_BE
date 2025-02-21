@@ -23,9 +23,20 @@ public class Friend extends BaseTimeEntity {
     private FriendStatus status;
 
     @Builder
-    public Friend(Long userId, Long friendId, FriendStatus status) {
+    public Friend(Long id, Long userId, Long friendId, FriendStatus status) {
+        this.id = id;
         this.userId = userId;
         this.friendId = friendId;
         this.status = status;
     }
+
+    public static Friend create(Long userId, Long friendId) {
+        return Friend.builder()
+            .userId(userId)
+            .friendId(friendId)
+            .status(FriendStatus.PENDING)
+            .build();
+    }
+
+    public void accept() { this.status = FriendStatus.ACCEPTED; }
 }
