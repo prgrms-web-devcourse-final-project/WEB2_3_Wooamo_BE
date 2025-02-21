@@ -21,15 +21,14 @@ public class Friend extends BaseTimeEntity {
     @Column(nullable = false)
     private FriendStatus status;
 
-    public Friend(Long id, Long userId, Long friendId, FriendStatus status) {
-        this.id = id;
+    public Friend(Long userId, Long friendId, FriendStatus status) {
         this.userId = userId;
         this.friendId = friendId;
         this.status = status;
     }
 
     public static Friend init(Long userId, Long friendId) {
-        return new Friend(null, userId, friendId, FriendStatus.PENDING);
+        return new Friend(userId, friendId, FriendStatus.PENDING);
     }
 
     public void accept() { this.status = FriendStatus.ACCEPTED; }
