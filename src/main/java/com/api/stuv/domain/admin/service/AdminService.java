@@ -1,8 +1,10 @@
 package com.api.stuv.domain.admin.service;
 
 import com.api.stuv.domain.admin.dto.CreateCostumeRequest;
+import com.api.stuv.domain.admin.exception.InvalidPointFormat;
 import com.api.stuv.domain.image.entity.ImageFile;
 import com.api.stuv.domain.image.entity.ImageType;
+import com.api.stuv.domain.image.exception.ImageFileNotFound;
 import com.api.stuv.domain.image.exception.InvalidImageFileFormat;
 import com.api.stuv.domain.image.repository.ImageFileRepository;
 import com.api.stuv.domain.image.service.ImageService;
@@ -15,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
+
 @Service
 @RequiredArgsConstructor
 public class AdminService {
@@ -26,10 +30,9 @@ public class AdminService {
 
     @Transactional
     public void createCostume(CreateCostumeRequest request, MultipartFile file) {
-        Costume costume = Costume.builder()
-                .costumeName(request.costumeName())
-                .point(request.point())
-                .build();
+        if(file == null || file.isEmpty()) {throw new ImageFileNotFound();}
+        if(request.point().compareTo(BigDecimal.ZERO) < 0) {throw new InvalidPointFormat();}
+        Costume costume = Costume.createCostumeContents(request.costumeName(), request.point());
         costumeRepository.save(costume);
         handleImage(costume, file);
     }
@@ -40,13 +43,7 @@ public class AdminService {
         String newFileName = FileUtils.generateNewFilename();
         String fullFileName = newFileName + "." + extension;
         s3ImageService.uploadImageFile(file, ImageType.COSTUME, costume.getId(), fullFileName);
-
-        ImageFile imageFile = ImageFile.builder()
-                // todo : 현재 로그인한 userId 에 대한 정보 필요
-                .imageType(ImageType.COSTUME)
-                .originFilename(file.getOriginalFilename())
-                .newFilename(fullFileName)
-                .build();
+        ImageFile imageFile = ImageFile.createImageFile(file.getOriginalFilename(), fullFileName, ImageType.COSTUME);
 
         imageFileRepository.save(imageFile);
         costume.updateImageFile(imageFile.getId());

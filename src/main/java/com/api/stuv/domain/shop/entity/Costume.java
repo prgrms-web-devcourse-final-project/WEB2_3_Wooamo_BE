@@ -18,6 +18,7 @@ public class Costume extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private Long imagefileId;
 
     @Column(nullable = false)
@@ -25,6 +26,15 @@ public class Costume extends BaseTimeEntity {
 
     @Column(precision = 10, nullable = false)
     private BigDecimal point;
+
+    public Costume(String costumeName, BigDecimal point) {
+        this.costumeName = costumeName;
+        this.point = point;
+    }
+
+    public static Costume createCostumeContents(String costumeName, BigDecimal point) {
+        return new Costume(costumeName, point);
+    }
 
     public void updateImageFile(Long imagefileId) {
         this.imagefileId = imagefileId;

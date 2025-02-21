@@ -3,7 +3,6 @@ package com.api.stuv.domain.image.entity;
 import com.api.stuv.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -17,8 +16,6 @@ public class ImageFile extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long userId;
-
     @Column(nullable = false)
     private String originFilename;
 
@@ -29,11 +26,13 @@ public class ImageFile extends BaseTimeEntity {
     @Column(nullable = false)
     private ImageType imageType;
 
-    @Builder
-    public ImageFile(Long userId, String originFilename, String newFilename, ImageType imageType) {
-        this.userId = userId;
+    public ImageFile(String originFilename, String newFilename, ImageType imageType) {
         this.originFilename = originFilename;
         this.newFilename = newFilename;
         this.imageType = imageType;
+    }
+
+    public static ImageFile createImageFile(String originFilename, String newFilename, ImageType imageType) {
+        return new ImageFile(originFilename, newFilename, imageType);
     }
 }
