@@ -3,8 +3,11 @@ package com.api.stuv.global.response;
 import com.api.stuv.global.exception.BadRequestException;
 import com.api.stuv.global.exception.ErrorCode;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.querydsl.jpa.impl.JPAQuery;
 import lombok.Getter;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -28,7 +31,12 @@ public class PageResponse<T> {
     }
 
     public static <T> PageResponse<T> of(Page<T> page) {
-        if ( page.getNumber() + 1 > page.getTotalPages() ) throw new BadRequestException(ErrorCode.INVALID_PAGE_NUMBER);
+        if ( page.getNumber() + 1 > page.getTotalPages() && page.getTotalPages() > 0 ) throw new BadRequestException(ErrorCode.INVALID_PAGE_NUMBER);
         return new PageResponse<>(page);
+    }
+
+    public static <K> PageResponse<K> applyPage(JPAQuery<K> query, Pageable pageable, Long count) {
+        List<K> content = query.offset(pageable.getOffset()).limit(pageable.getPageSize()).fetch();
+        return PageResponse.of(new PageImpl<>(content, pageable, count));
     }
 }

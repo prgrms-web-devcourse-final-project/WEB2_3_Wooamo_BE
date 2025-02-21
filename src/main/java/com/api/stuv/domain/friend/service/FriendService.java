@@ -47,7 +47,7 @@ public class FriendService {
 
     // TODO: profile image 경로 맞는지 확인
     @Transactional
-    public PageResponse<FriendRequestListResponse> getFriendRequestList(Long userId, Pageable pageable) {
-        return friendRepository.getFriendRequestList(userId, pageable, "http://localhost:8080/api/v1/costume/");
+    public PageResponse<FriendFollowRequestListResponse> getFriendFollowRequestList(Long userId, Pageable pageable) {
+        return friendRepository.getFriendFollowRequestList(userId, pageable, "http://localhost:8080/api/v1/costume/");
     }
 }
