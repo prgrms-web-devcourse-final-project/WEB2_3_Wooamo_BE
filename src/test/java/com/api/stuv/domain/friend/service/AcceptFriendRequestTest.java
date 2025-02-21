@@ -32,14 +32,7 @@ class AcceptFriendRequestTest {
     @Test
     void successAcceptFriendRequest() {
         // given
-
-
-        Friend friend = Friend.builder()
-                .id(friendId)
-                .userId(senderId)
-                .friendId(receiverId)
-                .status(FriendStatus.PENDING)
-                .build();
+        Friend friend = new Friend(friendId, senderId, receiverId, FriendStatus.PENDING);
 
         when(friendRepository.findById(friendId)).thenReturn(Optional.of(friend));
 

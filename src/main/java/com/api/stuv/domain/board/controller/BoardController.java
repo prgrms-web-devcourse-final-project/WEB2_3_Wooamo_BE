@@ -24,8 +24,8 @@ public class BoardController {
     @GetMapping("")
     public ResponseEntity<ApiResponse<PageResponse<BoardResponse>>> getBoardList(
             @RequestParam(required = false, defaultValue = "") String title,
-            @RequestParam(required = false, defaultValue = "0") Integer page,
-            @RequestParam(required = false, defaultValue = "10") Integer size
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size
     ) {
         return ResponseEntity.ok()
                 .body(ApiResponse.success(boardService.getBoardList(title, PageRequest.of(page, size))));
@@ -35,8 +35,8 @@ public class BoardController {
     @GetMapping("/{boardId}/comment")
     public ResponseEntity<ApiResponse<PageResponse<CommentResponse>>> getCommentList(
             @PathVariable Long boardId,
-            @RequestParam(required = false, defaultValue = "0") Integer page,
-            @RequestParam(required = false, defaultValue = "10") Integer size
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size
     ) {
         return ResponseEntity.ok()
                 .body(ApiResponse.success(boardService.getCommentList(boardId, PageRequest.of(page, size))));

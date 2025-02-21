@@ -28,7 +28,7 @@ public class FriendService {
 
         if (friendRepository.isFriendshipDuplicate(userId, friendId) > 0) throw new DuplicateException(ErrorCode.FRIEND_REQUEST_ALREADY_EXIST);
 
-        return FriendFollowResponse.from(friendRepository.save(Friend.create(userId, friendId)));
+        return FriendFollowResponse.from(friendRepository.save(Friend.init(userId, friendId)));
     }
 
     @Transactional
