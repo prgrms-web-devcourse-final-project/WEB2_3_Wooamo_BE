@@ -1,6 +1,7 @@
 package com.api.stuv.domain.board.service;
 
 import com.api.stuv.domain.board.dto.BoardResponse;
+import com.api.stuv.domain.board.dto.CommentResponse;
 import com.api.stuv.domain.board.entity.Comment;
 import com.api.stuv.domain.board.repository.BoardRepository;
 import com.api.stuv.domain.board.repository.CommentRepository;
@@ -27,6 +28,12 @@ public class BoardService {
     @Transactional(readOnly = true)
     public PageResponse<BoardResponse> getBoardList(String title, Pageable pageable) {
         return boardRepository.getBoardList(title, pageable, "http://localhost:8080/api/v1/board/image/");
+    }
+
+    // TODO : 이후 이미지 다운로드 기능 추가해 주세요!
+    public PageResponse<CommentResponse> getCommentList(Long boardId, Pageable pageable) {
+        if (!boardRepository.existsById(boardId)) throw new NotFoundException(ErrorCode.BOARD_NOT_FOUND);
+        return commentRepository.getCommentList(boardId, pageable, "http://localhost:8080/api/v1/costume/");
     }
 
     // TODO: 이후 알림 기능 추가

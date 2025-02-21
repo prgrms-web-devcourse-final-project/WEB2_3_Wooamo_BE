@@ -3,7 +3,6 @@ package com.api.stuv.domain.board.entity;
 import com.api.stuv.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -26,7 +25,6 @@ public class Comment extends BaseTimeEntity {
     @Column(nullable = false)
     private Long userId;
 
-    @Builder
     public Comment(Long boardId, String context, Long userId) {
         this.boardId = boardId;
         this.context = context;
