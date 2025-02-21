@@ -66,6 +66,13 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(e.getErrorCode().getMessage()));
     }
 
+    // No Content Exception
+    @ExceptionHandler(NoContentException.class)
+    protected ResponseEntity<ApiResponse<Void>> handleNoContentException(NoContentException e) {
+        log.info("[ERROR] handleNoContentException - {}", e.getMessage());
+        return ResponseEntity.noContent().build();
+    }
+
     // 그 외 예외
     @ExceptionHandler(BusinessException.class)
     protected ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException e) {

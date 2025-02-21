@@ -2,6 +2,7 @@ package com.api.stuv.global.response;
 
 import com.api.stuv.global.exception.BadRequestException;
 import com.api.stuv.global.exception.ErrorCode;
+import com.api.stuv.global.exception.NoContentException;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.querydsl.jpa.impl.JPAQuery;
 import lombok.Getter;
@@ -30,9 +31,8 @@ public class PageResponse<T> {
         this.hasNext = page.hasNext();
     }
 
-    // TODO: 현재 204번 코드 에러코드로 보내는중. header 수정 필요.
     public static <T> PageResponse<T> of(Page<T> page) {
-        if ( page.getTotalPages() == 0 ) throw new BadRequestException(ErrorCode.NO_CONTENT);
+        if ( page.getTotalPages() == 0 ) throw new NoContentException(ErrorCode.NO_CONTENT);
         else if ( page.getNumber() + 1 > page.getTotalPages() ) throw new BadRequestException(ErrorCode.INVALID_PAGE_NUMBER);
         return new PageResponse<>(page);
     }
