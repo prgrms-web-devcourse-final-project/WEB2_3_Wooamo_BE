@@ -11,8 +11,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import org.springframework.data.domain.Pageable;
-
 @RestController
 @RequestMapping("/api/board")
 @RequiredArgsConstructor
@@ -23,12 +21,13 @@ public class BoardController {
 
     @Operation(summary = "게시판 목록 조회 API", description = "게시판 목록을 조회 합니다.")
     @GetMapping("")
-    public ResponseEntity<ApiResponse<PageResponse<BoardResponse>>> getBoardList(@RequestParam(required = false, defaultValue = "") String title,
-                                                                    @RequestParam(required = false, defaultValue = "0") Integer page,
-                                                                    @RequestParam(required = false, defaultValue = "10") Integer size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public ResponseEntity<ApiResponse<PageResponse<BoardResponse>>> getBoardList(
+            @RequestParam(required = false, defaultValue = "") String title,
+            @RequestParam(required = false, defaultValue = "0") Integer page,
+            @RequestParam(required = false, defaultValue = "10") Integer size
+    ) {
         return ResponseEntity.ok()
-                .body(ApiResponse.success(boardService.getBoardList(title, pageable)));
+                .body(ApiResponse.success(boardService.getBoardList(title, PageRequest.of(page, size))));
     }
 
 }
