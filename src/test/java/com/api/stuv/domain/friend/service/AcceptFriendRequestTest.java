@@ -10,10 +10,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.lang.reflect.Field;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,14 +32,7 @@ class AcceptFriendRequestTest {
     @Test
     void successAcceptFriendRequest() {
         // given
-
-
-        Friend friend = Friend.builder()
-                .id(friendId)
-                .userId(senderId)
-                .friendId(receiverId)
-                .status(FriendStatus.PENDING)
-                .build();
+        Friend friend = createFriendWithId(friendId, senderId, receiverId);
 
         when(friendRepository.findById(friendId)).thenReturn(Optional.of(friend));
 
@@ -47,9 +40,25 @@ class AcceptFriendRequestTest {
         FriendFollowResponse response = friendService.acceptFriend(receiverId, friendId);
 
         // then
-        assertEquals(FriendStatus.ACCEPTED, friend.getStatus()); // 친구 요청 수락 상태로 변경
-        assertEquals(receiverId, response.receiverId()); // 친구 요청을 받은 유저가 맞는지 확인
-        assertNotNull(response); // response가 null이 아닌지 확인
-        assertEquals(friendId, response.friendId()); // 테이블 Pk 값의 일치 여부 확인
+        assertThat(friend.getStatus()).isEqualTo(FriendStatus.ACCEPTED);
+        assertThat(response).isNotNull();
+        assertThat(response.receiverId()).isEqualTo(receiverId);
+        assertThat(response.friendId()).isEqualTo(friendId);
+    }
+
+    public Friend createFriendWithId(Long id, Long userId, Long friendId) {
+        Friend friend = Friend.init(userId, friendId);
+        setId(friend, id);
+        return friend;
+    }
+
+    private void setId(Friend friend, Long id) {
+        try {
+            Field field = Friend.class.getDeclaredField("id");
+            field.setAccessible(true);
+            field.set(friend, id);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

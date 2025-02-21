@@ -12,8 +12,3 @@ public class NotFoundException extends RuntimeException {
         this.errorCode = errorCode;
     }
 }
-
-
-
-
-

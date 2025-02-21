@@ -9,7 +9,6 @@ import lombok.*;
 @Table(name = "friends")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Friend extends BaseTimeEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,20 +21,14 @@ public class Friend extends BaseTimeEntity {
     @Column(nullable = false)
     private FriendStatus status;
 
-    @Builder
-    public Friend(Long id, Long userId, Long friendId, FriendStatus status) {
-        this.id = id;
+    public Friend(Long userId, Long friendId, FriendStatus status) {
         this.userId = userId;
         this.friendId = friendId;
         this.status = status;
     }
 
-    public static Friend create(Long userId, Long friendId) {
-        return Friend.builder()
-            .userId(userId)
-            .friendId(friendId)
-            .status(FriendStatus.PENDING)
-            .build();
+    public static Friend init(Long userId, Long friendId) {
+        return new Friend(userId, friendId, FriendStatus.PENDING);
     }
 
     public void accept() { this.status = FriendStatus.ACCEPTED; }

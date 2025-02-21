@@ -1,6 +1,7 @@
 package com.api.stuv.domain.board.controller;
 
 import com.api.stuv.domain.board.dto.BoardResponse;
+import com.api.stuv.domain.board.dto.CommentResponse;
 import com.api.stuv.domain.board.service.BoardService;
 import com.api.stuv.global.response.ApiResponse;
 import com.api.stuv.global.response.PageResponse;
@@ -23,11 +24,22 @@ public class BoardController {
     @GetMapping("")
     public ResponseEntity<ApiResponse<PageResponse<BoardResponse>>> getBoardList(
             @RequestParam(required = false, defaultValue = "") String title,
-            @RequestParam(required = false, defaultValue = "0") Integer page,
-            @RequestParam(required = false, defaultValue = "10") Integer size
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size
     ) {
         return ResponseEntity.ok()
                 .body(ApiResponse.success(boardService.getBoardList(title, PageRequest.of(page, size))));
     }
 
+    //TODO: 이후 유저 검증 로직 추가
+    @Operation(summary = "코멘트 목록 조회 API", description = "코멘트 목록을 조회 합니다.")
+    @GetMapping("/{boardId}/comment")
+    public ResponseEntity<ApiResponse<PageResponse<CommentResponse>>> getCommentList(
+            @PathVariable Long boardId,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(boardService.getCommentList(boardId, PageRequest.of(page, size))));
+    }
 }
