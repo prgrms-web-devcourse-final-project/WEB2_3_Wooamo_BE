@@ -26,13 +26,10 @@ public class Comment extends BaseTimeEntity {
     @Column(nullable = false)
     private Long userId;
 
-    private Boolean isConfirm;
-
     @Builder
-    public Comment(Long boardId, String context, Long userId, Boolean isConfirm) {
+    public Comment(Long boardId, String context, Long userId) {
         this.boardId = boardId;
         this.context = context;
         this.userId = userId;
-        this.isConfirm = isConfirm;
     }
 }

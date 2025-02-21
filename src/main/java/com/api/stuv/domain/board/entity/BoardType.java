@@ -8,4 +8,9 @@ public enum BoardType {
     QUESTION("질문");
 
     private final String text;
+
+    @Override
+    public String toString() {
+        return text;
+    }
 }
