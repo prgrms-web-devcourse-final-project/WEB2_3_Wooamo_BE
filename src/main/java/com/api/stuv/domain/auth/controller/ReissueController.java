@@ -21,7 +21,7 @@ public class ReissueController {
     private final JWTUtil jwtUtil;
     private final ReissueService reissueService;
 
-    @PostMapping("/reissue")
+    @PostMapping("/api/user/reissue")
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
         String refresh = null;
 
@@ -62,6 +62,7 @@ public class ReissueController {
         Cookie cookie = new Cookie(key, value);
         cookie.setMaxAge(24*60*60);
         cookie.setHttpOnly(true);
+        cookie.setPath("/");
 
         return cookie;
     }

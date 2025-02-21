@@ -37,7 +37,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         this.jwtUtil = jwtUtil;
         this.redisService = redisService;
 
-        // 필터 경로를 "/auth/login"으로 설정
+        // 필터 경로를 "/api/user/login"으로 설정
         setFilterProcessesUrl("/api/user/login");
     }
 
@@ -112,6 +112,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         Cookie cookie = new Cookie(key, value);
         cookie.setMaxAge(24*60*60);
         cookie.setHttpOnly(true);
+        cookie.setPath("/");
 
         return cookie;
     }
