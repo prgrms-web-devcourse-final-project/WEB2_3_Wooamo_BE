@@ -122,5 +122,5 @@ payment:
   toss:
     test_secret_api_key: ${TOSS_TEST_SECRET_KEY}
 jwt:
-  secret-key:${JWT_SECRET_KEY}
+  secret-key: test
 ---
