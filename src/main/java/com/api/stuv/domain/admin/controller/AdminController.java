@@ -19,8 +19,8 @@ public class AdminController {
 
     @PostMapping(value = "/costume", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> createCostume(
-            @RequestPart(value = "post") @Valid CreateCostumeRequest request,
-            @RequestPart(value = "files", required = false) MultipartFile file
+            @RequestPart(value = "contents") @Valid CreateCostumeRequest request,
+            @RequestPart(value = "image", required = false) MultipartFile file
     ){
         adminService.createCostume(request, file);
         return ResponseEntity.status(HttpStatus.CREATED).body("");
