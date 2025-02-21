@@ -1,6 +1,6 @@
 package com.api.stuv.domain.friend.dto;
 
-public record FriendFollowRequestListResponse(
+public record FriendFollowListResponse(
         Long friendId,
         Long senderId,
         String profile,

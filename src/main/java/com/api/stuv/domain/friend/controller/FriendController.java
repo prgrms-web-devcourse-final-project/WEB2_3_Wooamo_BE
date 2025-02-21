@@ -36,12 +36,12 @@ public class FriendController {
     // TODO: userId 를 서버 내에서 받아 올 수 있게 되면 PathVariable 수정 필요
     @Operation(summary = "친구 요청 목록 조회 API", description = "특정 유저의 친구 요청 목록을 조회합니다.")
     @GetMapping("/request/{userId}")
-    public ResponseEntity<ApiResponse<PageResponse<FriendFollowRequestListResponse>>> getFriendFollowRequestList(
+    public ResponseEntity<ApiResponse<PageResponse<FriendFollowListResponse>>> getFriendFollowList(
             @PathVariable Long userId,
             @RequestParam(required = false, defaultValue = "0") Integer page,
             @RequestParam(required = false, defaultValue = "10") Integer size
     ) {
         return ResponseEntity.ok()
-                .body(ApiResponse.success(friendService.getFriendFollowRequestList(userId, PageRequest.of(page, size))));
+                .body(ApiResponse.success(friendService.getFriendFollowList(userId, PageRequest.of(page, size))));
     }
 }

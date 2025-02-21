@@ -35,6 +35,7 @@ public enum ErrorCode {
     INVALID_SORT_TYPE(400, -3007, "올바르지 않은 정렬 타입입니다."),
     INVALID_PAGE_SIZE(400, -3008, "올바르지 않은 페이지 사이즈입니다."),
     INVALID_PAGE_NUMBER(400, -3009, "올바르지 않은 페이지 번호입니다."),
+    NO_CONTENT(204, -3010, "조회 결과가 존재하지 않습니다."),
 
     // FRIEND
     FRIEND_NOT_FOUND(404, -4000, "해당 친구를 찾을 수 없습니다."),

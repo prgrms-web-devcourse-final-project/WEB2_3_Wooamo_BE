@@ -1,9 +1,9 @@
 package com.api.stuv.domain.friend.repository;
 
-import com.api.stuv.domain.friend.dto.FriendFollowRequestListResponse;
+import com.api.stuv.domain.friend.dto.FriendFollowListResponse;
 import com.api.stuv.global.response.PageResponse;
 import org.springframework.data.domain.Pageable;
 
 public interface FriendRepositoryCustom {
-    PageResponse<FriendFollowRequestListResponse> getFriendFollowRequestList(Long receiverId, Pageable pageable, String imageUrl);
+    PageResponse<FriendFollowListResponse> getFriendFollowList(Long receiverId, Pageable pageable, String imageUrl);
 }
