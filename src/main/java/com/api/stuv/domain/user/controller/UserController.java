@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @Tag(name = "User API", description = "유저 인증 관련 API")
 @RequestMapping("/api/user")
-public class userController {
+public class UserController {
     private final userService userservice;
 
     @PostMapping("/auth/send")
