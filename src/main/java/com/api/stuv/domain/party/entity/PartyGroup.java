@@ -49,6 +49,6 @@ public class PartyGroup extends BaseTimeEntity {
         this.usersCount = usersCount;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.status = PartyStatus.UPCOMING;
+        this.status = PartyStatus.PENDING;
     }
 }

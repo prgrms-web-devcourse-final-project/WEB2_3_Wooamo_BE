@@ -3,10 +3,6 @@ package com.api.stuv.domain.party.repository;
 import com.api.stuv.domain.party.dto.response.PartyGroupResponse;
 import com.api.stuv.domain.party.service.PartyService;
 import com.api.stuv.global.response.PageResponse;
-import com.querydsl.core.types.EntityPath;
-import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.junit.jupiter.api.Test;
@@ -43,7 +39,7 @@ class PartyGroupRepositoryImplTest {
     private PartyService partyService;
 
     @Test
-    void getPendingPartyGroupsWithSearch_ShouldReturnPageResponse() {
+    void findPendingGroupsByName_ShouldReturnPageResponse() {
         // GIVEN: Mock 데이터 준비
         List<PartyGroupResponse> mockData = List.of(
                 new PartyGroupResponse(1L, "파티1", 10L, 5L, LocalDate.of(2025, 2, 22), LocalDate.of(2025, 2, 26)),
@@ -53,11 +49,11 @@ class PartyGroupRepositoryImplTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // WHEN: Mocking된 partyRepository가 호출될 때 가짜 데이터 반환
-        when(partyRepository.getPendingPartyGroupsWithSearch(anyString(), any(Pageable.class)))
+        when(partyRepository.findPendingGroupsByName(anyString(), any(Pageable.class)))
                 .thenReturn(PageResponse.of(new PageImpl<PartyGroupResponse>(mockData, PageRequest.of(0, 10), mockData.size())));
 
         // ACT
-        PageResponse<PartyGroupResponse> result = partyService.getPendingPartyGroupsWithSearch("파티", pageable);
+        PageResponse<PartyGroupResponse> result = partyService.getPendingPartyGroups("파티", pageable);
 
         // ASSERT: 결과 검증 (AssertJ)
         assertThat(result).isNotNull();
