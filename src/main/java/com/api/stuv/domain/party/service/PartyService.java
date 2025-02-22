@@ -7,13 +7,19 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class PartyService {
 
     private final PartyGroupRepository partyRepository;
 
-    public PageResponse<PartyGroupResponse> getPendingPartyGroupsWithSearch(String name, Pageable pageable) {
-        return partyRepository.getPendingPartyGroupsWithSearch(name, pageable);
+    public PageResponse<PartyGroupResponse> getPendingPartyGroups(String name, Pageable pageable) {
+        return partyRepository.findPendingGroupsByName(name, pageable);
+    }
+
+    public List<PartyGroupResponse> getActivePartyGroupsByUserId(Long userId) {
+        return partyRepository.findActivePartyGroupsByUserId(userId);
     }
 }
