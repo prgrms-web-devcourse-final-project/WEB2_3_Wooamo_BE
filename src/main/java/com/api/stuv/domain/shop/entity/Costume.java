@@ -18,7 +18,6 @@ public class Costume extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private Long imagefileId;
 
     @Column(nullable = false)
