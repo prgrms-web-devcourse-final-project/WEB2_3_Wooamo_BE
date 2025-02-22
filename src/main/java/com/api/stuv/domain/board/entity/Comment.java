@@ -30,4 +30,8 @@ public class Comment extends BaseTimeEntity {
         this.context = context;
         this.userId = userId;
     }
+
+    public static Comment create(Long boardId, Long userId, String context) {
+        return new Comment(boardId, context, userId);
+    }
 }
