@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@ResponseBody
 @RequiredArgsConstructor
 public class ReissueController {
     private final JWTUtil jwtUtil;
