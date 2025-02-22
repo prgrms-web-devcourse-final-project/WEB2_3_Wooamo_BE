@@ -32,7 +32,7 @@ public class ReissueService {
 
         String newRefreshToken = jwtUtil.createJwt("refresh", userId, email, role, 86400000L);
         redisService.delete(refreshToken);
-        redisService.saveToken(email, newRefreshToken, Duration.ofDays(1));
+        redisService.save(newRefreshToken, email, Duration.ofDays(1));
 
         return  newRefreshToken;// 24시간
     }
