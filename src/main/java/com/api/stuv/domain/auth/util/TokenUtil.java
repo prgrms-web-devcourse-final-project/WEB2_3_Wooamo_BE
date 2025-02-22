@@ -1,4 +1,4 @@
-package com.api.stuv.domain.auth;
+package com.api.stuv.domain.auth.util;
 
 import com.api.stuv.domain.auth.dto.CustomUserDetails;
 import org.springframework.security.core.Authentication;
