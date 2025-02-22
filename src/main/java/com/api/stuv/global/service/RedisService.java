@@ -32,6 +32,8 @@ public class RedisService {
             return null;
         }
 
+
+
         return objectMapper.convertValue(rawData, clazz);
     }
 
