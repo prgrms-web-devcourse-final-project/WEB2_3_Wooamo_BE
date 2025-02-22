@@ -42,4 +42,14 @@ public class BoardController {
         return ResponseEntity.ok()
                 .body(ApiResponse.success(boardService.getCommentList(boardId, PageRequest.of(page, size))));
     }
+
+    @Operation(summary = "댓글 생성 API", description = "댓글을 생성합니다.")
+    @PostMapping("/{boardId}/comment")
+    public ResponseEntity<ApiResponse<Void>> createComment(
+            @PathVariable Long boardId,
+            @RequestBody String context
+    ) {
+        boardService.createComment(1L, boardId, context);
+        return ResponseEntity.ok().body(ApiResponse.success());
+    }
 }
