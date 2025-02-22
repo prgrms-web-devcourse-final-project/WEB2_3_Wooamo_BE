@@ -3,7 +3,6 @@ package com.api.stuv.domain.board.service;
 import com.api.stuv.domain.board.dto.BoardResponse;
 import com.api.stuv.domain.board.entity.Comment;
 import com.api.stuv.domain.board.dto.CommentResponse;
-import com.api.stuv.domain.board.entity.Comment;
 import com.api.stuv.domain.board.repository.BoardRepository;
 import com.api.stuv.domain.board.repository.CommentRepository;
 import com.api.stuv.domain.user.repository.UserRepository;
@@ -34,6 +33,7 @@ public class BoardService {
         return boardRepository.getBoardList(title, pageable, "http://localhost:8080/api/v1/board/image/");
     }
 
+    @Transactional
     public void deleteComment(Long userId, Long commentId) {
         if ( !userRepository.existsById(userId) ) throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
         Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException(ErrorCode.COMMENT_NOT_FOUND));
