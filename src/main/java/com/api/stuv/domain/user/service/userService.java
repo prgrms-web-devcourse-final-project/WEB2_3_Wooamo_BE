@@ -100,5 +100,4 @@ public class userService {
             throw new NotFoundException(ErrorCode.WRONG_VERIFICATION_CODE);
         }
     }
-
 }
