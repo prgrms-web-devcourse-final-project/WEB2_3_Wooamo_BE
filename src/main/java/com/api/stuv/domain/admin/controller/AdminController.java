@@ -2,6 +2,7 @@ package com.api.stuv.domain.admin.controller;
 
 import com.api.stuv.domain.admin.dto.CreateCostumeRequest;
 import com.api.stuv.domain.admin.service.AdminService;
+import com.api.stuv.global.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,11 +19,11 @@ public class AdminController {
     private final AdminService adminService;
 
     @PostMapping(value = "/costume", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> createCostume(
+    public ResponseEntity<ApiResponse<Void>> createCostume(
             @RequestPart(value = "contents") @Valid CreateCostumeRequest request,
             @RequestPart(value = "image", required = false) MultipartFile file
     ){
         adminService.createCostume(request, file);
-        return ResponseEntity.status(HttpStatus.CREATED).body("");
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success());
     }
 }
