@@ -2,20 +2,15 @@ package com.api.stuv.domain.user.controller;
 
 import com.api.stuv.domain.user.dto.request.EmailCertificationRequest;
 import com.api.stuv.domain.user.dto.request.UserRequest;
-import com.api.stuv.domain.user.service.KakaoLoginService;
+import com.api.stuv.domain.user.service.KakaoService;
 import com.api.stuv.domain.user.service.userService;
 import com.api.stuv.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,7 +18,7 @@ import org.springframework.web.client.RestTemplate;
 @RequestMapping("/api/user")
 public class UserController {
     private final userService userservice;
-    private final KakaoLoginService  kakaoLoginService;
+    private final KakaoService kakaoService;
 
 
     @PostMapping("/auth/send")
@@ -51,9 +46,11 @@ public class UserController {
     }
 
     @GetMapping("/kakaoLogin")
-    private String  kakaoLogin(@RequestParam("code") String code){
+    private UserRequest kakaoLogin(@RequestParam("code") String code){
         System.out.println("code:"+code);
-        return kakaoLoginService.getKakaoAccessToken(code);
+        String accessToken = kakaoService.getKakaoAccessToken(code);
+
+        return kakaoService.getKakaoUser(accessToken);
     }
 
 }

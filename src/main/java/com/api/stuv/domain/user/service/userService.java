@@ -11,6 +11,7 @@ import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
 import com.api.stuv.global.service.RedisService;
 import com.api.stuv.global.util.email.RandomCode;
+import com.api.stuv.global.util.email.RandomName;
 import com.api.stuv.global.util.email.provider.EmailProvider;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -28,16 +29,14 @@ import java.time.Duration;
 public class userService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-    private final WebClient webClient;
     private final EmailProvider  emailProvider;
-
-    private static final String NICKNAME_GENERATOR_URI = "https://nickname.hwanmoo.kr/?format=json";
     private final RedisService redisService;
+    private final RandomName randomName;
 
     public void registerUser(UserRequest userRequest) {
         String email = userRequest.email();
         String password = userRequest.password();
-        String nickname = userRequest.nickname() != null? userRequest.nickname() : randomName();
+        String nickname = userRequest.nickname() != null? userRequest.nickname() : randomName.getRandomName();
 
         if(!redisService.find(email, String.class).equals("Verified") || redisService.find(email, String.class) == null){
             throw new BadRequestException(ErrorCode.NOT_VERIFICATION_EMAIL);
@@ -56,18 +55,6 @@ public class userService {
                 .build();
 
         userRepository.save(user);
-    }
-
-    public String randomName(){
-        GenerateNicknameResponse response = webClient.get()
-                .uri(NICKNAME_GENERATOR_URI)
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .retrieve()
-                .bodyToMono(GenerateNicknameResponse.class)
-                .block();
-
-        String randomNickname = String.join("", response.getWords());
-        return randomNickname;
     }
 
     public void sendCertificateEmail(String email){
