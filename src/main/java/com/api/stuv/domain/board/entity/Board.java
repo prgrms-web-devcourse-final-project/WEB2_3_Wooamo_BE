@@ -3,7 +3,6 @@ package com.api.stuv.domain.board.entity;
 import com.api.stuv.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -31,8 +30,6 @@ public class Board extends BaseTimeEntity {
     @Column(nullable = false)
     private BoardType boardType;
 
-
-    @Builder
     public Board(Long userId, String title, String context, BoardType boardType) {
         this.userId = userId;
         this.title = title;

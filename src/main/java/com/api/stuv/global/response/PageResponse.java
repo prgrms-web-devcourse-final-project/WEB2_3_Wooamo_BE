@@ -30,10 +30,8 @@ public class PageResponse<T> {
         this.hasNext = page.hasNext();
     }
 
-    // TODO: 현재 204번 코드 에러코드로 보내는중. header 수정 필요.
     public static <T> PageResponse<T> of(Page<T> page) {
-        if ( page.getTotalPages() == 0 ) throw new BadRequestException(ErrorCode.NO_CONTENT);
-        else if ( page.getNumber() + 1 > page.getTotalPages() ) throw new BadRequestException(ErrorCode.INVALID_PAGE_NUMBER);
+        if ( page.getNumber() + 1 > page.getTotalPages() && page.getTotalPages() != 0 ) throw new BadRequestException(ErrorCode.INVALID_PAGE_NUMBER);
         return new PageResponse<>(page);
     }
 

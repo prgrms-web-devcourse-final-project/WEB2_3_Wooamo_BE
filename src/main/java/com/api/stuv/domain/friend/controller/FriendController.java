@@ -38,8 +38,8 @@ public class FriendController {
     @GetMapping("/request/{userId}")
     public ResponseEntity<ApiResponse<PageResponse<FriendFollowListResponse>>> getFriendFollowList(
             @PathVariable Long userId,
-            @RequestParam(required = false, defaultValue = "0") Integer page,
-            @RequestParam(required = false, defaultValue = "10") Integer size
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size
     ) {
         return ResponseEntity.ok()
                 .body(ApiResponse.success(friendService.getFriendFollowList(userId, PageRequest.of(page, size))));
