@@ -5,6 +5,6 @@ import com.api.stuv.global.exception.ErrorCode;
 
 public class CostumeNotFound extends BusinessException {
     public CostumeNotFound() {
-        super(ErrorCode.COSTUME_NOT_FOUNT);
+        super(ErrorCode.COSTUME_NOT_FOUND);
     }
 }
