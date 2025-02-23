@@ -22,7 +22,6 @@ public class CostumeRepositoryImpl implements CostumeRepositoryCustom {
 
     @Override
     public PageResponse<CostumeResponse> getCostumeList(Pageable pageable) {
-
         long totalCount = jpaQueryFactory.select(qCostume.count()).from(qCostume).fetchOne();
         List<CostumeResponse> listResponses = jpaQueryFactory
                 .select(qCostume.id,

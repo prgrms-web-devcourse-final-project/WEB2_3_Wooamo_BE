@@ -1,5 +1,6 @@
 package com.api.stuv.domain.board.service;
 
+import com.api.stuv.domain.board.dto.BoardDetailResponse;
 import com.api.stuv.domain.board.dto.BoardResponse;
 import com.api.stuv.domain.board.entity.Comment;
 import com.api.stuv.domain.board.dto.CommentResponse;
@@ -31,6 +32,12 @@ public class BoardService {
     @Transactional(readOnly = true)
     public PageResponse<BoardResponse> getBoardList(String title, Pageable pageable) {
         return boardRepository.getBoardList(title, pageable, "http://localhost:8080/api/v1/board/image/");
+    }
+
+    // TODO : 이후 이미지 기능 추가!
+    @Transactional(readOnly = true)
+    public BoardDetailResponse getBoardDetail(Long boardId) {
+        return boardRepository.getBoardDetail(boardId); // List.of("http://localhost:8080/api/v1/board/image/List");
     }
 
     @Transactional
