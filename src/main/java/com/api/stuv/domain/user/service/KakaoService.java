@@ -43,10 +43,25 @@ public class KakaoService {
     private String redirectUri;
 
     //카카오 회원 정보가 있을 시 로그인
-    public String login(KakaoUserRequest kakaoUserRequest, HttpServletResponse response) {
+    public String login(KakaoUserRequest kakaoUserRequest, HttpServletResponse response, HttpServletRequest request) {
         String email = kakaoUserRequest.email();
         Long userId = userRepository.findByEmail(email).getId();
         String role = "회원";
+
+        String login = null;
+        Cookie[] cookies = request.getCookies();
+        if(cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("refresh")) {
+                    login = cookie.getValue();
+                }
+            }
+
+            if (login != null) {
+                System.out.println(login);
+                redisService.delete(login);
+            }
+        }
 
         //토큰 생성
         String access = jwtUtil.createJwt("access", userId, email, role, 600000L);
@@ -149,18 +164,18 @@ public class KakaoService {
 
     //카카오 로그인 구현
     //정보가 있으면 로그인, 없으면 회원가입
-    public String kakaoLogin(String code, HttpServletResponse response){
+    public String kakaoLogin(String code, HttpServletResponse response, HttpServletRequest request) {
         String accessToken = getKakaoAccessToken(code);
         KakaoUserRequest kakaoUser = getKakaoUser(accessToken);
 
         User user = userRepository.findBySocialId(kakaoUser.socialId());
-        if(user == null){
-            userService.registerKakaoUser(kakaoUser);
-            return "회원가입이 완료되었습니다.";
+        if(user != null){
+            login(kakaoUser, response, request);
+            return "로그인되었습니다.";
         }
         else{
-            login(kakaoUser, response);
-            return "로그인되었습니다.";
+            userService.registerKakaoUser(kakaoUser);
+            return "회원가입이 완료되었습니다.";
         }
 
     }
