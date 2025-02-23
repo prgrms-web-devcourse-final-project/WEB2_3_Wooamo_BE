@@ -7,6 +7,7 @@ import com.api.stuv.domain.user.service.KakaoService;
 import com.api.stuv.domain.user.service.UserService;
 import com.api.stuv.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -47,9 +48,9 @@ public class UserController {
     }
 
     @GetMapping("/kakaoLogin")
-    private ResponseEntity<ApiResponse<String>> kakaoLogin(@RequestParam("code") String code, HttpServletResponse response){
+    private ResponseEntity<ApiResponse<String>> kakaoLogin(@RequestParam("code") String code, HttpServletResponse response, HttpServletRequest request){
 
         return ResponseEntity.ok()
-                .body(ApiResponse.success(kakaoService.kakaoLogin(code, response)));
+                .body(ApiResponse.success(kakaoService.kakaoLogin(code, response, request)));
     }
 }
