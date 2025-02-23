@@ -39,10 +39,6 @@ public class UserService {
             throw new BadRequestException(ErrorCode.NOT_VERIFICATION_EMAIL);
         }
 
-        if(userRepository.existsByNickname(nickname)){
-            throw new BadRequestException(ErrorCode.NICKNAME_ALREADY_EXIST);
-        }
-
         User user = User.builder()
                 .email(email)
                 .password(bCryptPasswordEncoder.encode(password))
@@ -106,6 +102,13 @@ public class UserService {
             redisService.save(email, "Verified", Duration.ofMinutes(10));
         } else {
             throw new NotFoundException(ErrorCode.WRONG_VERIFICATION_CODE);
+        }
+    }
+
+    public void checkDuplicateNickname(String nickname){
+        System.out.println(nickname);
+        if(userRepository.existsByNickname(nickname)){
+            throw new BadRequestException(ErrorCode.NICKNAME_ALREADY_EXIST);
         }
     }
 }

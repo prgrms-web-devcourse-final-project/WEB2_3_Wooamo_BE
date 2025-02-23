@@ -53,4 +53,13 @@ public class UserController {
         return ResponseEntity.ok()
                 .body(ApiResponse.success(kakaoService.kakaoLogin(code, response, request)));
     }
+
+    @PostMapping("/nickname")
+    private ResponseEntity<ApiResponse<Void>> duplicateNickname(@RequestBody @Valid UserRequest userRequest){
+        System.out.println(userRequest.nickname());
+        userservice.checkDuplicateNickname(userRequest.nickname());
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.success());
+    }
 }
