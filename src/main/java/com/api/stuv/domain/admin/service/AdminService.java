@@ -1,6 +1,7 @@
 package com.api.stuv.domain.admin.service;
 
-import com.api.stuv.domain.admin.dto.CreateCostumeRequest;
+import com.api.stuv.domain.admin.dto.CostumeRequest;
+import com.api.stuv.domain.admin.exception.CostumeNotFound;
 import com.api.stuv.domain.admin.exception.InvalidPointFormat;
 import com.api.stuv.domain.image.entity.ImageFile;
 import com.api.stuv.domain.image.entity.ImageType;
@@ -29,12 +30,20 @@ public class AdminService {
     private final ImageService imageService;
 
     @Transactional
-    public void createCostume(CreateCostumeRequest request, MultipartFile file) {
+    public void createCostume(CostumeRequest request, MultipartFile file) {
         if(file == null || file.isEmpty()) {throw new ImageFileNotFound();}
         if(request.point().compareTo(BigDecimal.ZERO) < 0) {throw new InvalidPointFormat();}
         Costume costume = Costume.createCostumeContents(request.costumeName(), request.point());
         costumeRepository.save(costume);
         handleImage(costume, file);
+    }
+
+    @Transactional
+    public void modifyCostume(long costumeId, CostumeRequest request){
+        Costume costume = costumeRepository.findById(costumeId).orElseThrow(CostumeNotFound::new);
+        if(request.point().compareTo(BigDecimal.ZERO) < 0) {throw new InvalidPointFormat();}
+        costume.modifyCostumeContents(request.costumeName(), request.point());
+        costumeRepository.save(costume);
     }
 
     public void handleImage(Costume costume, MultipartFile file) {
