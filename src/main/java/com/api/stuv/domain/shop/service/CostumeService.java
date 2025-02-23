@@ -16,4 +16,8 @@ public class CostumeService {
     public PageResponse<CostumeResponse> getCostumeList(Pageable pageable) {
         return costumeRepository.getCostumeList(pageable);
     }
+
+    public CostumeResponse getCostume(Long costumeId) {
+        return costumeRepository.getCostume(costumeId);
+    }
 }
