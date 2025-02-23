@@ -106,7 +106,6 @@ public class UserService {
     }
 
     public void checkDuplicateNickname(String nickname){
-        System.out.println(nickname);
         if(userRepository.existsByNickname(nickname)){
             throw new BadRequestException(ErrorCode.NICKNAME_ALREADY_EXIST);
         }
