@@ -25,8 +25,12 @@ public class RedisService {
         }
     }
 
-
     public <T> T find(String key, Class<T> clazz) {
+        if (clazz == String.class) {
+            String value = stringTemplate.opsForValue().get(key);
+            return clazz.cast(value);
+        }
+
         Object rawData = template.opsForValue().get(key);
         if (rawData == null) {
             return null;
