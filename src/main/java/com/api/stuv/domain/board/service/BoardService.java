@@ -1,5 +1,6 @@
 package com.api.stuv.domain.board.service;
 
+import com.api.stuv.domain.board.dto.BoardRequest;
 import com.api.stuv.domain.board.dto.BoardResponse;
 import com.api.stuv.domain.board.entity.Comment;
 import com.api.stuv.domain.board.dto.CommentResponse;
@@ -15,7 +16,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Slf4j
@@ -31,6 +35,15 @@ public class BoardService {
     @Transactional(readOnly = true)
     public PageResponse<BoardResponse> getBoardList(String title, Pageable pageable) {
         return boardRepository.getBoardList(title, pageable, "http://localhost:8080/api/v1/board/image/");
+    }
+
+    @Transactional
+    public Map<String, Long> createBoard(Long userId, BoardRequest boardRequest, List<MultipartFile> files) {
+        Long boardId = boardRepository.save(BoardRequest.from(userId, boardRequest)).getId();
+        if (files != null) {
+            // TODO : 이미지 업로드 기능 추가해 주세요!
+        }
+        return Map.of("boardId", boardId);
     }
 
     @Transactional
