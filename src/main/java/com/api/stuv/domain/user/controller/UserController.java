@@ -1,14 +1,15 @@
 package com.api.stuv.domain.user.controller;
 
 import com.api.stuv.domain.user.dto.request.EmailCertificationRequest;
+import com.api.stuv.domain.user.dto.request.KakaoUserRequest;
 import com.api.stuv.domain.user.dto.request.UserRequest;
 import com.api.stuv.domain.user.service.KakaoService;
-import com.api.stuv.domain.user.service.userService;
+import com.api.stuv.domain.user.service.UserService;
 import com.api.stuv.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "User API", description = "유저 인증 관련 API")
 @RequestMapping("/api/user")
 public class UserController {
-    private final userService userservice;
+    private final UserService userservice;
     private final KakaoService kakaoService;
 
 
@@ -46,11 +47,12 @@ public class UserController {
     }
 
     @GetMapping("/kakaoLogin")
-    private UserRequest kakaoLogin(@RequestParam("code") String code){
+    private String kakaoLogin(@RequestParam("code") String code, HttpServletResponse response){
         System.out.println("code:"+code);
         String accessToken = kakaoService.getKakaoAccessToken(code);
+        KakaoUserRequest userRequest = kakaoService.getKakaoUser(accessToken);
 
-        return kakaoService.getKakaoUser(accessToken);
+        return kakaoService.kakaoLogin(userRequest, response);
     }
 
 }

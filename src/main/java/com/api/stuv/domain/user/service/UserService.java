@@ -1,11 +1,11 @@
 package com.api.stuv.domain.user.service;
 
 import com.api.stuv.domain.user.dto.request.EmailCertificationRequest;
+import com.api.stuv.domain.user.dto.request.KakaoUserRequest;
 import com.api.stuv.domain.user.dto.request.UserRequest;
 import com.api.stuv.domain.user.entity.RoleType;
 import com.api.stuv.domain.user.entity.User;
 import com.api.stuv.domain.user.repository.UserRepository;
-import com.api.stuv.domain.user.response.GenerateNicknameResponse;
 import com.api.stuv.global.exception.BadRequestException;
 import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
@@ -15,18 +15,15 @@ import com.api.stuv.global.util.email.RandomName;
 import com.api.stuv.global.util.email.provider.EmailProvider;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Duration;
 
 
 @Service
 @RequiredArgsConstructor
-public class userService {
+public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final EmailProvider  emailProvider;
@@ -50,6 +47,24 @@ public class userService {
                 .email(email)
                 .password(bCryptPasswordEncoder.encode(password))
                 .nickname(nickname)
+                .costumeId(1L)
+                .role(RoleType.USER)
+                .build();
+
+        userRepository.save(user);
+    }
+
+    public void registerKakaoUser(KakaoUserRequest kakaoUserRequest) {
+        String email = kakaoUserRequest.email();
+        String password = kakaoUserRequest.password();
+        String nickname = kakaoUserRequest.nickname();
+        Long socialId = kakaoUserRequest.socialId();
+
+        User user = User.builder()
+                .email(email)
+                .password(bCryptPasswordEncoder.encode(password))
+                .nickname(nickname)
+                .socialId(socialId)
                 .costumeId(1L)
                 .role(RoleType.USER)
                 .build();
