@@ -8,15 +8,7 @@ public record BoardRequest(
         String context,
         String boardType
 ) {
-    public record createBoard(
-            Long userId,
-            Long confirmedCommentId,
-            String title,
-            String context,
-            BoardType boardType
-    ) {
-        public static Board from(Long userId, BoardRequest boardRequest) {
-            return new Board(userId, boardRequest.title(), boardRequest.context(), BoardType.fromText(boardRequest.boardType()));
-        }
+    public static Board from(Long userId, BoardRequest boardRequest) {
+        return new Board(userId, boardRequest.title(), boardRequest.context(), BoardType.fromText(boardRequest.boardType()));
     }
 }

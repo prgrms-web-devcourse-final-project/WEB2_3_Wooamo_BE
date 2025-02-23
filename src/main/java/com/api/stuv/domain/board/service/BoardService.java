@@ -39,7 +39,7 @@ public class BoardService {
 
     @Transactional
     public Map<String, Long> createBoard(Long userId, BoardRequest boardRequest, List<MultipartFile> files) {
-        Long boardId = boardRepository.save(BoardRequest.createBoard.from(userId, boardRequest)).getId();
+        Long boardId = boardRepository.save(BoardRequest.from(userId, boardRequest)).getId();
         if (files != null) {
             // TODO : 이미지 업로드 기능 추가해 주세요!
         }
