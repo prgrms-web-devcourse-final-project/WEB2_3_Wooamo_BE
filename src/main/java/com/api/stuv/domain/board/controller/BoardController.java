@@ -43,8 +43,8 @@ public class BoardController {
     @Operation(summary = "게시판 생성 API", description = "게시판을 생성합니다.")
     @PostMapping( value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<Map<String, Long>>> createBoard(
-            @RequestParam(value = "contents") @Valid BoardRequest boardRequest,
-            @RequestParam(value = "images", required = false) List<MultipartFile> files
+            @RequestPart(value = "contents") @Valid BoardRequest boardRequest,
+            @RequestPart(value = "images", required = false) List<MultipartFile> files
     ) {
         return ResponseEntity.ok().body(ApiResponse.success(boardService.createBoard(tokenUtil.getUserId(), boardRequest, files)));
     }

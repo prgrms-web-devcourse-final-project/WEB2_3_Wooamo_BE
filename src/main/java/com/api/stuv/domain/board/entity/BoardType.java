@@ -13,4 +13,13 @@ public enum BoardType {
     public String toString() {
         return text;
     }
+
+    public static BoardType fromText(String text) {
+        for (BoardType type : BoardType.values()) {
+            if (type.toString().equals(text)) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException("Invalid description: " + text);
+    }
 }

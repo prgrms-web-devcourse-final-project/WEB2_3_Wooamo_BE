@@ -16,7 +16,7 @@ public record BoardRequest(
             BoardType boardType
     ) {
         public static Board from(Long userId, BoardRequest boardRequest) {
-            return new Board(userId, boardRequest.title(), boardRequest.context(), BoardType.valueOf(boardRequest.boardType()));
+            return new Board(userId, boardRequest.title(), boardRequest.context(), BoardType.fromText(boardRequest.boardType()));
         }
     }
 }
