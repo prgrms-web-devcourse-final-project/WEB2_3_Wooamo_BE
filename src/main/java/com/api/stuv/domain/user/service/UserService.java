@@ -60,6 +60,12 @@ public class UserService {
         String nickname = kakaoUserRequest.nickname();
         Long socialId = kakaoUserRequest.socialId();
 
+        Boolean isExist = userRepository.existsByEmail(email);
+
+        if(isExist){
+            throw new NotFoundException(ErrorCode.USER_ALREADY_EXIST);
+        }
+
         User user = User.builder()
                 .email(email)
                 .password(bCryptPasswordEncoder.encode(password))
