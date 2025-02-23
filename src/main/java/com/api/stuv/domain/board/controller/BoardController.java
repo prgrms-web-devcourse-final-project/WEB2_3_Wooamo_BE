@@ -71,12 +71,19 @@ public class BoardController {
         return ResponseEntity.ok().body(ApiResponse.success());
     }
   
-      @Operation(summary = "댓글 삭제 API", description = "댓글을 삭제합니다.")
+    @Operation(summary = "댓글 삭제 API", description = "댓글을 삭제합니다.")
     @DeleteMapping("/comment/{commentId}")
     public ResponseEntity<ApiResponse<Void>> deleteComment(
             @PathVariable Long commentId
     ) {
         boardService.deleteComment(tokenUtil.getUserId(), commentId);
+        return ResponseEntity.ok().body(ApiResponse.success());
+    }
+
+    @Operation(summary = "댓글 채택 API", description = "댓글을 채택합니다.")
+    @PatchMapping("/comment/{commentId}")
+    public ResponseEntity<ApiResponse<Void>> confirmComment(@PathVariable Long commentId) {
+        boardService.confirmComment(6L, commentId);
         return ResponseEntity.ok().body(ApiResponse.success());
     }
 }

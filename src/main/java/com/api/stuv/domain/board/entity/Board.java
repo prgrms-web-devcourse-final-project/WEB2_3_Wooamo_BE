@@ -36,4 +36,8 @@ public class Board extends BaseTimeEntity {
         this.context = context;
         this.boardType = boardType;
     }
+
+    public void confirmComment(Long commentId) {
+        this.confirmedCommentId = commentId;
+    }
 }
