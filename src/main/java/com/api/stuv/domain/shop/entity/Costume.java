@@ -36,6 +36,11 @@ public class Costume extends BaseTimeEntity {
         return new Costume(costumeName, point);
     }
 
+    public void modifyCostumeContents(String costumeName, BigDecimal point) {
+        this.costumeName = costumeName;
+        this.point = point;
+    }
+
     public void updateImageFile(Long imagefileId) {
         this.imagefileId = imagefileId;
     }

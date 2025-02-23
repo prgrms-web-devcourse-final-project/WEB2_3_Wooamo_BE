@@ -1,6 +1,6 @@
 package com.api.stuv.domain.admin.controller;
 
-import com.api.stuv.domain.admin.dto.CreateCostumeRequest;
+import com.api.stuv.domain.admin.dto.CostumeRequest;
 import com.api.stuv.domain.admin.service.AdminService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,10 +19,19 @@ public class AdminController {
 
     @PostMapping(value = "/costume", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> createCostume(
-            @RequestPart(value = "contents") @Valid CreateCostumeRequest request,
+            @RequestPart(value = "contents") @Valid CostumeRequest request,
             @RequestPart(value = "image", required = false) MultipartFile file
     ){
         adminService.createCostume(request, file);
         return ResponseEntity.status(HttpStatus.CREATED).body("");
+    }
+
+    @PutMapping(value = "/costume/{costumeId}")
+    public ResponseEntity<String> updateCostume(
+            @PathVariable("costumeId") long costumeId,
+            @RequestBody @Valid CostumeRequest request
+    ) {
+        adminService.modifyCostume(costumeId, request);
+        return ResponseEntity.status(HttpStatus.OK).body("");
     }
 }
