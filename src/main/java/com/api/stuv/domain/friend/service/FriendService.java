@@ -48,4 +48,9 @@ public class FriendService {
     public PageResponse<FriendFollowListResponse> getFriendFollowList(Long userId, Pageable pageable) {
         return friendRepository.getFriendFollowList(userId, pageable, "http://localhost:8080/api/v1/costume/");
     }
+
+    @Transactional(readOnly = true)
+    public PageResponse<FriendResponse> getFriendList(Long userId, Pageable pageable) {
+        return friendRepository.getFriendList(userId, pageable, "http://localhost:8080/api/v1/costume/");
+    }
 }
