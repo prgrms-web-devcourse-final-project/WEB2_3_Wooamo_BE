@@ -9,9 +9,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import com.api.stuv.global.util.email.common.TemplateUtils;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 
 @RequiredArgsConstructor
