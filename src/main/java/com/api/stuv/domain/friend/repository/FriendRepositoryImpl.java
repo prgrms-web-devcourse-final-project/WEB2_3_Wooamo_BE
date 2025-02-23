@@ -1,6 +1,7 @@
 package com.api.stuv.domain.friend.repository;
 
 import com.api.stuv.domain.friend.dto.FriendFollowListResponse;
+import com.api.stuv.domain.friend.dto.FriendResponse;
 import com.api.stuv.domain.friend.entity.FriendStatus;
 import com.api.stuv.domain.friend.entity.QFriend;
 import com.api.stuv.domain.user.entity.QUser;
@@ -32,7 +33,24 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
         return PageResponse.applyPage(query, pageable, getTotalFriendFollowListPage(receiverId));
     }
 
+    @Override
+    public PageResponse<FriendResponse> getFriendList(Long receiverId, Pageable pageable, String imageUrl) {
+        JPAQuery<FriendResponse> query = jpaQueryFactory
+                .select(Projections.constructor(FriendResponse.class,
+                        u.id.as("userId"),
+                        u.nickname,
+                        u.context,
+                        TemplateUtils.getImageUrl(imageUrl, u.costumeId).as("profile")))
+                .from(f).leftJoin(u).on(f.userId.eq(u.id).or(f.friendId.eq(u.id)))
+                .where(f.userId.eq(receiverId).or(f.friendId.eq(receiverId)).and(f.status.eq(FriendStatus.ACCEPTED)).and(u.id.ne(receiverId)));
+        return PageResponse.applyPage(query, pageable, getTotalFriendListPage(receiverId));
+    }
+
     private Long getTotalFriendFollowListPage(Long receiverId) {
         return jpaQueryFactory.select(f.count()).from(f).where(f.friendId.eq(receiverId).and(f.status.eq(FriendStatus.PENDING))).fetchOne();
+    }
+
+    private Long getTotalFriendListPage(Long receiverId) {
+        return jpaQueryFactory.select(f.count()).from(f).where(f.userId.eq(receiverId).or(f.friendId.eq(receiverId)).and(f.status.eq(FriendStatus.ACCEPTED))).fetchOne();
     }
 }
