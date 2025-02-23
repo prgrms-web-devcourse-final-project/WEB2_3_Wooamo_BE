@@ -18,6 +18,8 @@ public class Board extends BaseTimeEntity {
 
     private Long userId;
 
+    private Long imagefileId;
+
     private Long confirmedCommentId;
 
     @Column(nullable = false)
@@ -35,5 +37,9 @@ public class Board extends BaseTimeEntity {
         this.title = title;
         this.context = context;
         this.boardType = boardType;
+    }
+
+    public void updateImageFile(Long imagefileId) {
+        this.imagefileId = imagefileId;
     }
 }

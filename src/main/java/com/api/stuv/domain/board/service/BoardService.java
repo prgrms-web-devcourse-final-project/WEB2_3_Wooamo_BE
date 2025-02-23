@@ -2,10 +2,16 @@ package com.api.stuv.domain.board.service;
 
 import com.api.stuv.domain.board.dto.BoardRequest;
 import com.api.stuv.domain.board.dto.BoardResponse;
+import com.api.stuv.domain.board.entity.Board;
 import com.api.stuv.domain.board.entity.Comment;
 import com.api.stuv.domain.board.dto.CommentResponse;
 import com.api.stuv.domain.board.repository.BoardRepository;
 import com.api.stuv.domain.board.repository.CommentRepository;
+import com.api.stuv.domain.image.entity.ImageFile;
+import com.api.stuv.domain.image.entity.ImageType;
+import com.api.stuv.domain.image.repository.ImageFileRepository;
+import com.api.stuv.domain.image.service.ImageService;
+import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.AccessDeniedException;
 import com.api.stuv.global.exception.ErrorCode;
@@ -30,6 +36,9 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
+    private final ImageService imageService;
+    private final S3ImageService s3ImageService;
+    private final ImageFileRepository imageFileRepository;
 
     // TODO : 이후 이미지 다운로드 기능 추가해 주세요!
     @Transactional(readOnly = true)
@@ -39,11 +48,17 @@ public class BoardService {
 
     @Transactional
     public Map<String, Long> createBoard(Long userId, BoardRequest boardRequest, List<MultipartFile> files) {
-        Long boardId = boardRepository.save(BoardRequest.from(userId, boardRequest)).getId();
-        if (files != null) {
-            // TODO : 이미지 업로드 기능 추가해 주세요!
-        }
-        return Map.of("boardId", boardId);
+        Board board = boardRepository.save(BoardRequest.from(userId, boardRequest));
+        if (files != null && !files.isEmpty()) { for (MultipartFile file : files) { handleImage(board, file); }}
+        return Map.of("boardId", board.getId());
+    }
+
+    public void handleImage(Board board, MultipartFile file) {
+        String fullFileName = imageService.getFileName(file);
+        s3ImageService.uploadImageFile(file, ImageType.BOARD, board.getId(), fullFileName);
+        ImageFile imageFile = ImageFile.createImageFile(file.getOriginalFilename(), fullFileName, ImageType.BOARD);
+        imageFileRepository.save(imageFile);
+        board.updateImageFile(imageFile.getId());
     }
 
     @Transactional
