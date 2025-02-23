@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Getter
 @Entity
@@ -15,7 +16,8 @@ public class PartyGroup extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long managerId;
+    @Column(nullable = false)
+    private Boolean isEvent;
 
     @Column(nullable = false)
     private String name;
@@ -26,19 +28,27 @@ public class PartyGroup extends BaseTimeEntity {
     @Column(precision = 10, nullable = false)
     private BigDecimal bettingPoint;
 
+    @Column(nullable = false)
     private Long usersCount;
+
+    @Column(nullable = false)
+    private LocalDate startDate;
+
+    @Column(nullable = false)
+    private LocalDate endDate;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PartyStatus status;
 
-    @Builder
-    public PartyGroup(Long managerId, String name, String context, BigDecimal bettingPoint, Long usersCount, PartyStatus status) {
-        this.managerId = managerId;
+    public PartyGroup(String name, String context, BigDecimal bettingPoint, Long usersCount, LocalDate startDate, LocalDate endDate) {
+        this.isEvent = false;
         this.name = name;
         this.context = context;
         this.bettingPoint = bettingPoint;
         this.usersCount = usersCount;
-        this.status = status;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.status = PartyStatus.PENDING;
     }
 }

@@ -1,5 +1,6 @@
 package com.api.stuv.domain.shop.repository;
 
+import com.api.stuv.domain.admin.exception.CostumeNotFound;
 import com.api.stuv.domain.image.entity.ImageType;
 import com.api.stuv.domain.image.entity.QImageFile;
 import com.api.stuv.domain.image.service.S3ImageService;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 public class CostumeRepositoryImpl implements CostumeRepositoryCustom {
@@ -43,5 +45,31 @@ public class CostumeRepositoryImpl implements CostumeRepositoryCustom {
                 )).toList();
 
         return PageResponse.of(new PageImpl<>(listResponses, pageable, totalCount));
+    }
+
+    @Override
+    public CostumeResponse getCostume(Long costumeId) {
+        return Optional.ofNullable(
+                jpaQueryFactory
+                        .select(
+                                qCostume.costumeName,
+                                qCostume.point,
+                                qImageFile.newFilename
+                        )
+                        .from(qCostume)
+                        .leftJoin(qImageFile)
+                        .on(qImageFile.id.eq(qCostume.imagefileId))
+                        .where(qCostume.id.eq(costumeId))
+                        .fetchOne())
+                .map(response -> new CostumeResponse(
+                        null,
+                        s3ImageService.generateImageFile(
+                                ImageType.COSTUME,
+                                costumeId,
+                                response.get(qImageFile.newFilename)
+                        ),
+                        response.get(qCostume.costumeName),
+                        response.get(qCostume.point)
+                )).orElseThrow(CostumeNotFound::new);
     }
 }

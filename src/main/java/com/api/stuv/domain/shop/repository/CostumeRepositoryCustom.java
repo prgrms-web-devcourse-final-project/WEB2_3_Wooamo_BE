@@ -6,4 +6,5 @@ import org.springframework.data.domain.Pageable;
 
 public interface CostumeRepositoryCustom {
     PageResponse<CostumeResponse> getCostumeList(Pageable pageable);
+    CostumeResponse getCostume(Long id);
 }
