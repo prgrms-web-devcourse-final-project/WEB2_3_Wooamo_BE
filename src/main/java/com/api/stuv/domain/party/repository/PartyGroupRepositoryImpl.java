@@ -69,7 +69,7 @@ public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
                         .and(pg.endDate.goe(LocalDate.now()))
                         .and(pg.id.eq(userId)))
                 .orderBy(pg.endDate.desc())
-                .groupBy(pg.id, pg.name, pg.usersCount, pg.startDate)
+                .groupBy(pg.id, pg.name, pg.usersCount, pg.endDate)
                 .fetch();
     }
 }
