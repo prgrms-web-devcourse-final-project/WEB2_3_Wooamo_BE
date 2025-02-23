@@ -5,6 +5,8 @@ import com.api.stuv.domain.user.dto.request.KakaoUserRequest;
 import com.api.stuv.domain.user.dto.request.UserRequest;
 import com.api.stuv.domain.user.entity.User;
 import com.api.stuv.domain.user.repository.UserRepository;
+import com.api.stuv.global.exception.ErrorCode;
+import com.api.stuv.global.exception.NotFoundException;
 import com.api.stuv.global.service.RedisService;
 import com.api.stuv.global.util.email.RandomCode;
 import com.api.stuv.global.util.email.RandomName;
@@ -58,7 +60,6 @@ public class KakaoService {
             }
 
             if (login != null) {
-                System.out.println(login);
                 redisService.delete(login);
             }
         }
@@ -101,7 +102,7 @@ public class KakaoService {
             );
         } catch (HttpClientErrorException e) {
             System.out.println("[kakao Login HTTP API 오류] " + e.getMessage());
-            return "Token Error";
+            throw new NotFoundException(ErrorCode.INVALID_ACCESS_TOKEN);
         }
 
         // HTTP 응답 (JSON) -> Access Token 파씽
@@ -119,7 +120,6 @@ public class KakaoService {
     }
 
     public KakaoUserRequest getKakaoUser(String accessToken) {
-        System.out.println("accessToken: " + accessToken);
         // HTTP Header 생성
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + accessToken);
@@ -138,7 +138,7 @@ public class KakaoService {
             );
         } catch (HttpClientErrorException e){
             System.out.println("[kakao Data Access API 오류] " + e.getMessage());
-            return null;
+            throw new NotFoundException(ErrorCode.DATA_ACCESS_API);
         }
 
         String resBody = res.getBody();
@@ -148,6 +148,7 @@ public class KakaoService {
             jsonNode = objectMapper.readTree(resBody);
         } catch (JsonProcessingException e) {
             System.out.println("[json 파싱 오류] " + e.getMessage());
+            throw new NotFoundException(ErrorCode.JSON_PARSING_ERROR);
         }
 
         // 필요한 값 json에서 파싱
@@ -184,7 +185,7 @@ public class KakaoService {
         Cookie cookie = new Cookie(key, value);
         cookie.setMaxAge(24*60*60);
         cookie.setHttpOnly(true);
-        //cookie.setPath("/");
+        cookie.setPath("/");
 
         return cookie;
     }
