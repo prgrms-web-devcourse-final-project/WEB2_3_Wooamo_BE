@@ -53,4 +53,9 @@ public class FriendService {
     public PageResponse<FriendResponse> getFriendList(Long userId, Pageable pageable) {
         return friendRepository.getFriendList(userId, pageable, "http://localhost:8080/api/v1/costume/");
     }
+
+    @Transactional(readOnly = true)
+    public PageResponse<FriendSearchResponse> searchUser(Long userId, String target, Pageable pageable) {
+        return friendRepository.searchUser(userId, target, pageable);
+    }
 }

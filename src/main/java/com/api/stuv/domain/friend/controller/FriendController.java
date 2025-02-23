@@ -1,5 +1,6 @@
 package com.api.stuv.domain.friend.controller;
 
+import com.api.stuv.domain.auth.util.TokenUtil;
 import com.api.stuv.domain.friend.dto.*;
 import com.api.stuv.domain.friend.service.FriendService;
 import com.api.stuv.global.response.ApiResponse;
@@ -18,42 +19,50 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Friend", description = "친구 관련 API")
 public class FriendController {
     private final FriendService friendService;
+    private final TokenUtil tokenUtil;
 
     @Operation(summary = "친구 요청 API", description = "특정 유저에게 친구 요청을 합니다.")
     @PostMapping("/request/{friendId}")
-    public ResponseEntity<ApiResponse<FriendFollowResponse>> requestFriend(@RequestBody Long userId, @PathVariable Long friendId) {
+    public ResponseEntity<ApiResponse<FriendFollowResponse>> requestFriend(@PathVariable Long friendId) {
         return ResponseEntity.ok()
-                .body(ApiResponse.success(friendService.requestFriend(userId, friendId)));
+                .body(ApiResponse.success(friendService.requestFriend(tokenUtil.getUserId(), friendId)));
     }
 
     @Operation(summary = "친구 수락 API", description = "특정 친구 요청을 수락 합니다.")
     @PatchMapping("/{friendId}")
-    public ResponseEntity<ApiResponse<FriendFollowResponse>> acceptFriend(@RequestBody Long userId, @PathVariable Long friendId) {
+    public ResponseEntity<ApiResponse<FriendFollowResponse>> acceptFriend(@PathVariable Long friendId) {
         return ResponseEntity.ok()
-                .body(ApiResponse.success(friendService.acceptFriend(userId, friendId)));
+                .body(ApiResponse.success(friendService.acceptFriend(tokenUtil.getUserId(), friendId)));
     }
 
-    // TODO: userId 를 서버 내에서 받아 올 수 있게 되면 PathVariable 수정 필요
     @Operation(summary = "친구 요청 목록 조회 API", description = "특정 유저의 친구 요청 목록을 조회합니다.")
-    @GetMapping("/request/{userId}")
+    @GetMapping("/request")
     public ResponseEntity<ApiResponse<PageResponse<FriendFollowListResponse>>> getFriendFollowList(
-            @PathVariable Long userId,
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size
     ) {
         return ResponseEntity.ok()
-                .body(ApiResponse.success(friendService.getFriendFollowList(userId, PageRequest.of(page, size))));
+                .body(ApiResponse.success(friendService.getFriendFollowList(tokenUtil.getUserId(), PageRequest.of(page, size))));
     }
 
-    // TODO: userId 를 서버 내에서 받아 올 수 있게 되면 PathVariable 수정 필요
     @Operation(summary = "친구 목록 조회 API", description = "특정 유저의 친구 목록을 조회합니다.")
-    @GetMapping("/{userId}")
+    @GetMapping("")
     public ResponseEntity<ApiResponse<PageResponse<FriendResponse>>> getFriendList(
-            @PathVariable Long userId,
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size
     ) {
         return ResponseEntity.ok()
-                .body(ApiResponse.success(friendService.getFriendList(userId, PageRequest.of(page, size))));
+                .body(ApiResponse.success(friendService.getFriendList(tokenUtil.getUserId(), PageRequest.of(page, size))));
+    }
+
+    @Operation(summary = "유저 검색 API", description = "특정 유저를 검색합니다.")
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<PageResponse<FriendSearchResponse>>> searchUser(
+            @RequestParam String query,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(friendService.searchUser(tokenUtil.getUserId(), query, PageRequest.of(page, size))));
     }
 }
