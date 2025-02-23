@@ -19,7 +19,7 @@ public class AdminController {
     private final AdminService adminService;
 
     @PostMapping(value = "/costume", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> createCostume(
+    public ResponseEntity<ApiResponse<Void>> createCostume(
             @RequestPart(value = "contents") @Valid CostumeRequest request,
             @RequestPart(value = "image", required = false) MultipartFile file
     ){
@@ -28,11 +28,11 @@ public class AdminController {
     }
 
     @PutMapping(value = "/costume/{costumeId}")
-    public ResponseEntity<String> updateCostume(
+    public ResponseEntity<ApiResponse<Void>> updateCostume(
             @PathVariable("costumeId") long costumeId,
             @RequestBody @Valid CostumeRequest request
     ) {
         adminService.modifyCostume(costumeId, request);
-        return ResponseEntity.status(HttpStatus.OK).body("");
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success());
     }
 }
