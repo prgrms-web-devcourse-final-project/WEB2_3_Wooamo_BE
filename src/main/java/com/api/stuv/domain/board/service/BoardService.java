@@ -55,7 +55,6 @@ public class BoardService {
 
     @Transactional
     public void deleteComment(Long userId, Long commentId) {
-        if ( !userRepository.existsById(userId) ) throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
         Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException(ErrorCode.COMMENT_NOT_FOUND));
         if (!Objects.equals(comment.getUserId(), userId)) throw new AccessDeniedException(ErrorCode.COMMENT_NOT_AUTHORIZED);
         commentRepository.delete(comment);
@@ -64,14 +63,12 @@ public class BoardService {
     // TODO : 이후 이미지 다운로드 기능 추가해 주세요!
     @Transactional(readOnly = true)
     public PageResponse<CommentResponse> getCommentList(Long boardId, Pageable pageable) {
-        if (!boardRepository.existsById(boardId)) throw new NotFoundException(ErrorCode.BOARD_NOT_FOUND);
         return commentRepository.getCommentList(boardId, pageable, "http://localhost:8080/api/v1/costume/");
     }
 
     // TODO: 이후 알림 기능 추가
     @Transactional
     public void createComment(Long userId, Long boardId, String content) {
-        if (!userRepository.existsById(userId)) throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
         if (!boardRepository.existsById(boardId)) throw new NotFoundException(ErrorCode.BOARD_NOT_FOUND);
         commentRepository.save(Comment.create(userId, boardId, content));
     }
