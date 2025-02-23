@@ -39,13 +39,12 @@ public class PartyController {
                 ));
     }
 
-    // TODO : tokenUtil.getUserId 적용
     @GetMapping("/active")
     @Operation(summary = "현재 사용자가 진행중인 팟 목록 조회 API", description = "현재 사용자가 진행중인 팟 목록을 조회합니다.")
     public ResponseEntity<ApiResponse<List<PartyGroupResponse>>> getActivePartyList() {
         return ResponseEntity.ok()
                 .body(ApiResponse.success(
-                        partyService.getActivePartyGroupsByUserId(/*tokenUtil.getUserId()*/ 1L)
+                        partyService.getActivePartyGroupsByUserId(tokenUtil.getUserId())
                 ));
     }
 }
