@@ -47,6 +47,7 @@ public class CostumeRepositoryImpl implements CostumeRepositoryCustom {
         return PageResponse.of(new PageImpl<>(listResponses, pageable, totalCount));
     }
 
+    @Override
     public CostumeResponse getCostume(Long costumeId) {
         return Optional.ofNullable(
                 jpaQueryFactory
