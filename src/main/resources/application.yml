@@ -132,8 +132,8 @@ payment:
 jwt:
   secret-key: test
 kakao:
-  api-key: ${KAKAO_API_KEY}
-  client-secret: ${KAKAO_CLIENT_SECRET}
+  api-key: test
+  client-secret: test
   redirect-uri: http://localhost:8080/api/user/kakaoLogin
   authentication:
     method: client_secret_post
