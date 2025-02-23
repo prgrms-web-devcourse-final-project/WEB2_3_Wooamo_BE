@@ -149,8 +149,9 @@ public class KakaoService {
 
     //카카오 로그인 구현
     //정보가 있으면 로그인, 없으면 회원가입
-    public String kakaoLogin(KakaoUserRequest kakaoUser, HttpServletResponse response){
-        //String accessToken = getKakaoAccessToken(code);
+    public String kakaoLogin(String code, HttpServletResponse response){
+        String accessToken = getKakaoAccessToken(code);
+        KakaoUserRequest kakaoUser = getKakaoUser(accessToken);
 
         User user = userRepository.findBySocialId(kakaoUser.socialId());
         if(user == null){

@@ -48,11 +48,8 @@ public class UserController {
 
     @GetMapping("/kakaoLogin")
     private String kakaoLogin(@RequestParam("code") String code, HttpServletResponse response){
-        System.out.println("code:"+code);
-        String accessToken = kakaoService.getKakaoAccessToken(code);
-        KakaoUserRequest userRequest = kakaoService.getKakaoUser(accessToken);
 
-        return kakaoService.kakaoLogin(userRequest, response);
+        return kakaoService.kakaoLogin(code, response);
     }
 
 }
