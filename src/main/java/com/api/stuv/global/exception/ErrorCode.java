@@ -52,7 +52,10 @@ public enum ErrorCode {
     COMMENT_NOT_AUTHORIZED(403, -6002, "해당 댓글에 대한 권한이 없습니다."),
 
     // COSTUME
-    COSTUME_NOT_FOUND(404, -7000, "해당 코스튬을 찾을 수 없습니다.")
+    COSTUME_NOT_FOUND(404, -7000, "해당 코스튬을 찾을 수 없습니다."),
+
+    // IMAGE
+    IMAGE_NAME_NOT_FOUND(404, -8000, "해당 이미지를 찾을 수 없습니다.")
     ;
 
     private final int status;
