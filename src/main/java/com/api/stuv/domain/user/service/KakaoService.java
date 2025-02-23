@@ -156,11 +156,11 @@ public class KakaoService {
         User user = userRepository.findBySocialId(kakaoUser.socialId());
         if(user == null){
             userService.registerKakaoUser(kakaoUser);
-            return "회원가입";
+            return "회원가입이 완료되었습니다.";
         }
         else{
             login(kakaoUser, response);
-            return "로그인";
+            return "로그인되었습니다.";
         }
 
     }

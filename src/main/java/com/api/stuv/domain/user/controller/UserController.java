@@ -47,9 +47,9 @@ public class UserController {
     }
 
     @GetMapping("/kakaoLogin")
-    private String kakaoLogin(@RequestParam("code") String code, HttpServletResponse response){
+    private ResponseEntity<ApiResponse<String>> kakaoLogin(@RequestParam("code") String code, HttpServletResponse response){
 
-        return kakaoService.kakaoLogin(code, response);
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(kakaoService.kakaoLogin(code, response)));
     }
-
 }
