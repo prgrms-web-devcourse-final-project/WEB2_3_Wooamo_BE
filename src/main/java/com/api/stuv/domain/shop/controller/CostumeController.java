@@ -7,10 +7,7 @@ import com.api.stuv.global.response.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api")
@@ -26,5 +23,13 @@ public class CostumeController {
     ) {
         return ResponseEntity.ok().body(ApiResponse.success(
                 costumeService.getCostumeList(PageRequest.of(page, size))));
+    }
+
+    @GetMapping(value = "/costume/{costumeId}")
+    public ResponseEntity<ApiResponse<CostumeResponse>> getCostume(
+            @PathVariable long costumeId
+    ) {
+        return ResponseEntity.ok().body(ApiResponse.success(
+                costumeService.getCostume(costumeId)));
     }
 }
