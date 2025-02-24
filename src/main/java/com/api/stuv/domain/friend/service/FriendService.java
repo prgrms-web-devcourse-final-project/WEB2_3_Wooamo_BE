@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -65,5 +66,10 @@ public class FriendService {
     @Transactional(readOnly = true)
     public PageResponse<FriendResponse> searchUser(Long userId, String target, Pageable pageable) {
         return friendRepository.searchUser(userId, target, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public List<FriendResponse> randomRecommendFriend(Long userId) {
+        return friendRepository.recommendFriend(userId);
     }
 }
