@@ -7,14 +7,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum ErrorCode {
     // USER
-    USER_ALREADY_EXIST(400, -1001, "해당 이메일이 이미 존재합니다."),
-    NICKNAME_ALREADY_EXIST(400, -1001, "해당 닉네임이 이미 존재합니다."),
-    CODE_EXPIRED(400, -1001, "인증 코드가 만료되었습니다."),
-    WRONG_SIGNUP(400, -1002, "올바르지 않은 회원가입입니다."),
-    WRONG_VERIFICATION_CODE(400, -1002, "인증번호가 올바르지 않습니다."),
-    NOT_VERIFICATION_EMAIL(400, -1002, "인증되지 않은 이메일입니다."),
-    INVALID_PASSWORD(400, -1003, "비빌번호가 올바르지 않습니다."),
-    USER_NOT_FOUND(404, -1004, "존재하지 않는 사용자입니다."),
+    USER_ALREADY_EXIST(400, -1000, "해당 이메일이 이미 존재합니다."),
+    NICKNAME_ALREADY_EXIST(409, -1001, "해당 닉네임이 이미 존재합니다."),
+    CODE_EXPIRED(400, -1002, "인증 코드가 만료되었습니다."),
+    WRONG_SIGNUP(400, -1003, "올바르지 않은 회원가입입니다."),
+    WRONG_VERIFICATION_CODE(400, -1004, "인증번호가 올바르지 않습니다."),
+    NOT_VERIFICATION_EMAIL(400, -1005, "인증되지 않은 이메일입니다."),
+    INVALID_PASSWORD(400, -1006, "아이디 또는 비밀번호가 올바르지 않습니다."),
+    USER_NOT_FOUND(404, -1007, "존재하지 않는 사용자입니다."),
+    DATA_ACCESS_API(401, -1008, "데이터를 받아오지 못했습니다"),
 
     // TOKEN
     EMPTY_JWT_TOKEN(400, -2000, "JWT 토큰이 없습니다."),
@@ -35,6 +36,8 @@ public enum ErrorCode {
     INVALID_SORT_TYPE(400, -3007, "올바르지 않은 정렬 타입입니다."),
     INVALID_PAGE_SIZE(400, -3008, "올바르지 않은 페이지 사이즈입니다."),
     INVALID_PAGE_NUMBER(400, -3009, "올바르지 않은 페이지 번호입니다."),
+    HTTP_API_ERROR(400, -3010, "HTTP API에서 오류가 발생했습니다."),
+   JSON_PARSING_ERROR(400, -3011, "JSON 파싱이 잘못되었습니다."),
 
     // FRIEND
     FRIEND_NOT_FOUND(404, -4000, "해당 친구를 찾을 수 없습니다."),
