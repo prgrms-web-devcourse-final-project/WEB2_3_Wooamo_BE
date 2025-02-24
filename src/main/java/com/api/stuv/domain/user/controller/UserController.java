@@ -1,8 +1,9 @@
 package com.api.stuv.domain.user.controller;
 
+import com.api.stuv.domain.auth.util.TokenUtil;
 import com.api.stuv.domain.user.dto.request.EmailCertificationRequest;
-import com.api.stuv.domain.user.dto.request.KakaoUserRequest;
 import com.api.stuv.domain.user.dto.request.UserRequest;
+import com.api.stuv.domain.user.dto.response.MyInformationResponse;
 import com.api.stuv.domain.user.service.KakaoService;
 import com.api.stuv.domain.user.service.UserService;
 import com.api.stuv.global.response.ApiResponse;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final UserService userservice;
     private final KakaoService kakaoService;
+    private final TokenUtil tokenUtil;
 
     @Operation(summary = "인증메일 전송 API", description = "인증 메일을 전송합니다.")
     @PostMapping("/auth/send")
@@ -66,4 +68,14 @@ public class UserController {
         return ResponseEntity.ok()
                 .body(ApiResponse.success());
     }
+
+    @Operation(summary = "내 정보 가져오기 API", description = "본인의 정보를 가져옵니다.")
+    @GetMapping
+    private ResponseEntity<ApiResponse<MyInformationResponse>> getMyInformation(){
+        Long myId = tokenUtil.getUserId();
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(userservice.getMyInformation(myId)));
+    }
+
 }

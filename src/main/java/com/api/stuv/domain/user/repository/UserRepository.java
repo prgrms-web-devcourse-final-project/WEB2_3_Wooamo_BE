@@ -1,5 +1,6 @@
 package com.api.stuv.domain.user.repository;
 
+import com.api.stuv.domain.user.dto.response.MyInformationResponse;
 import com.api.stuv.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
