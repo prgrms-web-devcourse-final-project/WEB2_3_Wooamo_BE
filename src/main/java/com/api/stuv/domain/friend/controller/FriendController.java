@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @Tag(name = "Friend", description = "친구 관련 API")
 public class FriendController {
-
     private final FriendService friendService;
     private final TokenUtil tokenUtil;
 
@@ -38,7 +37,7 @@ public class FriendController {
     }
 
     @Operation(summary = "친구 요청 목록 조회 API", description = "특정 유저의 친구 요청 목록을 조회합니다.")
-    @GetMapping("/request/{userId}")
+    @GetMapping("/request")
     public ResponseEntity<ApiResponse<PageResponse<FriendFollowListResponse>>> getFriendFollowList(
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size
@@ -48,7 +47,7 @@ public class FriendController {
     }
 
     @Operation(summary = "친구 목록 조회 API", description = "특정 유저의 친구 목록을 조회합니다.")
-    @GetMapping("/{userId}")
+    @GetMapping("")
     public ResponseEntity<ApiResponse<PageResponse<FriendResponse>>> getFriendList(
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size
@@ -62,5 +61,16 @@ public class FriendController {
     public ResponseEntity<ApiResponse<Void>> deleteFriend(@PathVariable Long friendId) {
         friendService.deleteFriend(tokenUtil.getUserId(), friendId);
         return ResponseEntity.ok().body(ApiResponse.success());
+    }
+
+    @Operation(summary = "유저 검색 API", description = "특정 유저를 검색합니다.")
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<PageResponse<FriendResponse>>> searchUser(
+            @RequestParam String query,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(friendService.searchUser(tokenUtil.getUserId(), query, PageRequest.of(page, size))));
     }
 }

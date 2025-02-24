@@ -61,4 +61,9 @@ public class FriendService {
         if ( !(friend.getUserId().equals(userId) || friend.getFriendId().equals(userId)) ) throw new AccessDeniedException(ErrorCode.FRIEND_DELETE_NOT_AUTHORIZED);
         friendRepository.delete(friend);
     }
+
+    @Transactional(readOnly = true)
+    public PageResponse<FriendResponse> searchUser(Long userId, String target, Pageable pageable) {
+        return friendRepository.searchUser(userId, target, pageable);
+    }
 }
