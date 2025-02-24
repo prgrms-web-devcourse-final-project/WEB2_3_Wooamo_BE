@@ -2,8 +2,8 @@ package com.api.stuv.domain.user.controller;
 
 import com.api.stuv.domain.auth.util.TokenUtil;
 import com.api.stuv.domain.user.dto.request.EmailCertificationRequest;
-import com.api.stuv.domain.user.dto.request.KakaoUserRequest;
 import com.api.stuv.domain.user.dto.request.UserRequest;
+import com.api.stuv.domain.user.dto.response.MyInformationResponse;
 import com.api.stuv.domain.user.dto.response.UserInformationResponse;
 import com.api.stuv.domain.user.service.KakaoService;
 import com.api.stuv.domain.user.service.UserService;
@@ -79,4 +79,14 @@ public class UserController {
                 .body(ApiResponse.success(userservice.getUserInformation(userId, myId)));
 
     }
+
+    @Operation(summary = "내 정보 가져오기 API", description = "본인의 정보를 가져옵니다.")
+    @GetMapping
+    private ResponseEntity<ApiResponse<MyInformationResponse>> getMyInformation(){
+        Long myId = tokenUtil.getUserId();
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(userservice.getMyInformation(myId)));
+    }
+
 }
