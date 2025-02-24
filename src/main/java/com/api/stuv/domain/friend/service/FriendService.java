@@ -55,7 +55,7 @@ public class FriendService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<FriendSearchResponse> searchUser(Long userId, String target, Pageable pageable) {
+    public PageResponse<FriendResponse> searchUser(Long userId, String target, Pageable pageable) {
         return friendRepository.searchUser(userId, target, pageable);
     }
 }

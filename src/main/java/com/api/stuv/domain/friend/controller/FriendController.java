@@ -57,7 +57,7 @@ public class FriendController {
 
     @Operation(summary = "유저 검색 API", description = "특정 유저를 검색합니다.")
     @GetMapping("/search")
-    public ResponseEntity<ApiResponse<PageResponse<FriendSearchResponse>>> searchUser(
+    public ResponseEntity<ApiResponse<PageResponse<FriendResponse>>> searchUser(
             @RequestParam String query,
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size

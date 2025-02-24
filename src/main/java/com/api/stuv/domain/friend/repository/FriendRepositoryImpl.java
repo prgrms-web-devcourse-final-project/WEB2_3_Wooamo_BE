@@ -2,7 +2,6 @@ package com.api.stuv.domain.friend.repository;
 
 import com.api.stuv.domain.friend.dto.FriendFollowListResponse;
 import com.api.stuv.domain.friend.dto.FriendResponse;
-import com.api.stuv.domain.friend.dto.FriendSearchResponse;
 import com.api.stuv.domain.friend.entity.FriendStatus;
 import com.api.stuv.domain.friend.entity.QFriend;
 import com.api.stuv.domain.image.entity.ImageType;
@@ -61,19 +60,19 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
     }
 
     @Override
-    public PageResponse<FriendSearchResponse> searchUser(Long userId, String target, Pageable pageable) {
-        List<FriendSearchResponse> response = jpaQueryFactory
+    public PageResponse<FriendResponse> searchUser(Long userId, String target, Pageable pageable) {
+        List<FriendResponse> response = jpaQueryFactory
                 .select(u.id, u.nickname, i.newFilename, u.context)
                 .from(u).leftJoin(uc).on(u.costumeId.eq(uc.id))
                 .leftJoin(c).on(uc.costumeId.eq(c.id))
                 .leftJoin(i).on(c.imagefileId.eq(i.id))
                 .where(u.nickname.contains(target).or(u.context.contains(target)).and(u.id.ne(userId)))
                 .offset(pageable.getOffset()).limit(pageable.getPageSize()).fetch()
-                .stream().map(tuple -> new FriendSearchResponse(
+                .stream().map(tuple -> new FriendResponse(
                         tuple.get(u.id),
                         tuple.get(u.nickname),
-                        s3ImageService.generateImageFile(ImageType.COSTUME, tuple.get(i.id), tuple.get(i.newFilename)),
-                        tuple.get(u.context))).toList();
+                        tuple.get(u.context),
+                        s3ImageService.generateImageFile(ImageType.COSTUME, tuple.get(i.id), tuple.get(i.newFilename)))).toList();
         return PageResponse.of(new PageImpl<>(response, pageable, getTotalSearchUserPage(userId, target)));
     }
 
