@@ -3,12 +3,14 @@ package com.api.stuv.domain.board.service;
 import com.api.stuv.domain.board.dto.BoardDetailResponse;
 import com.api.stuv.domain.board.dto.BoardRequest;
 import com.api.stuv.domain.board.dto.BoardResponse;
+import com.api.stuv.domain.board.dto.CommentResponse;
 import com.api.stuv.domain.board.entity.Board;
 import com.api.stuv.domain.board.entity.BoardType;
 import com.api.stuv.domain.board.entity.Comment;
-import com.api.stuv.domain.board.dto.CommentResponse;
 import com.api.stuv.domain.board.repository.BoardRepository;
 import com.api.stuv.domain.board.repository.CommentRepository;
+import com.api.stuv.domain.image.entity.EntityType;
+import com.api.stuv.domain.image.service.ImageService;
 import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.AccessDeniedException;
 import com.api.stuv.global.exception.ErrorCode;
@@ -33,6 +35,7 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
+    private final ImageService imageService;
 
     // TODO : 이후 이미지 다운로드 기능 추가해 주세요!
     @Transactional(readOnly = true)
@@ -43,9 +46,7 @@ public class BoardService {
     @Transactional
     public Map<String, Long> createBoard(Long userId, BoardRequest boardRequest, List<MultipartFile> files) {
         Long boardId = boardRepository.save(BoardRequest.from(userId, boardRequest)).getId();
-        if (files != null) {
-            // TODO : 이미지 업로드 기능 추가해 주세요!
-        }
+        if (files != null && !files.isEmpty()) { for (MultipartFile file : files) { imageService.handleImage(boardId, file, EntityType.BOARD); }}
         return Map.of("boardId", boardId);
     }
 

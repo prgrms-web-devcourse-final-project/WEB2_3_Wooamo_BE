@@ -1,7 +1,7 @@
 package com.api.stuv.domain.shop.repository;
 
 import com.api.stuv.domain.admin.exception.CostumeNotFound;
-import com.api.stuv.domain.image.entity.ImageType;
+import com.api.stuv.domain.image.entity.EntityType;
 import com.api.stuv.domain.image.entity.QImageFile;
 import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.domain.shop.dto.CostumeResponse;
@@ -39,7 +39,7 @@ public class CostumeRepositoryImpl implements CostumeRepositoryCustom {
                 .stream()
                 .map(tuple -> new CostumeResponse(
                         tuple.get(qCostume.id),
-                        s3ImageService.generateImageFile(ImageType.COSTUME, tuple.get(qCostume.id), tuple.get(qImageFile.newFilename)),
+                        s3ImageService.generateImageFile(EntityType.COSTUME, tuple.get(qCostume.id), tuple.get(qImageFile.newFilename)),
                         tuple.get(qCostume.costumeName),
                         tuple.get(qCostume.point)
                 )).toList();
@@ -64,7 +64,7 @@ public class CostumeRepositoryImpl implements CostumeRepositoryCustom {
                 .map(response -> new CostumeResponse(
                         null,
                         s3ImageService.generateImageFile(
-                                ImageType.COSTUME,
+                                EntityType.COSTUME,
                                 costumeId,
                                 response.get(qImageFile.newFilename)
                         ),
