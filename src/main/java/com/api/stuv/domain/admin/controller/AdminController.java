@@ -36,11 +36,11 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success());
     }
 
-//    @DeleteMapping(value = "/costume/{costumeId}")
-//    public ResponseEntity<ApiResponse<Void>> deleteCostume(
-//            @PathVariable("costumeId") long costumeId
-//    ){
-//        adminService.deleteCostume(costumeId);
-//        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success());
-//    }
+    @DeleteMapping(value = "/costume/{costumeId}")
+    public ResponseEntity<ApiResponse<Void>> deleteCostume(
+            @PathVariable("costumeId") long costumeId
+    ){
+        adminService.deleteCostume(costumeId);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success());
+    }
 }

@@ -45,11 +45,11 @@ public class AdminService {
         costumeRepository.save(costume);
     }
 
-//    public void deleteCostume(Long costumeId) {
-//        Costume costume = costumeRepository.findById(costumeId).orElseThrow(CostumeNotFound::new);
-//        ImageFile imageFile = imageFileRepository.findById(costume.getImagefileId()).orElseThrow(ImageFileNameNotFound::new);
-//        s3ImageService.deleteImageFile(EntityType.COSTUME, costume.getImagefileId(), imageFile.getNewFilename());
-//        imageFileRepository.deleteById(costume.getImagefileId());
-//        costumeRepository.delete(costume);
-//    }
+    public void deleteCostume(Long costumeId) {
+        Costume costume = costumeRepository.findById(costumeId).orElseThrow(CostumeNotFound::new);
+        ImageFile imageFile = imageFileRepository.findByEntityIdAndEntityType(costumeId, EntityType.COSTUME).orElseThrow(ImageFileNotFound::new);
+        s3ImageService.deleteImageFile(EntityType.COSTUME, costumeId, imageFile.getNewFilename());
+        imageFileRepository.deleteById(costumeId);
+        costumeRepository.delete(costume);
+    }
 }
