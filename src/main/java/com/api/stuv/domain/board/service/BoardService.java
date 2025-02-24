@@ -10,6 +10,8 @@ import com.api.stuv.domain.board.entity.Comment;
 import com.api.stuv.domain.board.repository.BoardRepository;
 import com.api.stuv.domain.board.repository.CommentRepository;
 import com.api.stuv.domain.image.entity.EntityType;
+import com.api.stuv.domain.image.entity.ImageFile;
+import com.api.stuv.domain.image.repository.ImageFileRepository;
 import com.api.stuv.domain.image.service.ImageService;
 import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.AccessDeniedException;
@@ -35,6 +37,7 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
+    private final ImageFileRepository imageFileRepository;
     private final ImageService imageService;
 
     // TODO : 이후 이미지 다운로드 기능 추가해 주세요!
@@ -57,6 +60,20 @@ public class BoardService {
     }
 
     @Transactional
+    public void deleteBoard(Long userId, Long boardId) {
+        Board board = boardRepository.findById(boardId).orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
+        if (!Objects.equals(board.getUserId(), userId)) throw new AccessDeniedException(ErrorCode.BOARD_NOT_AUTHORIZED);
+        List<Comment> comments = commentRepository.findAllByBoardId(boardId);
+        List<ImageFile> imageFiles = imageFileRepository.findAllByEntityIdAndEntityType(boardId, EntityType.BOARD);
+        if ( !imageFiles.isEmpty() ) {
+            // S3 이미지 삭제 작업
+            imageFileRepository.deleteAll(imageFiles);
+        }
+        commentRepository.deleteAll(comments);
+        boardRepository.delete(board);
+    }
+
+    @Transactional
     public void deleteComment(Long userId, Long commentId) {
         Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException(ErrorCode.COMMENT_NOT_FOUND));
         if (!Objects.equals(comment.getUserId(), userId)) throw new AccessDeniedException(ErrorCode.COMMENT_NOT_AUTHORIZED);
@@ -66,6 +83,7 @@ public class BoardService {
     // TODO : 이후 이미지 다운로드 기능 추가해 주세요!
     @Transactional(readOnly = true)
     public PageResponse<CommentResponse> getCommentList(Long boardId, Pageable pageable) {
+        if ( !boardRepository.existsById(boardId) ) throw new NotFoundException(ErrorCode.BOARD_NOT_FOUND);
         return commentRepository.getCommentList(boardId, pageable, "http://localhost:8080/api/v1/costume/");
     }
 
