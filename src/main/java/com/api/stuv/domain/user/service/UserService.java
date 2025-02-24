@@ -43,14 +43,7 @@ public class UserService {
             throw new BadRequestException(ErrorCode.NOT_VERIFICATION_EMAIL);
         }
 
-        User user = User.builder()
-                .email(email)
-                .password(bCryptPasswordEncoder.encode(password))
-                .nickname(nickname)
-                .costumeId(1L)
-                .role(RoleType.USER)
-                .build();
-
+        User user = userRequest.from(userRequest, bCryptPasswordEncoder);
         userRepository.save(user);
     }
 
@@ -66,15 +59,7 @@ public class UserService {
             throw new NotFoundException(ErrorCode.USER_ALREADY_EXIST);
         }
 
-        User user = User.builder()
-                .email(email)
-                .password(bCryptPasswordEncoder.encode(password))
-                .nickname(nickname)
-                .socialId(socialId)
-                .costumeId(1L)
-                .role(RoleType.USER)
-                .build();
-
+        User user = kakaoUserRequest.kakaoFrom(kakaoUserRequest, socialId,  bCryptPasswordEncoder);
         userRepository.save(user);
     }
 
