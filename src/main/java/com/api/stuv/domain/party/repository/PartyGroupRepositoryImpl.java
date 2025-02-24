@@ -1,10 +1,13 @@
 package com.api.stuv.domain.party.repository;
 
+import com.api.stuv.domain.party.dto.response.AdminPartyGroupResponse;
 import com.api.stuv.domain.party.dto.response.PartyGroupResponse;
+import com.api.stuv.domain.party.entity.PartyStatus;
 import com.api.stuv.domain.party.entity.QGroupMember;
 import com.api.stuv.domain.party.entity.QPartyGroup;
 import com.api.stuv.global.response.PageResponse;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -41,10 +44,10 @@ public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
                 .orderBy(pg.startDate.desc())
                 .groupBy(pg.id, pg.name, pg.usersCount, pg.startDate);
 
-        return PageResponse.applyPage(query, pageable, findPendingGroupsCountByName(name));
+        return PageResponse.applyPage(query, pageable, countPendingGroupsByName(name));
     }
 
-    private Long findPendingGroupsCountByName(String name) {
+    private Long countPendingGroupsByName(String name) {
         return factory.select(pg.countDistinct())
                 .from(pg)
                 .join(gm)
@@ -71,5 +74,33 @@ public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
                 .orderBy(pg.endDate.desc())
                 .groupBy(pg.id, pg.name, pg.usersCount, pg.endDate)
                 .fetch();
+    }
+
+    @Override
+    public PageResponse<AdminPartyGroupResponse> findAllPartyGroupsWithApproved(Pageable pageable) {
+        JPAQuery<AdminPartyGroupResponse> query = factory
+                .select(Projections.constructor(AdminPartyGroupResponse.class,
+                        pg.id,
+                        pg.name,
+                        pg.usersCount,
+                        gm.id.count(),
+                        pg.startDate,
+                        pg.endDate,
+                        new CaseBuilder()
+                                .when(pg.status.eq(PartyStatus.APPROVED)).then(PartyStatus.APPROVED.getText())
+                                .otherwise(PartyStatus.PENDING.getText())))
+                .from(pg)
+                .join(gm).on(pg.id.eq(gm.groupId))
+                .orderBy(pg.createdAt.desc())
+                .groupBy(pg.id, pg.name, pg.usersCount, pg.startDate, pg.endDate, pg.status);
+
+        return PageResponse.applyPage(query, pageable, countAllPartyGroupsWithApproved());
+    }
+
+    private Long countAllPartyGroupsWithApproved() {
+        return factory.select(pg.countDistinct())
+                .from(pg)
+                .join(gm).on(pg.id.eq(gm.groupId))
+                .fetchOne();
     }
 }

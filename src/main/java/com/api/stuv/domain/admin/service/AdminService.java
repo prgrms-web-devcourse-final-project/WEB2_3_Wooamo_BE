@@ -5,14 +5,17 @@ import com.api.stuv.domain.admin.exception.CostumeNotFound;
 import com.api.stuv.domain.admin.exception.InvalidPointFormat;
 import com.api.stuv.domain.image.entity.EntityType;
 import com.api.stuv.domain.image.entity.ImageFile;
-import com.api.stuv.domain.image.exception.ImageFileNameNotFound;
 import com.api.stuv.domain.image.exception.ImageFileNotFound;
 import com.api.stuv.domain.image.repository.ImageFileRepository;
 import com.api.stuv.domain.image.service.ImageService;
 import com.api.stuv.domain.image.service.S3ImageService;
+import com.api.stuv.domain.party.dto.response.AdminPartyGroupResponse;
+import com.api.stuv.domain.party.repository.PartyGroupRepository;
 import com.api.stuv.domain.shop.entity.Costume;
 import com.api.stuv.domain.shop.repository.CostumeRepository;
+import com.api.stuv.global.response.PageResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,6 +30,7 @@ public class AdminService {
     private final ImageFileRepository imageFileRepository;
     private final S3ImageService s3ImageService;
     private final ImageService imageService;
+    private final PartyGroupRepository partyGroupRepository;
 
     @Transactional
     public void createCostume(CostumeRequest request, MultipartFile file) {
@@ -51,5 +55,9 @@ public class AdminService {
         s3ImageService.deleteImageFile(EntityType.COSTUME, costumeId, imageFile.getNewFilename());
         imageFileRepository.deleteById(costumeId);
         costumeRepository.delete(costume);
+    }
+
+    public PageResponse<AdminPartyGroupResponse> getAllPartyGroupsWithApprovedStatus(Pageable pageable) {
+        return partyGroupRepository.findAllPartyGroupsWithApproved(pageable);
     }
 }
