@@ -1,5 +1,6 @@
 package com.api.stuv.domain.board.entity;
 
+import com.api.stuv.domain.board.dto.BoardUpdateRequest;
 import com.api.stuv.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -39,5 +40,10 @@ public class Board extends BaseTimeEntity {
 
     public void confirmComment(Long commentId) {
         this.confirmedCommentId = commentId;
+    }
+
+    public void update(BoardUpdateRequest request) {
+        this.title = request.title();
+        this.context = request.context();
     }
 }

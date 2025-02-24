@@ -1,9 +1,6 @@
 package com.api.stuv.domain.board.service;
 
-import com.api.stuv.domain.board.dto.BoardDetailResponse;
-import com.api.stuv.domain.board.dto.BoardRequest;
-import com.api.stuv.domain.board.dto.BoardResponse;
-import com.api.stuv.domain.board.dto.CommentResponse;
+import com.api.stuv.domain.board.dto.*;
 import com.api.stuv.domain.board.entity.Board;
 import com.api.stuv.domain.board.entity.BoardType;
 import com.api.stuv.domain.board.entity.Comment;
@@ -48,13 +45,27 @@ public class BoardService {
     @Transactional
     public Map<String, Long> createBoard(Long userId, BoardRequest boardRequest, List<MultipartFile> files) {
         Long boardId = boardRepository.save(BoardRequest.from(userId, boardRequest)).getId();
-        if (files != null && !files.isEmpty()) { for (MultipartFile file : files) { imageService.handleImage(boardId, file, EntityType.BOARD); }}
+        for (MultipartFile file : files) imageService.handleImage(boardId, file, EntityType.BOARD);
         return Map.of("boardId", boardId);
     }
 
     @Transactional(readOnly = true)
     public BoardDetailResponse getBoardDetail(Long boardId) {
         return boardRepository.getBoardDetail(boardId);
+    }
+
+    @Transactional
+    public Long updateBoard(Long userId, Long boardId, BoardUpdateRequest request, List<MultipartFile> files) {
+        Board board = boardRepository.findById(boardId).orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
+        if (!Objects.equals(board.getUserId(), userId)) throw new AccessDeniedException(ErrorCode.BOARD_NOT_AUTHORIZED);
+        board.update(request);
+        for (String existingImage : request.existingImages()) {
+            // TODO: S3에 있는 이미지 파일 삭제
+            imageFileRepository.deleteByNewFilename(existingImage);
+        }
+        // TODO: S3에 이미지 파일 업로드
+        for (MultipartFile file : files) imageService.handleImage(boardId, file, EntityType.BOARD);
+        return boardId;
     }
 
     @Transactional
