@@ -21,6 +21,7 @@ public class FriendController {
     private final FriendService friendService;
     private final TokenUtil tokenUtil;
 
+    // TODO: 알람 기능 추가시 알람 생성 로직 추가
     @Operation(summary = "친구 요청 API", description = "특정 유저에게 친구 요청을 합니다.")
     @PostMapping("/request/{friendId}")
     public ResponseEntity<ApiResponse<FriendFollowResponse>> requestFriend(@PathVariable Long friendId) {
@@ -52,6 +53,14 @@ public class FriendController {
             @RequestParam(required = false, defaultValue = "10") int size
     ) {
         return ResponseEntity.ok()
+                .body(ApiResponse.success(friendService.getFriendList(tokenUtil.getUserId(), PageRequest.of(page, size))));
+    }
+
+    @Operation(summary = "친구 삭제 API", description = "특정 친구를 삭제합니다.")
+    @DeleteMapping("/{friendId}")
+    public ResponseEntity<ApiResponse<Void>> deleteFriend(@PathVariable Long friendId) {
+        friendService.deleteFriend(tokenUtil.getUserId(), friendId);
+        return ResponseEntity.ok().body(ApiResponse.success());
                 .body(ApiResponse.success(friendService.getFriendList(tokenUtil.getUserId(), PageRequest.of(page, size))));
     }
 
