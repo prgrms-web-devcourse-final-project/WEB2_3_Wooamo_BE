@@ -60,7 +60,7 @@ public class BoardController {
     @Operation(summary = "게시판 삭제 API", description = "게시판을 삭제합니다.")
     @DeleteMapping("/{boardId}")
     public ResponseEntity<ApiResponse<Void>> deleteBoard(@PathVariable Long boardId) {
-        boardService.deleteBoard(1L, boardId);
+        boardService.deleteBoard(tokenUtil.getUserId(), boardId);
         return ResponseEntity.ok().body(ApiResponse.success());
     }
 
