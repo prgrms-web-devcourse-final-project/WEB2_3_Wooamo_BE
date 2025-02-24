@@ -8,4 +8,5 @@ import org.springframework.data.domain.Pageable;
 public interface FriendRepositoryCustom {
     PageResponse<FriendFollowListResponse> getFriendFollowList(Long receiverId, Pageable pageable, String imageUrl);
     PageResponse<FriendResponse> getFriendList(Long receiverId, Pageable pageable, String imageUrl);
+    PageResponse<FriendResponse> searchUser(Long userId, String target, Pageable pageable);
 }
