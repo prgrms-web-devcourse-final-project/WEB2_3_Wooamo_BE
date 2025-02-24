@@ -12,6 +12,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/friend")
@@ -72,5 +74,12 @@ public class FriendController {
     ) {
         return ResponseEntity.ok()
                 .body(ApiResponse.success(friendService.searchUser(tokenUtil.getUserId(), query, PageRequest.of(page, size))));
+    }
+
+    @Operation(summary = "친구 추천 API", description = "특정 유저에게 친구를 추천합니다.")
+    @GetMapping("/recommend")
+    public ResponseEntity<ApiResponse<List<FriendResponse>>> recommendFriend() {
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(friendService.randomRecommendFriend(tokenUtil.getUserId())));
     }
 }
