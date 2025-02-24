@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface ImageFileRepository extends JpaRepository<ImageFile, Long> {
     List<ImageFile> findAllByEntityIdAndEntityType(Long boardId, EntityType entityType);
+    void deleteByNewFilename(String filename);
 }
