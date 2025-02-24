@@ -61,7 +61,6 @@ public class FriendController {
     public ResponseEntity<ApiResponse<Void>> deleteFriend(@PathVariable Long friendId) {
         friendService.deleteFriend(tokenUtil.getUserId(), friendId);
         return ResponseEntity.ok().body(ApiResponse.success());
-                .body(ApiResponse.success(friendService.getFriendList(tokenUtil.getUserId(), PageRequest.of(page, size))));
     }
 
     @Operation(summary = "유저 검색 API", description = "특정 유저를 검색합니다.")
