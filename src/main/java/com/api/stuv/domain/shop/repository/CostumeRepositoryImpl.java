@@ -32,7 +32,7 @@ public class CostumeRepositoryImpl implements CostumeRepositoryCustom {
                         qCostume.point)
                 .from(qCostume)
                 .leftJoin(qImageFile)
-                .on(qImageFile.id.eq(qCostume.imagefileId))
+                .on(qImageFile.entityId.eq(qCostume.id).and(qImageFile.entityType.eq(EntityType.COSTUME)))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch()
@@ -58,7 +58,7 @@ public class CostumeRepositoryImpl implements CostumeRepositoryCustom {
                         )
                         .from(qCostume)
                         .leftJoin(qImageFile)
-                        .on(qImageFile.id.eq(qCostume.imagefileId))
+                        .on(qImageFile.entityId.eq(qCostume.id).and(qImageFile.entityType.eq(EntityType.COSTUME)))
                         .where(qCostume.id.eq(costumeId))
                         .fetchOne())
                 .map(response -> new CostumeResponse(
