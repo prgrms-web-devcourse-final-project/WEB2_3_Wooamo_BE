@@ -86,8 +86,13 @@ public class ConfirmCommentTest {
     void failConfirmCommentWhenCommentNotFound() {
         // given
         User writer = users.get(0);
+        User commentWriter = users.get(1);
+        Board board = boards.get(0);
+        Comment comment = comments.get(1);
 
-        when(commentRepository.findById(2L)).thenReturn(Optional.empty());
+        when(commentRepository.findById(2L)).thenReturn(Optional.of(comment));
+        when(boardRepository.findById(comment.getBoardId())).thenReturn(Optional.of(board));
+        when(userRepository.findById(comment.getUserId())).thenReturn(Optional.of(commentWriter));
 
         // when
         try {
@@ -102,10 +107,13 @@ public class ConfirmCommentTest {
     void failConfirmCommentWhenBoardNotFound() {
         // given
         User writer = users.get(0);
+        User commentWriter = users.get(1);
+        Board board = boards.get(0);
         Comment comment = comments.get(1);
 
         when(commentRepository.findById(2L)).thenReturn(Optional.of(comment));
-        when(boardRepository.findById(comment.getBoardId())).thenReturn(Optional.empty());
+        when(boardRepository.findById(comment.getBoardId())).thenReturn(Optional.of(board));
+        when(userRepository.findById(comment.getUserId())).thenReturn(Optional.of(commentWriter));
 
         // when
         try {
@@ -120,12 +128,13 @@ public class ConfirmCommentTest {
     void failConfirmCommentWhenBoardIsNotQuestion() {
         // given
         User writer = users.get(1);
+        User commentWriter = users.get(0);
         Board board = boards.get(1);
         Comment comment = comments.get(0);
 
         when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
         when(boardRepository.findById(comment.getBoardId())).thenReturn(Optional.of(board));
-
+        when(userRepository.findById(comment.getUserId())).thenReturn(Optional.of(commentWriter));
         // when
         try {
             boardService.confirmComment(writer.getId(), comment.getId());
@@ -139,11 +148,13 @@ public class ConfirmCommentTest {
     void failConfirmCommentWhenCommentIsWrittenByWriter() {
         // given
         User writer = users.get(0);
+        User commentWriter = users.get(0);
         Board board = boards.get(0);
         Comment comment = comments.get(0);
 
         when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
         when(boardRepository.findById(comment.getBoardId())).thenReturn(Optional.of(board));
+        when(userRepository.findById(comment.getUserId())).thenReturn(Optional.of(commentWriter));
 
         // when
         try {
@@ -158,13 +169,15 @@ public class ConfirmCommentTest {
     void failConfirmCommentWhenCommentAlreadyConfirmed() {
         // given
         User writer = users.get(0);
-        Board board = boards.get(2);
+        User commentWriter = users.get(1);
+        Board board = boards.get(0);
         Comment comment = comments.get(1);
 
         board.confirmComment(comment.getId());
 
         when(commentRepository.findById(2L)).thenReturn(Optional.of(comment));
         when(boardRepository.findById(comment.getBoardId())).thenReturn(Optional.of(board));
+        when(userRepository.findById(comment.getUserId())).thenReturn(Optional.of(commentWriter));
 
         // when
         try {
@@ -179,11 +192,13 @@ public class ConfirmCommentTest {
     void failConfirmCommentWhenUserIsNotAuthorized() {
         // given
         User writer = users.get(1);
+        User commentWriter = users.get(0);
         Board board = boards.get(3);
         Comment comment = comments.get(0);
 
         when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
         when(boardRepository.findById(comment.getBoardId())).thenReturn(Optional.of(board));
+        when(userRepository.findById(comment.getUserId())).thenReturn(Optional.of(commentWriter));
 
         // when
         try {
