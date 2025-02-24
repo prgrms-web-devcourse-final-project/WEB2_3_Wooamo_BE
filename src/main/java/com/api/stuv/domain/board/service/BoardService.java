@@ -69,10 +69,10 @@ public class BoardService {
         if (!Objects.equals(board.getUserId(), userId)) throw new AccessDeniedException(ErrorCode.BOARD_NOT_AUTHORIZED);
         board.update(request);
         for (String existingImage : request.existingImages()) {
-            // TODO: S3에 있는 이미지 파일 삭제
-            imageFileRepository.deleteByNewFilename(existingImage);
+            String fileName = existingImage.substring(existingImage.lastIndexOf('/') + 1);
+            s3ImageService.deleteImageFile(EntityType.BOARD, boardId, fileName);
+            imageFileRepository.deleteByNewFilename(fileName);
         }
-        // TODO: S3에 이미지 파일 업로드
         for (MultipartFile file : files) imageService.handleImage(boardId, file, EntityType.BOARD);
         return Map.of("boardId", boardId);
     }
