@@ -55,7 +55,7 @@ public class BoardService {
     }
 
     @Transactional
-    public Long updateBoard(Long userId, Long boardId, BoardUpdateRequest request, List<MultipartFile> files) {
+    public Map<String, Long> updateBoard(Long userId, Long boardId, BoardUpdateRequest request, List<MultipartFile> files) {
         Board board = boardRepository.findById(boardId).orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
         if (!Objects.equals(board.getUserId(), userId)) throw new AccessDeniedException(ErrorCode.BOARD_NOT_AUTHORIZED);
         board.update(request);
@@ -65,7 +65,7 @@ public class BoardService {
         }
         // TODO: S3에 이미지 파일 업로드
         for (MultipartFile file : files) imageService.handleImage(boardId, file, EntityType.BOARD);
-        return boardId;
+        return Map.of("boardId", boardId);
     }
 
     @Transactional

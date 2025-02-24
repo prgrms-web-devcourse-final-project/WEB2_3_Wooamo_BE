@@ -57,7 +57,7 @@ public class BoardController {
 
     @Operation(summary = "게시판 수정 API", description = "게시판을 수정합니다.")
     @PutMapping("/{boardId}")
-    public ResponseEntity<ApiResponse<Long>> updateBoard(
+    public ResponseEntity<ApiResponse<Map<String, Long>>> updateBoard(
             @PathVariable Long boardId,
             @RequestBody BoardUpdateRequest boardUpdateRequest,
             @RequestPart(value = "images", required = false) List<MultipartFile> files
