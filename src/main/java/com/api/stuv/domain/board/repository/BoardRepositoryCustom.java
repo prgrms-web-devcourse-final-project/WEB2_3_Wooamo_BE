@@ -6,6 +6,6 @@ import com.api.stuv.global.response.PageResponse;
 import org.springframework.data.domain.Pageable;
 
 public interface BoardRepositoryCustom {
-    PageResponse<BoardResponse> getBoardList(String title, Pageable pageable, String imageUrl);
+    PageResponse<BoardResponse> getBoardList(String title, Pageable pageable);
     BoardDetailResponse getBoardDetail(Long boardId);
 }
