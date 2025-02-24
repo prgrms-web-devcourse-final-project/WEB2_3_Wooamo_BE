@@ -87,6 +87,19 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
                 .where(b.id.eq(boardId))
                 .fetchOne();
         if (Objects.isNull(boardDetails)) throw new NotFoundException(ErrorCode.BOARD_NOT_FOUND);
+
+        List<String> imageList = jpaQueryFactory
+                .select(i.newFilename)
+                .from(i)
+                .leftJoin(b).on(b.id.eq(i.entityId))
+                .where(i.entityType.eq(EntityType.BOARD).and(b.id.eq(boardId)))
+                .fetch()
+                .stream()
+                .map( filename -> {
+                    return filename == null ? null : s3ImageService.generateImageFile(
+                            EntityType.COSTUME, boardId, filename);
+                }).toList();
+
         return new BoardDetailResponse(
                 boardDetails.get(b.title),
                 boardDetails.get(u.id),
@@ -96,7 +109,7 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
                 boardDetails.get(TemplateUtils.timeFormater(b.createdAt)),
                 boardDetails.get(b.confirmedCommentId.isNotNull()),
                 boardDetails.get(b.context),
-                null
+                imageList
         );
     }
 
