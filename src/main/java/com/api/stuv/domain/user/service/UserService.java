@@ -3,10 +3,13 @@ package com.api.stuv.domain.user.service;
 import com.api.stuv.domain.auth.util.TokenUtil;
 import com.api.stuv.domain.user.dto.request.EmailCertificationRequest;
 import com.api.stuv.domain.user.dto.request.KakaoUserRequest;
+import com.api.stuv.domain.user.dto.request.UserCostumeRequest;
 import com.api.stuv.domain.user.dto.request.UserRequest;
 import com.api.stuv.domain.user.dto.response.UserInformationResponse;
 import com.api.stuv.domain.user.dto.response.MyInformationResponse;
 import com.api.stuv.domain.user.entity.User;
+import com.api.stuv.domain.user.entity.UserCostume;
+import com.api.stuv.domain.user.repository.UserCostumeRepository;
 import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.BadRequestException;
 import com.api.stuv.global.exception.DuplicateException;
@@ -28,6 +31,7 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final UserCostumeRepository userCostumeRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final EmailProvider  emailProvider;
     private final RedisService redisService;
@@ -43,8 +47,16 @@ public class UserService {
             throw new BadRequestException(ErrorCode.NOT_VERIFICATION_EMAIL);
         }
 
+        //사용자 정보 저장
         User user = userRequest.from(userRequest, bCryptPasswordEncoder);
         userRepository.save(user);
+
+        //userCostume 저장
+        Long userId = user.getId();
+        Long costumeId = user.getCostumeId();
+        UserCostumeRequest userCostumeRequest = new UserCostumeRequest(userId, costumeId);
+        UserCostume userCostume = userCostumeRequest.createUserCostumeRequeset(userId,  costumeId);
+        userCostumeRepository.save(userCostume);
     }
 
     public void registerKakaoUser(KakaoUserRequest kakaoUserRequest) {
@@ -61,6 +73,12 @@ public class UserService {
 
         User user = kakaoUserRequest.kakaoFrom(kakaoUserRequest, socialId,  bCryptPasswordEncoder);
         userRepository.save(user);
+
+        Long userId = user.getId();
+        Long costumeId = user.getCostumeId();
+        UserCostumeRequest userCostumeRequest = new UserCostumeRequest(userId, costumeId);
+        UserCostume userCostume = userCostumeRequest.createUserCostumeRequeset(userId,  costumeId);
+        userCostumeRepository.save(userCostume);
     }
 
     public void sendCertificateEmail(String email){
@@ -84,7 +102,6 @@ public class UserService {
         if(code == null){
             //코드 만료
             throw new NotFoundException(ErrorCode.CODE_EXPIRED);
-            //return false;
         }
         if(code.equals(userCode)){
             redisService.delete(email);
