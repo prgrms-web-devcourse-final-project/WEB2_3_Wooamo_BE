@@ -1,5 +1,6 @@
 package com.api.stuv.domain.board.service;
 
+import com.api.stuv.domain.board.dto.BoardDetailResponse;
 import com.api.stuv.domain.board.dto.BoardRequest;
 import com.api.stuv.domain.board.dto.BoardResponse;
 import com.api.stuv.domain.board.entity.Comment;
@@ -44,6 +45,12 @@ public class BoardService {
             // TODO : 이미지 업로드 기능 추가해 주세요!
         }
         return Map.of("boardId", boardId);
+    }
+
+    // TODO : 이후 이미지 기능 추가!
+    @Transactional(readOnly = true)
+    public BoardDetailResponse getBoardDetail(Long boardId) {
+        return boardRepository.getBoardDetail(boardId);
     }
 
     @Transactional
