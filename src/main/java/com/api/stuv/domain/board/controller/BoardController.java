@@ -59,7 +59,6 @@ public class BoardController {
                 .body(ApiResponse.success(boardService.getBoardDetail(boardId)));
     }
 
-    //TODO: 이후 유저 검증 로직 추가
     @Operation(summary = "코멘트 목록 조회 API", description = "코멘트 목록을 조회 합니다.")
     @GetMapping("/{boardId}/comment")
     public ResponseEntity<ApiResponse<PageResponse<CommentResponse>>> getCommentList(

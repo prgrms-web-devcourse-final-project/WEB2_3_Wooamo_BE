@@ -53,4 +53,12 @@ public class FriendService {
     public PageResponse<FriendResponse> getFriendList(Long userId, Pageable pageable) {
         return friendRepository.getFriendList(userId, pageable, "http://localhost:8080/api/v1/costume/");
     }
+
+    @Transactional
+    public void deleteFriend(Long userId, Long friendId) {
+        Friend friend = friendRepository.findById(friendId).orElseThrow(() -> new NotFoundException(ErrorCode.FRIEND_NOT_FOUND));
+        if ( !friend.getStatus().equals(FriendStatus.ACCEPTED) ) throw new NotFoundException(ErrorCode.FRIEND_NOT_FOUND);
+        if ( !(friend.getUserId().equals(userId) || friend.getFriendId().equals(userId)) ) throw new AccessDeniedException(ErrorCode.FRIEND_DELETE_NOT_AUTHORIZED);
+        friendRepository.delete(friend);
+    }
 }

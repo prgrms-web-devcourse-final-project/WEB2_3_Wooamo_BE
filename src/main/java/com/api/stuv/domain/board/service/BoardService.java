@@ -65,7 +65,6 @@ public class BoardService {
     // TODO : 이후 이미지 다운로드 기능 추가해 주세요!
     @Transactional(readOnly = true)
     public PageResponse<CommentResponse> getCommentList(Long boardId, Pageable pageable) {
-        if (!boardRepository.existsById(boardId)) throw new NotFoundException(ErrorCode.BOARD_NOT_FOUND);
         return commentRepository.getCommentList(boardId, pageable, "http://localhost:8080/api/v1/costume/");
     }
 
