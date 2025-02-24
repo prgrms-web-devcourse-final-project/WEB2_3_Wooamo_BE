@@ -1,10 +1,7 @@
 package com.api.stuv.domain.user.service;
 
 import com.api.stuv.domain.auth.util.TokenUtil;
-import com.api.stuv.domain.user.dto.request.EmailCertificationRequest;
-import com.api.stuv.domain.user.dto.request.KakaoUserRequest;
-import com.api.stuv.domain.user.dto.request.UserCostumeRequest;
-import com.api.stuv.domain.user.dto.request.UserRequest;
+import com.api.stuv.domain.user.dto.request.*;
 import com.api.stuv.domain.user.dto.response.ModifyProfileResponse;
 import com.api.stuv.domain.user.dto.response.UserInformationResponse;
 import com.api.stuv.domain.user.dto.response.MyInformationResponse;
