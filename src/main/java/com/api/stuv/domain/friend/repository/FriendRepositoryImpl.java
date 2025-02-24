@@ -13,6 +13,7 @@ import com.api.stuv.domain.user.entity.QUserCostume;
 import com.api.stuv.global.response.PageResponse;
 import com.api.stuv.global.util.email.common.TemplateUtils;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -74,6 +75,24 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
                         tuple.get(u.context),
                         s3ImageService.generateImageFile(EntityType.COSTUME, tuple.get(i.id), tuple.get(i.newFilename)))).toList();
         return PageResponse.of(new PageImpl<>(response, pageable, getTotalSearchUserPage(userId, target)));
+    }
+
+    @Override
+    public List<FriendResponse> recommendFriend(Long userId) {
+        List<Long> friendIds = jpaQueryFactory.select(f.friendId).from(f).where(f.userId.eq(userId)).fetch();
+        friendIds.addAll(jpaQueryFactory.select(f.userId).from(f).where(f.friendId.eq(userId)).fetch());
+        return jpaQueryFactory
+                .select(u.id, u.nickname, i.newFilename, u.context)
+                .from(u).leftJoin(uc).on(u.costumeId.eq(uc.id))
+                .leftJoin(i).on(uc.costumeId.eq(i.entityId).and(i.entityType.eq(EntityType.COSTUME)))
+                .where(u.id.notIn(friendIds))
+                .orderBy(Expressions.numberTemplate(Double.class, "RAND()").asc())
+                .limit(3)
+                .fetch().stream().map(tuple -> new FriendResponse(
+                        tuple.get(u.id),
+                        tuple.get(u.nickname),
+                        tuple.get(u.context),
+                        s3ImageService.generateImageFile(EntityType.COSTUME, tuple.get(i.id), tuple.get(i.newFilename)))).toList();
     }
 
     private Long getTotalFriendFollowListPage(Long receiverId) {
