@@ -37,8 +37,6 @@ public class BoardService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final ImageService imageService;
-    private final S3ImageService s3ImageService;
-    private final ImageFileRepository imageFileRepository;
 
     // TODO : 이후 이미지 다운로드 기능 추가해 주세요!
     @Transactional(readOnly = true)
@@ -49,15 +47,8 @@ public class BoardService {
     @Transactional
     public Map<String, Long> createBoard(Long userId, BoardRequest boardRequest, List<MultipartFile> files) {
         Long boardId = boardRepository.save(BoardRequest.from(userId, boardRequest)).getId();
-        if (files != null && !files.isEmpty()) { for (MultipartFile file : files) { handleImage(boardId, file); }}
+        if (files != null && !files.isEmpty()) { for (MultipartFile file : files) { imageService.handleImage(boardId, file, EntityType.BOARD); }}
         return Map.of("boardId", boardId);
-    }
-
-    public void handleImage(Long boardId, MultipartFile file) {
-        String fullFileName = imageService.getFileName(file);
-        s3ImageService.uploadImageFile(file, EntityType.BOARD, boardId, fullFileName);
-        ImageFile imageFile = ImageFile.createImageFile(file.getOriginalFilename(), fullFileName, boardId, EntityType.BOARD);
-        imageFileRepository.save(imageFile);
     }
 
     @Transactional
