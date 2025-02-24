@@ -34,7 +34,7 @@ public class AdminService {
         if(request.point().compareTo(BigDecimal.ZERO) < 0) {throw new InvalidPointFormat();}
         Costume costume = Costume.createCostumeContents(request.costumeName(), request.point());
         costumeRepository.save(costume);
-        handleImage(costume, file);
+        imageService.handleImage(costume.getId(), file, EntityType.COSTUME);
     }
 
     @Transactional
@@ -47,18 +47,9 @@ public class AdminService {
 
     public void deleteCostume(Long costumeId) {
         Costume costume = costumeRepository.findById(costumeId).orElseThrow(CostumeNotFound::new);
-        ImageFile imageFile = imageFileRepository.findById(costume.getImagefileId()).orElseThrow(ImageFileNameNotFound::new);
-        s3ImageService.deleteImageFile(EntityType.COSTUME, costume.getImagefileId(), imageFile.getNewFilename());
-        imageFileRepository.deleteById(costume.getImagefileId());
+        ImageFile imageFile = imageFileRepository.findByEntityIdAndEntityType(costumeId, EntityType.COSTUME).orElseThrow(ImageFileNotFound::new);
+        s3ImageService.deleteImageFile(EntityType.COSTUME, costumeId, imageFile.getNewFilename());
+        imageFileRepository.deleteById(costumeId);
         costumeRepository.delete(costume);
-    }
-
-    public void handleImage(Costume costume, MultipartFile file) {
-        String fullFileName = imageService.getFileName(file);
-        s3ImageService.uploadImageFile(file, EntityType.COSTUME, costume.getId(), fullFileName);
-        // todo : imageFile entity 변경에 따른 코스튬 리팩토링 필요
-        //ImageFile imageFile = ImageFile.createImageFile(file.getOriginalFilename(), fullFileName, EntityType.COSTUME);
-        //imageFileRepository.save(imageFile);
-        //costume.updateImageFile(imageFile.getId());
     }
 }

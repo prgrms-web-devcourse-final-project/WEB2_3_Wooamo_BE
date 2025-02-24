@@ -33,7 +33,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
         Tuple costumeDetails = jpaQueryFactory
                 .select(i.id, i.newFilename)
                 .from(uc).leftJoin(c).on(uc.costumeId.eq(c.id))
-                .leftJoin(i).on(c.imagefileId.eq(i.id))
+                .leftJoin(i).on(c.id.eq(i.entityId).and(i.entityType.eq(EntityType.COSTUME)))
                 .where(uc.id.eq(userCostumeId))
                 .fetchOne();
 
