@@ -13,7 +13,7 @@ import com.api.stuv.domain.image.entity.EntityType;
 import com.api.stuv.domain.image.entity.ImageFile;
 import com.api.stuv.domain.image.repository.ImageFileRepository;
 import com.api.stuv.domain.image.service.ImageService;
-import com.api.stuv.domain.user.repository.UserRepository;
+import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.global.exception.AccessDeniedException;
 import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
@@ -38,6 +38,7 @@ public class BoardService {
     private final CommentRepository commentRepository;
     private final ImageFileRepository imageFileRepository;
     private final ImageService imageService;
+    private final S3ImageService s3ImageService;
 
     @Transactional(readOnly = true)
     public PageResponse<BoardResponse> getBoardList(String title, Pageable pageable) {
@@ -62,9 +63,11 @@ public class BoardService {
         if (!Objects.equals(board.getUserId(), userId)) throw new AccessDeniedException(ErrorCode.BOARD_NOT_AUTHORIZED);
         List<Comment> comments = commentRepository.findAllByBoardId(boardId);
         List<ImageFile> imageFiles = imageFileRepository.findAllByEntityIdAndEntityType(boardId, EntityType.BOARD);
-        if ( !imageFiles.isEmpty() ) {
-            // S3 이미지 삭제 작업
-            imageFileRepository.deleteAll(imageFiles);
+        if (!imageFiles.isEmpty()) {
+            for(ImageFile imageFile : imageFiles) {
+                s3ImageService.deleteImageFile(EntityType.BOARD, boardId, imageFile.getNewFilename());
+                imageFileRepository.deleteByNewFilename(imageFile.getNewFilename());
+            }
         }
         commentRepository.deleteAll(comments);
         boardRepository.delete(board);
