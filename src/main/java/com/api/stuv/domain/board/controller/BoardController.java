@@ -52,11 +52,16 @@ public class BoardController {
 
     @Operation(summary = "게시판 상세 조회 API", description = "게시판 상세를 조회 합니다.")
     @GetMapping("/{boardId}")
-    public ResponseEntity<ApiResponse<BoardDetailResponse>> getBoardDetail(
-            @PathVariable Long boardId
-    ) {
+    public ResponseEntity<ApiResponse<BoardDetailResponse>> getBoardDetail(@PathVariable Long boardId) {
         return ResponseEntity.ok()
                 .body(ApiResponse.success(boardService.getBoardDetail(boardId)));
+    }
+
+    @Operation(summary = "게시판 삭제 API", description = "게시판을 삭제합니다.")
+    @DeleteMapping("/{boardId}")
+    public ResponseEntity<ApiResponse<Void>> deleteBoard(@PathVariable Long boardId) {
+        boardService.deleteBoard(1L, boardId);
+        return ResponseEntity.ok().body(ApiResponse.success());
     }
 
     @Operation(summary = "코멘트 목록 조회 API", description = "코멘트 목록을 조회 합니다.")
@@ -73,19 +78,14 @@ public class BoardController {
     // TODO: 이후 알림 기능 추가
     @Operation(summary = "댓글 생성 API", description = "댓글을 생성합니다.")
     @PostMapping("/{boardId}/comment")
-    public ResponseEntity<ApiResponse<Void>> createComment(
-            @PathVariable Long boardId,
-            @RequestBody String context
-    ) {
+    public ResponseEntity<ApiResponse<Void>> createComment(@PathVariable Long boardId, @RequestBody String context) {
         boardService.createComment(tokenUtil.getUserId(), boardId, context);
         return ResponseEntity.ok().body(ApiResponse.success());
     }
   
     @Operation(summary = "댓글 삭제 API", description = "댓글을 삭제합니다.")
     @DeleteMapping("/comment/{commentId}")
-    public ResponseEntity<ApiResponse<Void>> deleteComment(
-            @PathVariable Long commentId
-    ) {
+    public ResponseEntity<ApiResponse<Void>> deleteComment(@PathVariable Long commentId) {
         boardService.deleteComment(tokenUtil.getUserId(), commentId);
         return ResponseEntity.ok().body(ApiResponse.success());
     }
