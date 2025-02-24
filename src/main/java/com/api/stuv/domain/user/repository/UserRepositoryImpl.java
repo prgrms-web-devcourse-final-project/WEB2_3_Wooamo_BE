@@ -11,6 +11,8 @@ import com.api.stuv.domain.user.entity.QUser;
 import com.api.stuv.domain.user.dto.response.MyInformationResponse;
 import com.api.stuv.domain.user.entity.QUser;
 import com.api.stuv.domain.user.entity.QUserCostume;
+import com.api.stuv.global.exception.ErrorCode;
+import com.api.stuv.global.exception.NotFoundException;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -70,12 +72,21 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
                .where(u.id.eq(userId))
                .fetchOne();
 
+       if(informationDetails == null) {
+           throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
+       }
+
+       String status = null;
+       if(informationDetails.get(f.status) != null) {
+           status = informationDetails.get(f.status).toString();
+       }
+
        return new UserInformationResponse(
                informationDetails.get(u.id),
                informationDetails.get(u.context),
                informationDetails.get(u.blogLink),
                informationDetails.get(u.nickname),
-               informationDetails.get(f.status)
+               status
        );
     }
 
