@@ -9,8 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -23,9 +21,9 @@ public class ImageService {
 
     public void handleImage(Long entityId, MultipartFile file, EntityType entityType) {
         String fullFileName = getFileName(file);
-        s3ImageService.uploadImageFile(file, entityType, entityId, fullFileName);
         ImageFile imageFile = ImageFile.createImageFile(file.getOriginalFilename(), fullFileName, entityId, entityType);
         imageFileRepository.save(imageFile);
+        s3ImageService.uploadImageFile(file, entityType, entityId, fullFileName);
     }
 
     public String getFileName(MultipartFile file) {
