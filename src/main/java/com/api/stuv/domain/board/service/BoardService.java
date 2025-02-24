@@ -13,6 +13,7 @@ import com.api.stuv.domain.image.entity.EntityType;
 import com.api.stuv.domain.image.entity.ImageFile;
 import com.api.stuv.domain.image.repository.ImageFileRepository;
 import com.api.stuv.domain.image.service.ImageService;
+import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.AccessDeniedException;
 import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
@@ -35,6 +36,8 @@ public class BoardService {
 
     private final BoardRepository boardRepository;
     private final CommentRepository commentRepository;
+    private final ImageFileRepository imageFileRepository;
+    private final UserRepository userRepository;
     private final ImageFileRepository imageFileRepository;
     private final ImageService imageService;
 
