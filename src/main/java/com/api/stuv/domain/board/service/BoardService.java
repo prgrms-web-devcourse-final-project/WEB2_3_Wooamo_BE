@@ -51,7 +51,6 @@ public class BoardService {
         return Map.of("boardId", boardId);
     }
 
-    // TODO : 이후 이미지 기능 추가!
     @Transactional(readOnly = true)
     public BoardDetailResponse getBoardDetail(Long boardId) {
         return boardRepository.getBoardDetail(boardId);
