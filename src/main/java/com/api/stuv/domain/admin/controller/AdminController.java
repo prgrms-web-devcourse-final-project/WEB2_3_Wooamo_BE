@@ -21,7 +21,7 @@ public class AdminController {
     @PostMapping(value = "/costume", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<Void>> createCostume(
             @RequestPart(value = "contents") @Valid CostumeRequest request,
-            @RequestPart(value = "image", required = false) MultipartFile file
+            @RequestPart(value = "image") MultipartFile file
     ){
         adminService.createCostume(request, file);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success());
@@ -36,11 +36,11 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success());
     }
 
-    @DeleteMapping(value = "/costume/{costumeId}")
-    public ResponseEntity<ApiResponse<Void>> deleteCostume(
-            @PathVariable("costumeId") long costumeId
-    ){
-        adminService.deleteCostume(costumeId);
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success());
-    }
+//    @DeleteMapping(value = "/costume/{costumeId}")
+//    public ResponseEntity<ApiResponse<Void>> deleteCostume(
+//            @PathVariable("costumeId") long costumeId
+//    ){
+//        adminService.deleteCostume(costumeId);
+//        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success());
+//    }
 }
