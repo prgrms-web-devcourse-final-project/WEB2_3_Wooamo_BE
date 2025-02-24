@@ -1,6 +1,10 @@
 package com.api.stuv.domain.board.service;
 
-import com.api.stuv.domain.board.dto.*;
+import com.api.stuv.domain.board.dto.BoardDetailResponse;
+import com.api.stuv.domain.board.dto.BoardRequest;
+import com.api.stuv.domain.board.dto.BoardResponse;
+import com.api.stuv.domain.board.dto.BoardUpdateRequest;
+import com.api.stuv.domain.board.dto.CommentResponse;
 import com.api.stuv.domain.board.entity.Board;
 import com.api.stuv.domain.board.entity.BoardType;
 import com.api.stuv.domain.board.entity.Comment;
