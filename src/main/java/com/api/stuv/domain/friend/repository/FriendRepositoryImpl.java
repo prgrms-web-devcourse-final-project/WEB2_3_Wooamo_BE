@@ -4,7 +4,7 @@ import com.api.stuv.domain.friend.dto.FriendFollowListResponse;
 import com.api.stuv.domain.friend.dto.FriendResponse;
 import com.api.stuv.domain.friend.entity.FriendStatus;
 import com.api.stuv.domain.friend.entity.QFriend;
-import com.api.stuv.domain.image.entity.ImageType;
+import com.api.stuv.domain.image.entity.EntityType;
 import com.api.stuv.domain.image.entity.QImageFile;
 import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.domain.shop.entity.QCostume;
@@ -72,7 +72,7 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
                         tuple.get(u.id),
                         tuple.get(u.nickname),
                         tuple.get(u.context),
-                        s3ImageService.generateImageFile(ImageType.COSTUME, tuple.get(i.id), tuple.get(i.newFilename)))).toList();
+                        s3ImageService.generateImageFile(EntityType.COSTUME, tuple.get(i.id), tuple.get(i.newFilename)))).toList();
         return PageResponse.of(new PageImpl<>(response, pageable, getTotalSearchUserPage(userId, target)));
     }
 
