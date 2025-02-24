@@ -1,5 +1,6 @@
 package com.api.stuv.domain.board.controller;
 
+import com.api.stuv.domain.board.dto.BoardDetailResponse;
 import com.api.stuv.domain.auth.util.TokenUtil;
 import com.api.stuv.domain.board.dto.BoardRequest;
 import com.api.stuv.domain.board.dto.BoardResponse;
@@ -49,6 +50,16 @@ public class BoardController {
         return ResponseEntity.ok().body(ApiResponse.success(boardService.createBoard(tokenUtil.getUserId(), boardRequest, files)));
     }
 
+    @Operation(summary = "게시판 상세 조회 API", description = "게시판 상세를 조회 합니다.")
+    @GetMapping("/{boardId}")
+    public ResponseEntity<ApiResponse<BoardDetailResponse>> getBoardDetail(
+            @PathVariable Long boardId
+    ) {
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(boardService.getBoardDetail(boardId)));
+    }
+
+    //TODO: 이후 유저 검증 로직 추가
     @Operation(summary = "코멘트 목록 조회 API", description = "코멘트 목록을 조회 합니다.")
     @GetMapping("/{boardId}/comment")
     public ResponseEntity<ApiResponse<PageResponse<CommentResponse>>> getCommentList(
@@ -71,12 +82,19 @@ public class BoardController {
         return ResponseEntity.ok().body(ApiResponse.success());
     }
   
-      @Operation(summary = "댓글 삭제 API", description = "댓글을 삭제합니다.")
+    @Operation(summary = "댓글 삭제 API", description = "댓글을 삭제합니다.")
     @DeleteMapping("/comment/{commentId}")
     public ResponseEntity<ApiResponse<Void>> deleteComment(
             @PathVariable Long commentId
     ) {
         boardService.deleteComment(tokenUtil.getUserId(), commentId);
+        return ResponseEntity.ok().body(ApiResponse.success());
+    }
+
+    @Operation(summary = "댓글 채택 API", description = "댓글을 채택합니다.")
+    @PatchMapping("/comment/{commentId}")
+    public ResponseEntity<ApiResponse<Void>> confirmComment(@PathVariable Long commentId) {
+        boardService.confirmComment(tokenUtil.getUserId(), commentId);
         return ResponseEntity.ok().body(ApiResponse.success());
     }
 }
