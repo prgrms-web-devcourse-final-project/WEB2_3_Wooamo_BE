@@ -35,6 +35,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
                 s3ImageService.generateImageFile(EntityType.COSTUME, costumeDetails.get(i.id), costumeDetails.get(i.newFilename));
     }
 
+    //TODO: 후에 프로필 이미지 불러오기 추가해주세요!
     @Override
     public MyInformationResponse getUserByMyId(Long myId) {
         Tuple informationDetails = jpaQueryFactory
