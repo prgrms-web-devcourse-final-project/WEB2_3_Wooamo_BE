@@ -62,5 +62,8 @@ public class User extends BaseTimeEntity {
     public void modifyProfileRequest(String context, String link) {
         this.context = context;
         this.blogLink = link;
+
+  public void updatePoint(BigDecimal point) {
+        this.point = this.point.add(point);
     }
 }
