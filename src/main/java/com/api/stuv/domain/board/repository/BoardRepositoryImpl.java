@@ -3,19 +3,24 @@ package com.api.stuv.domain.board.repository;
 import com.api.stuv.domain.board.dto.BoardDetailResponse;
 import com.api.stuv.domain.board.dto.BoardResponse;
 import com.api.stuv.domain.board.entity.QBoard;
+import com.api.stuv.domain.image.entity.EntityType;
+import com.api.stuv.domain.image.entity.QImageFile;
+import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.domain.user.entity.QUser;
 import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
 import com.api.stuv.global.response.PageResponse;
+import com.api.stuv.global.util.email.common.TemplateUtils;
 import com.querydsl.core.Tuple;
-import com.querydsl.core.types.Projections;
-import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import com.api.stuv.global.util.email.common.TemplateUtils;
 
+import java.util.List;
 import java.util.Objects;
 
 
@@ -23,23 +28,48 @@ import java.util.Objects;
 public class BoardRepositoryImpl implements BoardRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
     private final UserRepository userRepository;
+    private final S3ImageService s3ImageService;
+
     private final QBoard b = QBoard.board;
     private final QUser u = QUser.user;
+    private final QImageFile i = QImageFile.imageFile;
 
     @Override
-    public PageResponse<BoardResponse> getBoardList(String title, Pageable pageable, String imageUrl) {
-        JPAQuery<BoardResponse> query = jpaQueryFactory
-                .select(Projections.constructor(BoardResponse.class,
+    public PageResponse<BoardResponse> getBoardList(String title, Pageable pageable) {
+        JPQLQuery<String> imageSubQuery = JPAExpressions
+                .select(i.newFilename)
+                .from(i)
+                .where(i.entityId.eq(b.id).and(i.entityType.eq(EntityType.BOARD)))
+                .groupBy(i.entityId)
+                .orderBy(i.createdAt.asc())
+                .limit(1);
+
+        List<BoardResponse> query = jpaQueryFactory
+                .select(
                         b.id.as("boardId"),
                         b.title,
                         b.boardType,
-                        b.confirmedCommentId.isNotNull(),
+                        b.confirmedCommentId,
                         TemplateUtils.timeFormater(b.createdAt),
-                        TemplateUtils.getImageUrl(imageUrl, b.id).as("image")))
+                        imageSubQuery
+                )
                 .from(b)
-                .where(b.title.contains(title));
+                .where(b.title.contains(title))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch()
+                .stream()
+                .map(tuple -> new BoardResponse(
+                        tuple.get(b.id.as("boardId")),
+                        tuple.get(b.title),
+                        tuple.get(b.boardType),
+                        Boolean.TRUE.equals(tuple.get(b.confirmedCommentId.isNotNull())),
+                        tuple.get(TemplateUtils.timeFormater(b.createdAt)),
+                        tuple.get(imageSubQuery) == null ? null : s3ImageService.generateImageFile(
+                                EntityType.BOARD, tuple.get(b.id),tuple.get(imageSubQuery))
+                )).toList();
 
-        return PageResponse.applyPage(query, pageable, getTotalBoardListPage(title));
+        return PageResponse.of(new PageImpl<>(query, pageable, getTotalBoardListPage(title)));
     }
 
     @Override

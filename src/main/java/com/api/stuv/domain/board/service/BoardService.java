@@ -36,14 +36,12 @@ public class BoardService {
 
     private final BoardRepository boardRepository;
     private final CommentRepository commentRepository;
-    private final UserRepository userRepository;
     private final ImageFileRepository imageFileRepository;
     private final ImageService imageService;
 
-    // TODO : 이후 이미지 다운로드 기능 추가해 주세요!
     @Transactional(readOnly = true)
     public PageResponse<BoardResponse> getBoardList(String title, Pageable pageable) {
-        return boardRepository.getBoardList(title, pageable, "http://localhost:8080/api/v1/board/image/");
+        return boardRepository.getBoardList(title, pageable);
     }
 
     @Transactional
