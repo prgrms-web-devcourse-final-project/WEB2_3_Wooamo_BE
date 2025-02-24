@@ -15,6 +15,8 @@ public record UserRequest(
                 .password(bCryptPasswordEncoder.encode(userRequest.password()))
                 .nickname(userRequest.nickname())
                 .costumeId(1L)
+                .context("")
+                .blogLink("")
                 .role(RoleType.USER)
                 .build();
     }

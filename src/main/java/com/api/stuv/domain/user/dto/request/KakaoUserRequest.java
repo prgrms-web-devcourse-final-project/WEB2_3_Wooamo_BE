@@ -17,6 +17,8 @@ public record KakaoUserRequest(
                 .nickname(kakaoUserRequest.nickname())
                 .socialId(socialId)
                 .costumeId(1L)
+                .context("")
+                .blogLink("")
                 .role(RoleType.USER)
                 .build();
     }
