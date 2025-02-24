@@ -7,8 +7,8 @@ import com.api.stuv.domain.board.entity.Comment;
 import com.api.stuv.domain.board.dto.CommentResponse;
 import com.api.stuv.domain.board.repository.BoardRepository;
 import com.api.stuv.domain.board.repository.CommentRepository;
+import com.api.stuv.domain.image.entity.EntityType;
 import com.api.stuv.domain.image.entity.ImageFile;
-import com.api.stuv.domain.image.entity.ImageType;
 import com.api.stuv.domain.image.repository.ImageFileRepository;
 import com.api.stuv.domain.image.service.ImageService;
 import com.api.stuv.domain.image.service.S3ImageService;
@@ -48,17 +48,16 @@ public class BoardService {
 
     @Transactional
     public Map<String, Long> createBoard(Long userId, BoardRequest boardRequest, List<MultipartFile> files) {
-        Board board = boardRepository.save(BoardRequest.from(userId, boardRequest));
-        if (files != null && !files.isEmpty()) { for (MultipartFile file : files) { handleImage(board, file); }}
-        return Map.of("boardId", board.getId());
+        Long boardId = boardRepository.save(BoardRequest.from(userId, boardRequest)).getId();
+        if (files != null && !files.isEmpty()) { for (MultipartFile file : files) { handleImage(boardId, file); }}
+        return Map.of("boardId", boardId);
     }
 
-    public void handleImage(Board board, MultipartFile file) {
+    public void handleImage(Long boardId, MultipartFile file) {
         String fullFileName = imageService.getFileName(file);
-        s3ImageService.uploadImageFile(file, ImageType.BOARD, board.getId(), fullFileName);
-        ImageFile imageFile = ImageFile.createImageFile(file.getOriginalFilename(), fullFileName, ImageType.BOARD);
+        s3ImageService.uploadImageFile(file, EntityType.BOARD, boardId, fullFileName);
+        ImageFile imageFile = ImageFile.createImageFile(file.getOriginalFilename(), fullFileName, boardId, EntityType.BOARD);
         imageFileRepository.save(imageFile);
-        board.updateImageFile(imageFile.getId());
     }
 
     @Transactional

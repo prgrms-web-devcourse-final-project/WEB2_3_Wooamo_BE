@@ -1,6 +1,6 @@
 package com.api.stuv.domain.image.service;
 
-import com.api.stuv.domain.image.entity.ImageType;
+import com.api.stuv.domain.image.entity.EntityType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -22,11 +22,11 @@ public class S3ImageService {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
-    public void uploadImageFile(MultipartFile file, ImageType imageType, Long id, String fileName) {
+    public void uploadImageFile(MultipartFile file, EntityType entityType, Long id, String fileName) {
         try{
             PutObjectRequest request = PutObjectRequest.builder()
                     .bucket(bucket)
-                    .key(generateKey(imageType, id, fileName)) // s3 내부 저장 경로 설정
+                    .key(generateKey(entityType, id, fileName)) // s3 내부 저장 경로 설정
                     .contentType(file.getContentType()) // 파일 타입
                     .build();
             s3Client.putObject(request, RequestBody.fromInputStream(file.getInputStream(), file.getSize())); // s3에 파일 업로드
@@ -35,22 +35,22 @@ public class S3ImageService {
         }
     }
 
-    private static String generateKey(ImageType imageType, Long id, String fileName) {
-        return String.format("%s/%d/%s", imageType.getPath(), id, fileName);
+    private static String generateKey(EntityType entityType, Long id, String fileName) {
+        return String.format("%s/%d/%s", entityType.getPath(), id, fileName);
     }
 
-    public String generateImageFile(ImageType imageType, Long id, String fileName) {
+    public String generateImageFile(EntityType entityType, Long id, String fileName) {
         return s3Client.utilities().getUrl(GetUrlRequest.builder()
                 .bucket(bucket)
-                .key(generateKey(imageType, id, fileName))
+                .key(generateKey(entityType, id, fileName))
                 .build()).toString();
     }
 
-    public void deleteImageFile(ImageType imageType, Long id, String fileName) {
+    public void deleteImageFile(EntityType entityType, Long id, String fileName) {
         try {
             DeleteObjectRequest request = DeleteObjectRequest.builder()
                     .bucket(bucket)
-                    .key(generateKey(imageType, id, fileName))
+                    .key(generateKey(entityType, id, fileName))
                     .build();
             s3Client.deleteObject(request);
         } catch (S3Exception e) {

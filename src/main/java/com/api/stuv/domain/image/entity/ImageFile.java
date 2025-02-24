@@ -22,17 +22,21 @@ public class ImageFile extends BaseTimeEntity {
     @Column(nullable = false)
     private String newFilename;
 
+    @Column(nullable = false)
+    private Long entityId;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ImageType imageType;
+    private EntityType entityType;
 
-    public ImageFile(String originFilename, String newFilename, ImageType imageType) {
+    public ImageFile(String originFilename, String newFilename, Long entityId, EntityType entityType) {
         this.originFilename = originFilename;
         this.newFilename = newFilename;
-        this.imageType = imageType;
+        this.entityId = entityId;
+        this.entityType = entityType;
     }
 
-    public static ImageFile createImageFile(String originFilename, String newFilename, ImageType imageType) {
-        return new ImageFile(originFilename, newFilename, imageType);
+    public static ImageFile createImageFile(String originFilename, String newFilename, Long entityId, EntityType entityType) {
+        return new ImageFile(originFilename, newFilename, entityId, entityType);
     }
 }

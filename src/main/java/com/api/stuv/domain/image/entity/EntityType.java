@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum ImageType {
+public enum EntityType {
     BOARD("게시글","board"),
     EVENT("이벤트","event"),
     CONFIRM("인증","confirm"),
