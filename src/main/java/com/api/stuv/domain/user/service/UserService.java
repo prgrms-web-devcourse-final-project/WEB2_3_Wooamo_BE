@@ -118,7 +118,7 @@ public class UserService {
     public UserInformationResponse getUserInformation(Long userId, Long myId){
         UserInformationResponse information = userRepository.getUserInformation(userId, myId);
 
-        return information;
+      return information;
     }
 
     public MyInformationResponse getMyInformation(Long myId){

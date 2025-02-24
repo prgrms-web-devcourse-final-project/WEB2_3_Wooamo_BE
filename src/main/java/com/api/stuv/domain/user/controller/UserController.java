@@ -5,6 +5,7 @@ import com.api.stuv.domain.user.dto.request.EmailCertificationRequest;
 import com.api.stuv.domain.user.dto.request.UserRequest;
 import com.api.stuv.domain.user.dto.response.MyInformationResponse;
 import com.api.stuv.domain.user.dto.response.UserInformationResponse;
+import com.api.stuv.domain.user.dto.response.MyInformationResponse;
 import com.api.stuv.domain.user.service.KakaoService;
 import com.api.stuv.domain.user.service.UserService;
 import com.api.stuv.global.response.ApiResponse;

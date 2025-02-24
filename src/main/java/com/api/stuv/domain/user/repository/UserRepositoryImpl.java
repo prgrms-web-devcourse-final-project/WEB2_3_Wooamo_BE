@@ -6,6 +6,7 @@ import com.api.stuv.domain.image.entity.QImageFile;
 import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.domain.shop.entity.QCostume;
 import com.api.stuv.domain.user.dto.response.UserInformationResponse;
+import com.api.stuv.domain.user.dto.response.MyInformationResponse;
 import com.api.stuv.domain.user.entity.QUser;
 import com.api.stuv.domain.user.dto.response.MyInformationResponse;
 import com.api.stuv.domain.user.entity.QUser;
@@ -39,25 +40,6 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
                 s3ImageService.generateImageFile(EntityType.COSTUME, costumeDetails.get(i.id), costumeDetails.get(i.newFilename));
     }
 
-    @Override
-    public UserInformationResponse getUserInformation(Long userId, Long myId) {
-        Tuple informationDetails = jpaQueryFactory
-                .select(u.id, u.context, u.blogLink, u.nickname, f.status)
-                .from(u)
-                .leftJoin(f).on
-                        (f.userId.eq(userId).and(f.friendId.eq(myId))
-                        .or(f.friendId.eq(userId).and(f.userId.eq(myId))))
-                .where(u.id.eq(userId))
-                .fetchOne();
-
-        return new UserInformationResponse(
-                informationDetails.get(u.id),
-                informationDetails.get(u.context),
-                informationDetails.get(u.blogLink),
-                informationDetails.get(u.nickname),
-                informationDetails.get(f.status)
-        );
-    }
 
     //TODO: 후에 프로필 이미지 불러오기 추가해주세요!
     @Override
@@ -75,6 +57,26 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
                 informationDetails.get(u.nickname),
                 informationDetails.get(u.point)
         );
+    }
+
+  @Override
+   public UserInformationResponse getUserInformation(Long userId, Long myId) {
+       Tuple informationDetails = jpaQueryFactory
+               .select(u.id, u.context, u.blogLink, u.nickname, f.status)
+               .from(u)
+               .leftJoin(f).on
+                       (f.userId.eq(userId).and(f.friendId.eq(myId))
+                       .or(f.friendId.eq(userId).and(f.userId.eq(myId))))
+               .where(u.id.eq(userId))
+               .fetchOne();
+
+       return new UserInformationResponse(
+               informationDetails.get(u.id),
+               informationDetails.get(u.context),
+               informationDetails.get(u.blogLink),
+               informationDetails.get(u.nickname),
+               informationDetails.get(f.status)
+       );
     }
 
 
