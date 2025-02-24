@@ -1,11 +1,11 @@
 package com.api.stuv.domain.user.service;
 
+import com.api.stuv.domain.auth.util.TokenUtil;
 import com.api.stuv.domain.user.dto.request.EmailCertificationRequest;
 import com.api.stuv.domain.user.dto.request.KakaoUserRequest;
 import com.api.stuv.domain.user.dto.request.UserRequest;
 import com.api.stuv.domain.user.dto.response.UserInformationResponse;
 import com.api.stuv.domain.user.dto.response.MyInformationResponse;
-import com.api.stuv.domain.user.entity.RoleType;
 import com.api.stuv.domain.user.entity.User;
 import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.BadRequestException;
@@ -22,7 +22,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.List;
 
 
 @Service
@@ -33,6 +32,7 @@ public class UserService {
     private final EmailProvider  emailProvider;
     private final RedisService redisService;
     private final RandomName randomName;
+    private final TokenUtil tokenUtil;
 
     public void registerUser(UserRequest userRequest) {
         String email = userRequest.email();
@@ -100,13 +100,15 @@ public class UserService {
         }
     }
 
-    public UserInformationResponse getUserInformation(Long userId, Long myId){
+    public UserInformationResponse getUserInformation(Long userId){
+        Long myId = tokenUtil.getUserId();
         UserInformationResponse information = userRepository.getUserInformation(userId, myId);
 
       return information;
     }
 
-    public MyInformationResponse getMyInformation(Long myId){
+    public MyInformationResponse getMyInformation(){
+        Long myId = tokenUtil.getUserId();
         MyInformationResponse information = userRepository.getUserByMyId(myId);
 
         return information;
