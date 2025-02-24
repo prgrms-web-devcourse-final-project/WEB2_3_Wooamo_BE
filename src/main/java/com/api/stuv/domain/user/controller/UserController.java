@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final UserService userservice;
     private final KakaoService kakaoService;
-    private final TokenUtil tokenUtil;
+    //private final TokenUtil tokenUtil;
 
     @Operation(summary = "인증메일 전송 API", description = "인증 메일을 전송합니다.")
     @PostMapping("/auth/send")
@@ -74,20 +74,20 @@ public class UserController {
     @Operation(summary = "타인 정보 가져오기 API", description = "타인의 정보를 가져옵니다.")
     @GetMapping("/{userId}")
     private ResponseEntity<ApiResponse<UserInformationResponse>> getUserInformation(@PathVariable("userId") Long userId){
-        Long myId = tokenUtil.getUserId();
+        //Long myId = tokenUtil.getUserId();
 
         return ResponseEntity.ok()
-                .body(ApiResponse.success(userservice.getUserInformation(userId, myId)));
+                .body(ApiResponse.success(userservice.getUserInformation(userId)));
 
     }
 
     @Operation(summary = "내 정보 가져오기 API", description = "본인의 정보를 가져옵니다.")
     @GetMapping
     private ResponseEntity<ApiResponse<MyInformationResponse>> getMyInformation(){
-        Long myId = tokenUtil.getUserId();
+        //Long myId = tokenUtil.getUserId();
 
         return ResponseEntity.ok()
-                .body(ApiResponse.success(userservice.getMyInformation(myId)));
+                .body(ApiResponse.success(userservice.getMyInformation()));
     }
 
 }

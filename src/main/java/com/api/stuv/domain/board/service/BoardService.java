@@ -15,7 +15,10 @@ import com.api.stuv.domain.image.entity.ImageFile;
 import com.api.stuv.domain.image.repository.ImageFileRepository;
 import com.api.stuv.domain.image.service.ImageService;
 import com.api.stuv.domain.image.service.S3ImageService;
+import com.api.stuv.domain.user.entity.User;
+import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.AccessDeniedException;
+import com.api.stuv.global.exception.BadRequestException;
 import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
 import com.api.stuv.global.response.PageResponse;
@@ -26,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -37,6 +41,7 @@ public class BoardService {
 
     private final BoardRepository boardRepository;
     private final CommentRepository commentRepository;
+    private final UserRepository userRepository;
     private final ImageFileRepository imageFileRepository;
     private final ImageService imageService;
     private final S3ImageService s3ImageService;
@@ -91,6 +96,8 @@ public class BoardService {
     @Transactional
     public void deleteComment(Long userId, Long commentId) {
         Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException(ErrorCode.COMMENT_NOT_FOUND));
+        Board board = boardRepository.findById(comment.getBoardId()).orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
+        if (board.getConfirmedCommentId() != null && board.getConfirmedCommentId().equals(commentId)) throw new BadRequestException(ErrorCode.CONFIRMED_COMMENT);
         if (!Objects.equals(comment.getUserId(), userId)) throw new AccessDeniedException(ErrorCode.COMMENT_NOT_AUTHORIZED);
         commentRepository.delete(comment);
     }
@@ -112,12 +119,18 @@ public class BoardService {
     // TODO: 이후 알림 기능 추가
     @Transactional
     public void confirmComment(Long userId, Long commentId) {
+
+        final int CONFIRM_COMMENT_POINT = 50;
+
         Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException(ErrorCode.COMMENT_NOT_FOUND));
         Board board = boardRepository.findById(comment.getBoardId()).orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
+        User user = userRepository.findById(comment.getUserId()).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
         if (!board.getBoardType().equals(BoardType.QUESTION)) throw new AccessDeniedException(ErrorCode.BOARD_NOT_QUESTION);
         if (comment.getUserId().equals(userId)) throw new AccessDeniedException(ErrorCode.COMMENT_BY_WRITER);
         if (board.getConfirmedCommentId() != null) throw new AccessDeniedException(ErrorCode.COMMENT_ALREADY_CONFIRM);
         if (!board.getUserId().equals(userId)) throw new AccessDeniedException(ErrorCode.COMMENT_NOT_AUTHORIZED);
         board.confirmComment(commentId);
+        user.updatePoint(BigDecimal.valueOf(CONFIRM_COMMENT_POINT));
+
     }
 }

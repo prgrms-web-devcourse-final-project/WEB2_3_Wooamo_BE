@@ -57,4 +57,8 @@ public class User extends BaseTimeEntity {
         this.role = role;
         this.blogLink = blogLink;
     }
+
+    public void updatePoint(BigDecimal point) {
+        this.point = this.point.add(point);
+    }
 }

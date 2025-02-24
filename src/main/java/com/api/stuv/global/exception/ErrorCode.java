@@ -51,12 +51,13 @@ public enum ErrorCode {
     BOARD_NOT_FOUND(404, -5000, "해당 게시글을 찾을 수 없습니다."),
     BOARD_NOT_AUTHORIZED(403, -5001, "해당 게시글에 대한 권한이 없습니다."),
 
-            // COMMENT
+    // COMMENT
     COMMENT_NOT_FOUND(404, -6000, "해당 댓글을 찾을 수 없습니다."),
     COMMENT_ALREADY_CONFIRM(400, -6001, "이미 채택된 댓글이 있습니다."),
     COMMENT_NOT_AUTHORIZED(403, -6002, "해당 댓글에 대한 권한이 없습니다."),
     BOARD_NOT_QUESTION(400, -6003, "질문 게시글이 아닙니다."),
     COMMENT_BY_WRITER(400, -6004, "작성자는 채택할 수 없습니다."),
+    CONFIRMED_COMMENT(400, -6005, "채택된 댓글은 삭제할 수 없습니다."),
 
     // COSTUME
     COSTUME_NOT_FOUND(404, -7000, "해당 코스튬을 찾을 수 없습니다."),
