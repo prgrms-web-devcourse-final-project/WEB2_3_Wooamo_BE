@@ -3,6 +3,8 @@ package com.api.stuv.domain.board.service;
 import com.api.stuv.domain.board.dto.BoardDetailResponse;
 import com.api.stuv.domain.board.dto.BoardRequest;
 import com.api.stuv.domain.board.dto.BoardResponse;
+import com.api.stuv.domain.board.entity.Board;
+import com.api.stuv.domain.board.entity.BoardType;
 import com.api.stuv.domain.board.entity.Comment;
 import com.api.stuv.domain.board.dto.CommentResponse;
 import com.api.stuv.domain.board.repository.BoardRepository;
@@ -71,5 +73,17 @@ public class BoardService {
     public void createComment(Long userId, Long boardId, String content) {
         if (!boardRepository.existsById(boardId)) throw new NotFoundException(ErrorCode.BOARD_NOT_FOUND);
         commentRepository.save(Comment.create(userId, boardId, content));
+    }
+
+    // TODO: 이후 알림 기능 추가
+    @Transactional
+    public void confirmComment(Long userId, Long commentId) {
+        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException(ErrorCode.COMMENT_NOT_FOUND));
+        Board board = boardRepository.findById(comment.getBoardId()).orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
+        if (!board.getBoardType().equals(BoardType.QUESTION)) throw new AccessDeniedException(ErrorCode.BOARD_NOT_QUESTION);
+        if (comment.getUserId().equals(userId)) throw new AccessDeniedException(ErrorCode.COMMENT_BY_WRITER);
+        if (board.getConfirmedCommentId() != null) throw new AccessDeniedException(ErrorCode.COMMENT_ALREADY_CONFIRM);
+        if (!board.getUserId().equals(userId)) throw new AccessDeniedException(ErrorCode.COMMENT_NOT_AUTHORIZED);
+        board.confirmComment(commentId);
     }
 }
