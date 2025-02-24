@@ -57,7 +57,7 @@ public class BoardController {
                 .body(ApiResponse.success(boardService.getBoardDetail(boardId)));
     }
 
-    @Operation(summary = "게시판 삭제 API", description = "게시판을 삭제합니다.")
+    @Operation(summary = "게시글 삭제 API", description = "게시글을 삭제합니다.")
     @DeleteMapping("/{boardId}")
     public ResponseEntity<ApiResponse<Void>> deleteBoard(@PathVariable Long boardId) {
         boardService.deleteBoard(tokenUtil.getUserId(), boardId);
