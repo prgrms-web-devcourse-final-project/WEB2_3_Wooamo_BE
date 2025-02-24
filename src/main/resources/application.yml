@@ -70,6 +70,14 @@ payment:
     test_secret_api_key: ${TOSS_TEST_SECRET_KEY}
 jwt:
   secret-key: ${JWT_SECRET_KEY}
+kakao:
+  api-key: ${KAKAO_API_KEY}
+  client-secret: ${KAKAO_CLIENT_SECRET}
+  redirect-uri: http://localhost:8080/api/user/kakaoLogin
+  authentication:
+    method: POST
+    grant-type: authorization_code
+
 ---
 spring:
   config:
@@ -123,4 +131,11 @@ payment:
     test_secret_api_key: ${TOSS_TEST_SECRET_KEY}
 jwt:
   secret-key: test
+kakao:
+  api-key: test
+  client-secret: test
+  redirect-uri: http://localhost:8080/api/user/kakaoLogin
+  authentication:
+    method: client_secret_post
+    grant-type: authorization_code
 ---
