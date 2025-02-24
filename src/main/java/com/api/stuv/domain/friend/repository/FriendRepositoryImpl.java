@@ -66,7 +66,7 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
                 .select(u.id, u.nickname, i.newFilename, u.context)
                 .from(u).leftJoin(uc).on(u.costumeId.eq(uc.id))
                 .leftJoin(c).on(uc.costumeId.eq(c.id))
-                .leftJoin(i).on(c.imagefileId.eq(i.id))
+                .leftJoin(i).on(c.id.eq(i.entityId).and(i.entityType.eq(EntityType.COSTUME)))
                 .where(u.nickname.contains(target).or(u.context.contains(target)).and(u.id.ne(userId)))
                 .offset(pageable.getOffset()).limit(pageable.getPageSize()).fetch()
                 .stream().map(tuple -> new FriendResponse(
