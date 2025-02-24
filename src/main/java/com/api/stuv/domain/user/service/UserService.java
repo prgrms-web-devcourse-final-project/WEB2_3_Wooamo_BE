@@ -7,6 +7,7 @@ import com.api.stuv.domain.user.entity.RoleType;
 import com.api.stuv.domain.user.entity.User;
 import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.BadRequestException;
+import com.api.stuv.global.exception.DuplicateException;
 import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
 import com.api.stuv.global.service.RedisService;
@@ -107,7 +108,7 @@ public class UserService {
 
     public void checkDuplicateNickname(String nickname){
         if(userRepository.existsByNickname(nickname)){
-            throw new BadRequestException(ErrorCode.NICKNAME_ALREADY_EXIST);
+            throw new DuplicateException(ErrorCode.NICKNAME_ALREADY_EXIST);
         }
     }
 }
