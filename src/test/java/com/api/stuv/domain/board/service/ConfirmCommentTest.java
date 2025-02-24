@@ -7,6 +7,7 @@ import com.api.stuv.domain.board.repository.BoardRepository;
 import com.api.stuv.domain.board.repository.CommentRepository;
 import com.api.stuv.domain.user.entity.RoleType;
 import com.api.stuv.domain.user.entity.User;
+import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.AccessDeniedException;
 import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
@@ -18,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,12 +36,15 @@ public class ConfirmCommentTest {
     @Mock
     private CommentRepository commentRepository;
 
+    @Mock
+    private UserRepository userRepository;
+
     @InjectMocks
     private BoardService boardService;
 
     List<User> users = List.of(
-            new User(1L, "user1", "user1", null, null, "user1", null, null, RoleType.USER, null),
-            new User(2L, "user2", "user2", null, null, "user2", null, null, RoleType.USER, null)
+            new User(1L, "user1", "user1", null, null, "user1", BigDecimal.valueOf(0), null, RoleType.USER, null),
+            new User(2L, "user2", "user2", null, null, "user2", BigDecimal.valueOf(0), null, RoleType.USER, null)
     );
 
     List<Board> boards = List.of(
@@ -60,25 +65,27 @@ public class ConfirmCommentTest {
     void successConfirmComment() {
         // given
         User writer = users.get(0);
+        User commentWriter = users.get(1);
         Board board = boards.get(0);
         Comment comment = comments.get(1);
 
 
         when(commentRepository.findById(2L)).thenReturn(Optional.of(comment));
         when(boardRepository.findById(comment.getBoardId())).thenReturn(Optional.of(board));
+        when(userRepository.findById(comment.getUserId())).thenReturn(Optional.of(commentWriter));
 
         // when
         boardService.confirmComment(writer.getId(), comment.getId());
 
         // then
         assertThat(board.getConfirmedCommentId()).isEqualTo(comment.getId());
+        assertThat(commentWriter.getPoint()).isEqualTo(BigDecimal.valueOf(50));
     }
 
     @Test
     void failConfirmCommentWhenCommentNotFound() {
         // given
         User writer = users.get(0);
-        Board board = boards.get(0);
 
         when(commentRepository.findById(2L)).thenReturn(Optional.empty());
 
