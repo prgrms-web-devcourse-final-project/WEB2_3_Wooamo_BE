@@ -3,7 +3,7 @@ package com.api.stuv.domain.user.dto.response;
 import java.math.BigDecimal;
 
 public record MyInformationResponse(
-        Long id,
+        Long userId,
         String context,
         String blogLink,
         String nickname,

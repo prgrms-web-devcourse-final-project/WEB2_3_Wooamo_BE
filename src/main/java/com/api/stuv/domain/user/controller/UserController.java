@@ -70,7 +70,7 @@ public class UserController {
     }
 
     @Operation(summary = "내 정보 가져오기 API", description = "본인의 정보를 가져옵니다.")
-    @GetMapping("/")
+    @GetMapping
     private ResponseEntity<ApiResponse<MyInformationResponse>> getMyInformation(){
         Long myId = tokenUtil.getUserId();
 
