@@ -3,6 +3,7 @@ package com.api.stuv.domain.user.service;
 import com.api.stuv.domain.user.dto.request.EmailCertificationRequest;
 import com.api.stuv.domain.user.dto.request.KakaoUserRequest;
 import com.api.stuv.domain.user.dto.request.UserRequest;
+import com.api.stuv.domain.user.dto.response.UserInformationResponse;
 import com.api.stuv.domain.user.entity.RoleType;
 import com.api.stuv.domain.user.entity.User;
 import com.api.stuv.domain.user.repository.UserRepository;
@@ -110,5 +111,11 @@ public class UserService {
         if(userRepository.existsByNickname(nickname)){
             throw new DuplicateException(ErrorCode.NICKNAME_ALREADY_EXIST);
         }
+    }
+
+    public UserInformationResponse getUserInformation(Long userId, Long myId){
+        UserInformationResponse information = userRepository.getUserInformation(userId, myId);
+
+        return information;
     }
 }
