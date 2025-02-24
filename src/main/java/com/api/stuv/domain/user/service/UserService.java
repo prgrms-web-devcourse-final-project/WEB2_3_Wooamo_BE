@@ -1,10 +1,8 @@
 package com.api.stuv.domain.user.service;
 
 import com.api.stuv.domain.auth.util.TokenUtil;
-import com.api.stuv.domain.user.dto.request.EmailCertificationRequest;
-import com.api.stuv.domain.user.dto.request.KakaoUserRequest;
-import com.api.stuv.domain.user.dto.request.UserCostumeRequest;
-import com.api.stuv.domain.user.dto.request.UserRequest;
+import com.api.stuv.domain.user.dto.request.*;
+import com.api.stuv.domain.user.dto.response.ModifyProfileResponse;
 import com.api.stuv.domain.user.dto.response.UserInformationResponse;
 import com.api.stuv.domain.user.dto.response.MyInformationResponse;
 import com.api.stuv.domain.user.entity.User;
@@ -21,6 +19,7 @@ import com.api.stuv.global.util.email.RandomName;
 import com.api.stuv.global.util.email.provider.EmailProvider;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.token.TokenService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -129,5 +128,20 @@ public class UserService {
         MyInformationResponse information = userRepository.getUserByMyId(myId);
 
         return information;
+    }
+
+    @Transactional
+    public ModifyProfileResponse modifyProfile(ModifyProfileRequest modifyProfileRequest){
+        Long userId = tokenUtil.getUserId();
+        String context =  modifyProfileRequest.context();
+        String link = modifyProfileRequest.link();
+
+        User user = userRepository.findById(userId).orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
+
+        user.modifyProfileRequest(context, link);
+        userRepository.save(user);
+
+        ModifyProfileResponse modifyProfileResponse = new ModifyProfileResponse(userId);
+        return modifyProfileResponse;
     }
 }

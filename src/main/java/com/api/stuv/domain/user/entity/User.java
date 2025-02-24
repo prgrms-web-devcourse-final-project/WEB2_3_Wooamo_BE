@@ -1,5 +1,6 @@
 package com.api.stuv.domain.user.entity;
 
+import com.api.stuv.domain.user.dto.request.ModifyProfileRequest;
 import com.api.stuv.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -58,6 +59,11 @@ public class User extends BaseTimeEntity {
         this.blogLink = blogLink;
     }
 
+    public void modifyProfileRequest(String context, String link) {
+        this.context = context;
+        this.blogLink = link;
+    }
+    
     public void updatePoint(BigDecimal point) {
         this.point = this.point.add(point);
     }
