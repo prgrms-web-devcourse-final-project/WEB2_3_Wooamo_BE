@@ -37,8 +37,6 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final CommentRepository commentRepository;
     private final ImageFileRepository imageFileRepository;
-    private final UserRepository userRepository;
-    private final ImageFileRepository imageFileRepository;
     private final ImageService imageService;
 
     @Transactional(readOnly = true)
