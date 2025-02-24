@@ -4,6 +4,8 @@ import com.api.stuv.domain.auth.util.TokenUtil;
 import com.api.stuv.domain.user.dto.request.EmailCertificationRequest;
 import com.api.stuv.domain.user.dto.request.UserRequest;
 import com.api.stuv.domain.user.dto.response.MyInformationResponse;
+import com.api.stuv.domain.user.dto.response.UserInformationResponse;
+import com.api.stuv.domain.user.dto.response.MyInformationResponse;
 import com.api.stuv.domain.user.service.KakaoService;
 import com.api.stuv.domain.user.service.UserService;
 import com.api.stuv.global.response.ApiResponse;
@@ -67,6 +69,16 @@ public class UserController {
 
         return ResponseEntity.ok()
                 .body(ApiResponse.success());
+    }
+
+    @Operation(summary = "타인 정보 가져오기 API", description = "타인의 정보를 가져옵니다.")
+    @GetMapping("/{userId}")
+    private ResponseEntity<ApiResponse<UserInformationResponse>> getUserInformation(@PathVariable("userId") Long userId){
+        Long myId = tokenUtil.getUserId();
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(userservice.getUserInformation(userId, myId)));
+
     }
 
     @Operation(summary = "내 정보 가져오기 API", description = "본인의 정보를 가져옵니다.")
