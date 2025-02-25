@@ -64,10 +64,14 @@ public class TodoService {
 
     public void deleteTodoList(Long todoId){
         Long userId = tokenUtil.getUserId();
-
+        if(userId == null){
+            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
+        }
 
         TodoList todolist = todoListRepository.findTodoListByUserIdAndTodoId(userId, todoId);
-
+        if(todolist == null){
+            throw new NotFoundException(ErrorCode.TODO_NOT_FOUND);
+        }
         todoListRepository.delete(todolist);
     }
 
