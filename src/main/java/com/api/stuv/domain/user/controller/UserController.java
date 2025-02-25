@@ -75,8 +75,6 @@ public class UserController {
     @Operation(summary = "타인 정보 가져오기 API", description = "타인의 정보를 가져옵니다.")
     @GetMapping("/{userId}")
     private ResponseEntity<ApiResponse<UserInformationResponse>> getUserInformation(@PathVariable("userId") Long userId){
-        //Long myId = tokenUtil.getUserId();
-
         return ResponseEntity.ok()
                 .body(ApiResponse.success(userService.getUserInformation(userId)));
 
@@ -85,8 +83,6 @@ public class UserController {
     @Operation(summary = "내 정보 가져오기 API", description = "본인의 정보를 가져옵니다.")
     @GetMapping
     private ResponseEntity<ApiResponse<MyInformationResponse>> getMyInformation(){
-        //Long myId = tokenUtil.getUserId();
-
         return ResponseEntity.ok()
                 .body(ApiResponse.success(userService.getMyInformation()));
     }
