@@ -5,6 +5,7 @@ import com.api.stuv.domain.admin.dto.request.CostumeRequest;
 import com.api.stuv.domain.admin.dto.response.AdminPartyAuthDetailResponse;
 import com.api.stuv.domain.admin.exception.CostumeNotFound;
 import com.api.stuv.domain.admin.exception.InvalidPointFormat;
+import com.api.stuv.domain.image.dto.ImageResponse;
 import com.api.stuv.domain.image.entity.EntityType;
 import com.api.stuv.domain.image.entity.ImageFile;
 import com.api.stuv.domain.image.exception.ImageFileNotFound;
@@ -12,6 +13,8 @@ import com.api.stuv.domain.image.repository.ImageFileRepository;
 import com.api.stuv.domain.image.service.ImageService;
 import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.domain.admin.dto.response.AdminPartyGroupResponse;
+import com.api.stuv.domain.party.entity.PartyGroup;
+import com.api.stuv.domain.party.repository.confirm.QuestConfirmRepository;
 import com.api.stuv.domain.party.repository.member.GroupMemberRepository;
 import com.api.stuv.domain.party.repository.party.PartyGroupRepository;
 import com.api.stuv.domain.shop.entity.Costume;
@@ -40,6 +43,7 @@ public class AdminService {
     private final ImageService imageService;
     private final PartyGroupRepository partyGroupRepository;
     private final GroupMemberRepository groupMemberRepository;
+    private final QuestConfirmRepository questConfirmRepository;
 
     @Transactional
     public void createCostume(CostumeRequest request, MultipartFile file) {
@@ -79,5 +83,12 @@ public class AdminService {
         List<MemberDetailDTO> members = groupMemberRepository.findMemberListWithConfirmedByDate(partyId, date);
 
         return AdminPartyAuthDetailResponse.from(response, members);
+    }
+
+    public ImageResponse getGroupMemberConfirmImageByDate(Long partyId, Long memberId, LocalDate date) {
+        PartyGroup partyGroup = partyGroupRepository.findById(partyId).orElseThrow(() -> new NotFoundException(ErrorCode.PARTY_NOT_FOUND));
+        if (date.isBefore(partyGroup.getStartDate()) || date.isAfter(partyGroup.getEndDate())) throw new DateOutOfRangeException(ErrorCode.PARTY_INVALID_DATE);
+
+        return questConfirmRepository.findGroupMemberConfirmImageByDate(memberId, date);
     }
 }
