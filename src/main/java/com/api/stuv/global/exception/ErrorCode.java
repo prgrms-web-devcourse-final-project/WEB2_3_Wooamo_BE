@@ -64,6 +64,11 @@ public enum ErrorCode {
 
     // IMAGE
     IMAGE_NAME_NOT_FOUND(404, -8000, "해당 이미지를 찾을 수 없습니다."),
+
+    //TODO
+    TODO_ALREADY_EXIST(409, -9000, "해당 TODO는 이미 존재합니다."),
+    TODO_NOT_FOUND(404, -900, "해당 TODO를 찾을 수 없습니다."),
+    TODO_SAVE_FAILED(400, -9002, "TODO 저장에 실패했습니다.")
     ;
 
     private final int status;
