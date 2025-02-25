@@ -37,7 +37,7 @@ public enum ErrorCode {
     INVALID_PAGE_SIZE(400, -3008, "올바르지 않은 페이지 사이즈입니다."),
     INVALID_PAGE_NUMBER(400, -3009, "올바르지 않은 페이지 번호입니다."),
     HTTP_API_ERROR(400, -3010, "HTTP API에서 오류가 발생했습니다."),
-   JSON_PARSING_ERROR(400, -3011, "JSON 파싱이 잘못되었습니다."),
+    JSON_PARSING_ERROR(400, -3011, "JSON 파싱이 잘못되었습니다."),
 
     // FRIEND
     FRIEND_NOT_FOUND(404, -4000, "해당 친구를 찾을 수 없습니다."),
@@ -64,6 +64,10 @@ public enum ErrorCode {
 
     // IMAGE
     IMAGE_NAME_NOT_FOUND(404, -8000, "해당 이미지를 찾을 수 없습니다."),
+
+    // PARTY
+    PARTY_NOT_FOUND(404, -9000, "해당 팟을 팢을 수 없습니다."),
+    PARTY_INVALID_DATE(400, -9001, "해당 날짜는 팟의 인증 기간이 아닙니다."),
     ;
 
     private final int status;

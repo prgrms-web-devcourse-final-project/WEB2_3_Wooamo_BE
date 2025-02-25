@@ -1,6 +1,6 @@
 package com.api.stuv.domain.admin.service;
 
-import com.api.stuv.domain.party.dto.response.AdminPartyGroupResponse;
+import com.api.stuv.domain.admin.dto.response.AdminPartyGroupResponse;
 import com.api.stuv.domain.party.entity.PartyGroup;
 import com.api.stuv.domain.party.entity.PartyStatus;
 import com.api.stuv.domain.party.repository.party.PartyGroupRepository;

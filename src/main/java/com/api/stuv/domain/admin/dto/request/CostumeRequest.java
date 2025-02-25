@@ -1,4 +1,4 @@
-package com.api.stuv.domain.admin.dto;
+package com.api.stuv.domain.admin.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 
