@@ -1,12 +1,13 @@
 package com.api.stuv.domain.user.service;
 
-import com.api.stuv.domain.user.dto.request.EmailCertificationRequest;
-import com.api.stuv.domain.user.dto.request.KakaoUserRequest;
-import com.api.stuv.domain.user.dto.request.UserRequest;
+import com.api.stuv.domain.auth.util.TokenUtil;
+import com.api.stuv.domain.user.dto.request.*;
+import com.api.stuv.domain.user.dto.response.ModifyProfileResponse;
 import com.api.stuv.domain.user.dto.response.UserInformationResponse;
 import com.api.stuv.domain.user.dto.response.MyInformationResponse;
-import com.api.stuv.domain.user.entity.RoleType;
 import com.api.stuv.domain.user.entity.User;
+import com.api.stuv.domain.user.entity.UserCostume;
+import com.api.stuv.domain.user.repository.UserCostumeRepository;
 import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.BadRequestException;
 import com.api.stuv.global.exception.DuplicateException;
@@ -18,21 +19,23 @@ import com.api.stuv.global.util.email.RandomName;
 import com.api.stuv.global.util.email.provider.EmailProvider;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.token.TokenService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.List;
 
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final UserCostumeRepository userCostumeRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final EmailProvider  emailProvider;
     private final RedisService redisService;
     private final RandomName randomName;
+    private final TokenUtil tokenUtil;
 
     public void registerUser(UserRequest userRequest) {
         String email = userRequest.email();
@@ -43,15 +46,16 @@ public class UserService {
             throw new BadRequestException(ErrorCode.NOT_VERIFICATION_EMAIL);
         }
 
-        User user = User.builder()
-                .email(email)
-                .password(bCryptPasswordEncoder.encode(password))
-                .nickname(nickname)
-                .costumeId(1L)
-                .role(RoleType.USER)
-                .build();
-
+        //사용자 정보 저장
+        User user = userRequest.from(userRequest, bCryptPasswordEncoder);
         userRepository.save(user);
+
+        //userCostume 저장
+        Long userId = user.getId();
+        Long costumeId = user.getCostumeId();
+        UserCostumeRequest userCostumeRequest = new UserCostumeRequest(userId, costumeId);
+        UserCostume userCostume = userCostumeRequest.createUserCostumeRequeset(userId,  costumeId);
+        userCostumeRepository.save(userCostume);
     }
 
     public void registerKakaoUser(KakaoUserRequest kakaoUserRequest) {
@@ -66,16 +70,14 @@ public class UserService {
             throw new NotFoundException(ErrorCode.USER_ALREADY_EXIST);
         }
 
-        User user = User.builder()
-                .email(email)
-                .password(bCryptPasswordEncoder.encode(password))
-                .nickname(nickname)
-                .socialId(socialId)
-                .costumeId(1L)
-                .role(RoleType.USER)
-                .build();
-
+        User user = kakaoUserRequest.kakaoFrom(kakaoUserRequest, socialId,  bCryptPasswordEncoder);
         userRepository.save(user);
+
+        Long userId = user.getId();
+        Long costumeId = user.getCostumeId();
+        UserCostumeRequest userCostumeRequest = new UserCostumeRequest(userId, costumeId);
+        UserCostume userCostume = userCostumeRequest.createUserCostumeRequeset(userId,  costumeId);
+        userCostumeRepository.save(userCostume);
     }
 
     public void sendCertificateEmail(String email){
@@ -99,7 +101,6 @@ public class UserService {
         if(code == null){
             //코드 만료
             throw new NotFoundException(ErrorCode.CODE_EXPIRED);
-            //return false;
         }
         if(code.equals(userCode)){
             redisService.delete(email);
@@ -115,15 +116,32 @@ public class UserService {
         }
     }
 
-    public UserInformationResponse getUserInformation(Long userId, Long myId){
+    public UserInformationResponse getUserInformation(Long userId){
+        Long myId = tokenUtil.getUserId();
         UserInformationResponse information = userRepository.getUserInformation(userId, myId);
 
       return information;
     }
 
-    public MyInformationResponse getMyInformation(Long myId){
+    public MyInformationResponse getMyInformation(){
+        Long myId = tokenUtil.getUserId();
         MyInformationResponse information = userRepository.getUserByMyId(myId);
 
         return information;
+    }
+
+    @Transactional
+    public ModifyProfileResponse modifyProfile(ModifyProfileRequest modifyProfileRequest){
+        Long userId = tokenUtil.getUserId();
+        String context =  modifyProfileRequest.context();
+        String link = modifyProfileRequest.link();
+
+        User user = userRepository.findById(userId).orElseThrow(()->new NotFoundException(ErrorCode.USER_NOT_FOUND));
+
+        user.modifyProfileRequest(context, link);
+        userRepository.save(user);
+
+        ModifyProfileResponse modifyProfileResponse = new ModifyProfileResponse(userId);
+        return modifyProfileResponse;
     }
 }

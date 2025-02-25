@@ -1,9 +1,10 @@
 package com.api.stuv.domain.board.controller;
 
-import com.api.stuv.domain.board.dto.BoardDetailResponse;
 import com.api.stuv.domain.auth.util.TokenUtil;
+import com.api.stuv.domain.board.dto.BoardDetailResponse;
 import com.api.stuv.domain.board.dto.BoardRequest;
 import com.api.stuv.domain.board.dto.BoardResponse;
+import com.api.stuv.domain.board.dto.BoardUpdateRequest;
 import com.api.stuv.domain.board.dto.CommentResponse;
 import com.api.stuv.domain.board.service.BoardService;
 import com.api.stuv.global.response.ApiResponse;
@@ -47,7 +48,8 @@ public class BoardController {
             @RequestPart(value = "contents") @Valid BoardRequest boardRequest,
             @RequestPart(value = "images", required = false) List<MultipartFile> files
     ) {
-        return ResponseEntity.ok().body(ApiResponse.success(boardService.createBoard(tokenUtil.getUserId(), boardRequest, files)));
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(boardService.createBoard(tokenUtil.getUserId(), boardRequest, files)));
     }
 
     @Operation(summary = "게시판 상세 조회 API", description = "게시판 상세를 조회 합니다.")
@@ -55,6 +57,17 @@ public class BoardController {
     public ResponseEntity<ApiResponse<BoardDetailResponse>> getBoardDetail(@PathVariable Long boardId) {
         return ResponseEntity.ok()
                 .body(ApiResponse.success(boardService.getBoardDetail(boardId)));
+    }
+
+    @Operation(summary = "게시판 수정 API", description = "게시판을 수정합니다.")
+    @PutMapping("/{boardId}")
+    public ResponseEntity<ApiResponse<Map<String, Long>>> updateBoard(
+            @PathVariable Long boardId,
+            @RequestBody BoardUpdateRequest boardUpdateRequest,
+            @RequestPart(value = "images", required = false) List<MultipartFile> files
+    ) {
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(boardService.updateBoard(tokenUtil.getUserId(), boardId, boardUpdateRequest, files)));
     }
 
     @Operation(summary = "게시글 삭제 API", description = "게시글을 삭제합니다.")
