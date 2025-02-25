@@ -68,8 +68,8 @@ public class BoardService {
         Board board = boardRepository.findById(boardId).orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
         if (!Objects.equals(board.getUserId(), userId)) throw new AccessDeniedException(ErrorCode.BOARD_NOT_AUTHORIZED);
         board.update(request);
-        for (String existingImage : request.existingImages()) {
-            String fileName = existingImage.substring(existingImage.lastIndexOf('/') + 1);
+        for (String deletedImage : request.deletedImages()) {
+            String fileName = deletedImage.substring(deletedImage.lastIndexOf('/') + 1);
             s3ImageService.deleteImageFile(EntityType.BOARD, boardId, fileName);
             imageFileRepository.deleteByNewFilename(fileName);
         }
