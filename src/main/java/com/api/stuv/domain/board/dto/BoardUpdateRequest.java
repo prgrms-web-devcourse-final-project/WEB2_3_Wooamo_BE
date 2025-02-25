@@ -5,5 +5,5 @@ import java.util.List;
 public record BoardUpdateRequest(
         String title,
         String context,
-        List<String> existingImages
+        List<String> deletedImages
 ) {}

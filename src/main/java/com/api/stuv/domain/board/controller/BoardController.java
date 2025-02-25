@@ -59,7 +59,7 @@ public class BoardController {
     @PutMapping("/{boardId}")
     public ResponseEntity<ApiResponse<Map<String, Long>>> updateBoard(
             @PathVariable Long boardId,
-            @RequestPart(value = "post") @Valid BoardUpdateRequest boardUpdateRequest,
+            @RequestPart(value = "contents") @Valid BoardUpdateRequest boardUpdateRequest,
             @RequestPart(value = "images", required = false) List<MultipartFile> files
     ) {
         return ResponseEntity.ok()
