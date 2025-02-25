@@ -63,7 +63,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     }
 
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException {
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws AuthenticationException, IOException {
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
 
         String email = customUserDetails.getUsername();
@@ -107,7 +107,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     }
 
     @Override
-    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException {
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws AuthenticationException, IOException {
         response.setStatus(401);
         response.setContentType("application/json;charset=UTF-8");
         response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.error("로그인에 실패했습니다.")));
