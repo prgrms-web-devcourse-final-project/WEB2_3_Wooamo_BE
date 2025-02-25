@@ -1,13 +1,16 @@
 package com.api.stuv.domain.user.controller;
 
 import com.api.stuv.domain.auth.util.TokenUtil;
+import com.api.stuv.domain.user.dto.request.AddTodoRequest;
 import com.api.stuv.domain.user.dto.request.EmailCertificationRequest;
 import com.api.stuv.domain.user.dto.request.ModifyProfileRequest;
 import com.api.stuv.domain.user.dto.request.UserRequest;
+import com.api.stuv.domain.user.dto.response.AddTodoResponse;
 import com.api.stuv.domain.user.dto.response.ModifyProfileResponse;
 import com.api.stuv.domain.user.dto.response.MyInformationResponse;
 import com.api.stuv.domain.user.dto.response.UserInformationResponse;
 import com.api.stuv.domain.user.service.KakaoService;
+import com.api.stuv.domain.user.service.TodoService;
 import com.api.stuv.domain.user.service.UserService;
 import com.api.stuv.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,7 +29,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final UserService userService;
     private final KakaoService kakaoService;
-    private final TokenUtil tokenUtil;
+    private final TodoService todoService;
 
     @Operation(summary = "인증메일 전송 API", description = "인증 메일을 전송합니다.")
     @PostMapping("/auth/send")
@@ -97,5 +100,14 @@ public class UserController {
         userService.modifyProfile(modifyProfileRequest);
         return ResponseEntity.ok()
                 .body(ApiResponse.success(userService.modifyProfile(modifyProfileRequest)));
+    }
+
+    @Operation(summary = "투두리스트 추가 API", description = "오늘의 투두 리스트를 추가합니다.")
+    @PostMapping("/todo")
+    private ResponseEntity<ApiResponse<AddTodoResponse>> addTodoList(@RequestBody @Valid AddTodoRequest addTodoRequest){
+        System.out.println(addTodoRequest.todo());
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(todoService.addTodoList(addTodoRequest)));
     }
 }
