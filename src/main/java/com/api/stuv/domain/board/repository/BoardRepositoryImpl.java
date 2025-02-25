@@ -7,7 +7,6 @@ import com.api.stuv.domain.image.entity.EntityType;
 import com.api.stuv.domain.image.entity.QImageFile;
 import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.domain.user.entity.QUser;
-import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
 import com.api.stuv.global.response.PageResponse;
@@ -27,7 +26,6 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class BoardRepositoryImpl implements BoardRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
-    private final UserRepository userRepository;
     private final S3ImageService s3ImageService;
 
     private final QBoard b = QBoard.board;
@@ -79,11 +77,13 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
                         u.id,
                         u.nickname,
                         u.costumeId,
+                        i.newFilename,
                         b.boardType,
                         TemplateUtils.timeFormater(b.createdAt),
                         b.confirmedCommentId.isNotNull(),
                         b.context)
                 .from(b).leftJoin(u).on(b.userId.eq(u.id))
+                .leftJoin(i).on(u.costumeId.eq(i.entityId).and(i.entityType.eq(EntityType.COSTUME)))
                 .where(b.id.eq(boardId))
                 .fetchOne();
         if (Objects.isNull(boardDetails)) throw new NotFoundException(ErrorCode.BOARD_NOT_FOUND);
@@ -95,16 +95,13 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
                 .where(i.entityType.eq(EntityType.BOARD).and(b.id.eq(boardId)))
                 .fetch()
                 .stream()
-                .map( filename -> {
-                    return filename == null ? null : s3ImageService.generateImageFile(
-                            EntityType.COSTUME, boardId, filename);
-                }).toList();
+                .map( filename -> filename == null ? null : s3ImageService.generateImageFile(EntityType.COSTUME, boardId, filename)).toList();
 
         return new BoardDetailResponse(
                 boardDetails.get(b.title),
                 boardDetails.get(u.id),
                 boardDetails.get(u.nickname),
-                userRepository.getUserProfile(boardDetails.get(u.costumeId)),
+                boardDetails.get(i.newFilename) == null ? null :s3ImageService.generateImageFile(EntityType.COSTUME, boardDetails.get(u.costumeId), boardDetails.get(i.newFilename)),
                 Objects.requireNonNull(boardDetails.get(b.boardType)).toString(),
                 boardDetails.get(TemplateUtils.timeFormater(b.createdAt)),
                 boardDetails.get(b.confirmedCommentId.isNotNull()),
