@@ -7,7 +7,7 @@ public record MyInformationResponse(
         String context,
         String link,
         String nickname,
-        BigDecimal point
-        //TODO: 후에 프로필 이미지 추가해주세요!
+        BigDecimal point,
+        String profile
 ) {
 }
