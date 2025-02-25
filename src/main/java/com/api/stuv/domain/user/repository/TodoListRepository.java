@@ -13,4 +13,9 @@ public interface TodoListRepository extends JpaRepository<TodoList, Long> {
 
     @Query("SELECT t FROM TodoList t WHERE t.userId = :userId")
     List<TodoList> getTodoListByUserId(Long userId);
+
+    @Query("SELECT t FROM TodoList t WHERE t.userId = :userId AND t.id = :todoId")
+    TodoList findTodoListByUserIdAndTodoId(Long userId, Long todoId);
+
+    TodoList todo(String todo);
 }

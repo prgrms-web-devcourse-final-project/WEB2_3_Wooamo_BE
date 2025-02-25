@@ -42,7 +42,14 @@ public class TodoService {
                 .toList();
 
         return todoListResponses;
+    }
 
+    public void deleteTodoList(Long todoId){
+        Long userId = tokenUtil.getUserId();
+
+        TodoList todolist = todoListRepository.findTodoListByUserIdAndTodoId(userId, todoId);
+
+        todoListRepository.delete(todolist);
     }
 
 }
