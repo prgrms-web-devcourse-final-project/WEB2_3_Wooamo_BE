@@ -3,7 +3,6 @@ package com.api.stuv.domain.party.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -21,14 +20,15 @@ public class QuestConfirm {
 
     private Long memberId;
 
-    private Boolean isConfirm;
-
     private LocalDate confirmDate;
 
-    @Builder
-    public QuestConfirm(Long memberId, Boolean isConfirm, LocalDate confirmDate) {
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ConfirmStatus confirmStatus;
+
+    public QuestConfirm(Long memberId, LocalDate confirmDate) {
         this.memberId = memberId;
-        this.isConfirm = isConfirm;
         this.confirmDate = confirmDate;
+        this.confirmStatus = ConfirmStatus.PENDING;
     }
 }

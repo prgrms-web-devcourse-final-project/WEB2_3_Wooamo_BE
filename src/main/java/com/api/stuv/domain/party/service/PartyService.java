@@ -1,7 +1,7 @@
 package com.api.stuv.domain.party.service;
 
 import com.api.stuv.domain.party.dto.response.PartyGroupResponse;
-import com.api.stuv.domain.party.repository.PartyGroupRepository;
+import com.api.stuv.domain.party.repository.party.PartyGroupRepository;
 import com.api.stuv.global.response.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;

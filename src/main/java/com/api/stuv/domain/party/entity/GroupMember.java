@@ -25,6 +25,6 @@ public class GroupMember {
     @Column(nullable = false)
     private QuestStatus questStatus;
 
-    @Column(precision = 10, scale = 0)
+    @Column(precision = 10)
     private BigDecimal bettingPoint;
 }

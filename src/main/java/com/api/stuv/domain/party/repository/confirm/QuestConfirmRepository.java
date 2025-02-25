@@ -1,4 +1,4 @@
-package com.api.stuv.domain.party.repository;
+package com.api.stuv.domain.party.repository.confirm;
 
 import com.api.stuv.domain.party.entity.QuestConfirm;
 import org.springframework.data.jpa.repository.JpaRepository;

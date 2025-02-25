@@ -29,7 +29,7 @@ public class PartyGroup extends BaseTimeEntity {
     private BigDecimal bettingPoint;
 
     @Column(nullable = false)
-    private Long usersCount;
+    private Long recruitCap;
 
     @Column(nullable = false)
     private LocalDate startDate;
@@ -41,14 +41,14 @@ public class PartyGroup extends BaseTimeEntity {
     @Column(nullable = false)
     private PartyStatus status;
 
-    public PartyGroup(String name, String context, BigDecimal bettingPoint, Long usersCount, LocalDate startDate, LocalDate endDate) {
+    public PartyGroup(String name, String context, BigDecimal bettingPoint, Long recruitCap, LocalDate startDate, LocalDate endDate, PartyStatus status) {
         this.isEvent = false;
         this.name = name;
         this.context = context;
         this.bettingPoint = bettingPoint;
-        this.usersCount = usersCount;
+        this.recruitCap = recruitCap;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.status = PartyStatus.PENDING;
+        this.status = status != null ? status : PartyStatus.PENDING;
     }
 }
