@@ -116,4 +116,13 @@ public class UserController {
         return  ResponseEntity.ok()
                 .body(ApiResponse.success(todoService.getTodoList()));
     }
+
+    @Operation(summary = "투두리스트 삭제 API", description = "오늘의 투두 리스트를 삭제합니다.")
+    @DeleteMapping("/todo/{todoId}")
+    private ResponseEntity<ApiResponse<Void>> deleteTodoList(@PathVariable("todoId") Long todoId) {
+        todoService.deleteTodoList(todoId);
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.success());
+    }
 }
