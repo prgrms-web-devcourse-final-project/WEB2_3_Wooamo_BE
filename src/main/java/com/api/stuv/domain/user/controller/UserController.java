@@ -1,9 +1,6 @@
 package com.api.stuv.domain.user.controller;
 
-import com.api.stuv.domain.user.dto.request.AddTodoRequest;
-import com.api.stuv.domain.user.dto.request.EmailCertificationRequest;
-import com.api.stuv.domain.user.dto.request.ModifyProfileRequest;
-import com.api.stuv.domain.user.dto.request.UserRequest;
+import com.api.stuv.domain.user.dto.request.*;
 import com.api.stuv.domain.user.dto.response.*;
 import com.api.stuv.domain.user.service.KakaoService;
 import com.api.stuv.domain.user.service.TodoService;
@@ -121,6 +118,15 @@ public class UserController {
     @DeleteMapping("/todo/{todoId}")
     private ResponseEntity<ApiResponse<Void>> deleteTodoList(@PathVariable("todoId") Long todoId) {
         todoService.deleteTodoList(todoId);
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.success());
+    }
+
+    @Operation(summary = "투두리스트 수정 API", description = "오늘의 투두 리스트를 수정합니다.")
+    @PutMapping("/todo/{todoId}")
+    private ResponseEntity<ApiResponse<Void>> ModifyTodoList(@PathVariable("todoId") Long todoId, @RequestBody @Valid ModifyTodoRequest modifyTodoRequest) {
+        todoService.modifyTodoList(todoId, modifyTodoRequest);
 
         return ResponseEntity.ok()
                 .body(ApiResponse.success());

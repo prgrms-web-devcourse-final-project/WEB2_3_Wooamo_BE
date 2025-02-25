@@ -1,5 +1,6 @@
 package com.api.stuv.domain.user.entity;
 
+import com.api.stuv.domain.user.dto.request.ModifyTodoRequest;
 import com.api.stuv.global.entity.BaseTimeEntity;
 import lombok.*;
 import jakarta.persistence.*;
@@ -27,5 +28,10 @@ public class TodoList extends BaseTimeEntity {
         this.userId = userId;
         this.todo = todo;
         this.isChecked = isChecked;
+    }
+
+    public void updateTodoList(ModifyTodoRequest modifyTodoRequest){
+        this.todo = modifyTodoRequest.todo();
+        this.isChecked = modifyTodoRequest.isChecked();
     }
 }
