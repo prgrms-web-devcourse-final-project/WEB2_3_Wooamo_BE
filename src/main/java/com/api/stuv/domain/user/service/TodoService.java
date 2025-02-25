@@ -83,8 +83,14 @@ public class TodoService {
 
     public void modifyTodoList(Long todoId, ModifyTodoRequest modifyTodoRequest){
         Long userId = tokenUtil.getUserId();
+        if(userId == null){
+            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
+        }
 
         TodoList todolist = todoListRepository.findTodoListByUserIdAndTodoId(userId, todoId);
+        if(todolist == null){
+            throw new NotFoundException(ErrorCode.TODO_NOT_FOUND);
+        }
         todolist.updateTodoList(modifyTodoRequest);
 
         todoListRepository.save(todolist);
