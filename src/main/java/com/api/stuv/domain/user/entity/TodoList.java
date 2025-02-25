@@ -19,6 +19,7 @@ public class TodoList extends BaseTimeEntity {
     @Column(nullable = false)
     private String todo;
 
+    @Column(nullable = false)
     private Boolean isChecked;
 
     @Builder
