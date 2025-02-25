@@ -1,4 +1,4 @@
-package com.api.stuv.domain.party.dto.response;
+package com.api.stuv.domain.admin.dto.response;
 
 import java.time.LocalDate;
 
