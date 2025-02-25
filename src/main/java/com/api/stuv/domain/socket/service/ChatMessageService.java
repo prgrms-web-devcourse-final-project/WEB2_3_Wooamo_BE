@@ -65,4 +65,10 @@ public class ChatMessageService {
                 .collect(Collectors.toList());
     }
 
+    // roomId에 해당하는 메시지들을 읽음 상태로 업데이트
+    @Transactional
+    public void markMessagesAsRead(String roomId, Long userId) {
+        chatMessageRepository.updateManyReadBy(roomId, userId);
+    }
+
 }
