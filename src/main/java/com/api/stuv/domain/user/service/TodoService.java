@@ -45,9 +45,14 @@ public class TodoService {
 
     public List<GetTodoListResponse> getTodoList(){
         Long userId = tokenUtil.getUserId();
-
+        if(userId == null){
+            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
+        }
 
         List<TodoList> todoList = todoListRepository.getTodoListByUserId(userId);
+        if(todoList == null){
+            throw new NotFoundException(ErrorCode.TODOLIST_NOT_FOUND);
+        }
 
         List<GetTodoListResponse> todoListResponses = todoListRepository.getTodoListByUserId(userId)
                 .stream()
