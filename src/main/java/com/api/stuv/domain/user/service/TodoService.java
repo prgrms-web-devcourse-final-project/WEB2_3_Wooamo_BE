@@ -36,10 +36,10 @@ public class TodoService {
 
         List<TodoList> todoList = todoListRepository.getTodoListByUserId(userId);
 
-        List<GetTodoListResponse> todoListResponses = new ArrayList<>();
-        for (TodoList todo : todoList) {
-            todoListResponses.add(new GetTodoListResponse(todo.getId(), todo.getTodo(), todo.getIsChecked()));
-        }
+        List<GetTodoListResponse> todoListResponses = todoListRepository.getTodoListByUserId(userId)
+                .stream()
+                .map(todo -> new GetTodoListResponse(todo.getId(), todo.getTodo(), todo.getIsChecked()))
+                .toList();
 
         return todoListResponses;
 
