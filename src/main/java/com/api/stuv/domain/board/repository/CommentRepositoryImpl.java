@@ -7,6 +7,7 @@ import com.api.stuv.domain.image.entity.EntityType;
 import com.api.stuv.domain.image.entity.QImageFile;
 import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.domain.user.entity.QUser;
+import com.api.stuv.domain.user.entity.QUserCostume;
 import com.api.stuv.global.response.PageResponse;
 import com.api.stuv.global.util.email.common.TemplateUtils;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -25,6 +26,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
     private final QBoard b = QBoard.board;
     private final QComment c = QComment.comment;
     private final QUser u = QUser.user;
+    private final QUserCostume uc = QUserCostume.userCostume;
     private final QImageFile i = QImageFile.imageFile;
 
     @Override
@@ -34,20 +36,21 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                 .select(c.id,
                         c.userId,
                         u.nickname,
-                        u.costumeId,
+                        uc.costumeId,
                         i.newFilename,
                         c.context,
                         TemplateUtils.timeFormater(c.createdAt),
                         c.id.eq(confirmedCommentId == null ? -1L : confirmedCommentId ))
-                .from(c).leftJoin(u).on(c.userId.eq(u.id))
-                .leftJoin(i).on(u.costumeId.eq(i.entityId).and(i.entityType.eq(EntityType.COSTUME)))
+                .from(c).join(u).on(c.userId.eq(u.id))
+                .leftJoin(uc).on(u.costumeId.eq(uc.id))
+                .leftJoin(i).on(uc.costumeId.eq(i.entityId).and(i.entityType.eq(EntityType.COSTUME)))
                 .where(c.boardId.eq(boardId))
                 .offset(pageable.getOffset()).limit(pageable.getPageSize()).fetch()
                 .stream().map( tuple -> new CommentResponse(
                         tuple.get(c.id),
                         tuple.get(c.userId),
                         tuple.get(u.nickname),
-                        tuple.get(i.newFilename) == null ? null : s3ImageService.generateImageFile(EntityType.COSTUME, tuple.get(u.costumeId), tuple.get(i.newFilename)),
+                        tuple.get(i.newFilename) == null ? null : s3ImageService.generateImageFile(EntityType.COSTUME, tuple.get(uc.costumeId), tuple.get(i.newFilename)),
                         tuple.get(c.context),
                         tuple.get(6, String.class),
                         tuple.get(7, Boolean.class)
