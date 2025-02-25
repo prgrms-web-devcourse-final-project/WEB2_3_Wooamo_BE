@@ -75,12 +75,6 @@ public class TodoService {
         todoListRepository.delete(todolist);
     }
 
-    @Scheduled(cron = "0 0 0 * * *")
-    public void deleteAllTodoLists(){
-        todoListRepository.deleteAll();
-        System.out.println("모든 TodoList가 삭제되었습니다.");
-    }
-
     public void modifyTodoList(Long todoId, ModifyTodoRequest modifyTodoRequest){
         Long userId = tokenUtil.getUserId();
         if(userId == null){
