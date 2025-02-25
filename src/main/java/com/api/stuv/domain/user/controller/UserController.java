@@ -1,14 +1,7 @@
 package com.api.stuv.domain.user.controller;
 
-import com.api.stuv.domain.auth.util.TokenUtil;
-import com.api.stuv.domain.user.dto.request.AddTodoRequest;
-import com.api.stuv.domain.user.dto.request.EmailCertificationRequest;
-import com.api.stuv.domain.user.dto.request.ModifyProfileRequest;
-import com.api.stuv.domain.user.dto.request.UserRequest;
-import com.api.stuv.domain.user.dto.response.AddTodoResponse;
-import com.api.stuv.domain.user.dto.response.ModifyProfileResponse;
-import com.api.stuv.domain.user.dto.response.MyInformationResponse;
-import com.api.stuv.domain.user.dto.response.UserInformationResponse;
+import com.api.stuv.domain.user.dto.request.*;
+import com.api.stuv.domain.user.dto.response.*;
 import com.api.stuv.domain.user.service.KakaoService;
 import com.api.stuv.domain.user.service.TodoService;
 import com.api.stuv.domain.user.service.UserService;
@@ -21,6 +14,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -109,5 +104,31 @@ public class UserController {
 
         return ResponseEntity.ok()
                 .body(ApiResponse.success(todoService.addTodoList(addTodoRequest)));
+    }
+
+    @Operation(summary = "투두리스트 조회 API", description = "오늘의 투두 리스트를 조회합니다.")
+    @GetMapping("/todo")
+    private ResponseEntity<ApiResponse<List<GetTodoListResponse>>> addTodoList(){
+
+        return  ResponseEntity.ok()
+                .body(ApiResponse.success(todoService.getTodoList()));
+    }
+
+    @Operation(summary = "투두리스트 삭제 API", description = "오늘의 투두 리스트를 삭제합니다.")
+    @DeleteMapping("/todo/{todoId}")
+    private ResponseEntity<ApiResponse<Void>> deleteTodoList(@PathVariable("todoId") Long todoId) {
+        todoService.deleteTodoList(todoId);
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.success());
+    }
+
+    @Operation(summary = "투두리스트 수정 API", description = "오늘의 투두 리스트를 수정합니다.")
+    @PutMapping("/todo/{todoId}")
+    private ResponseEntity<ApiResponse<Void>> ModifyTodoList(@PathVariable("todoId") Long todoId, @RequestBody @Valid ModifyTodoRequest modifyTodoRequest) {
+        todoService.modifyTodoList(todoId, modifyTodoRequest);
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.success());
     }
 }
