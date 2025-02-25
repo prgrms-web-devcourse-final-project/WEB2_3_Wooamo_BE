@@ -2,6 +2,7 @@ package com.api.stuv.domain.user.service;
 
 import com.api.stuv.domain.auth.util.TokenUtil;
 import com.api.stuv.domain.user.dto.request.AddTodoRequest;
+import com.api.stuv.domain.user.dto.request.ModifyTodoRequest;
 import com.api.stuv.domain.user.dto.response.AddTodoResponse;
 import com.api.stuv.domain.user.dto.response.GetTodoListResponse;
 import com.api.stuv.domain.user.entity.TodoList;
@@ -50,6 +51,15 @@ public class TodoService {
         TodoList todolist = todoListRepository.findTodoListByUserIdAndTodoId(userId, todoId);
 
         todoListRepository.delete(todolist);
+    }
+
+    public void modifyTodoList(Long todoId, ModifyTodoRequest modifyTodoRequest){
+        Long userId = tokenUtil.getUserId();
+
+        TodoList todolist = todoListRepository.findTodoListByUserIdAndTodoId(userId, todoId);
+        todolist.updateTodoList(modifyTodoRequest);
+
+        todoListRepository.save(todolist);
     }
 
 }
