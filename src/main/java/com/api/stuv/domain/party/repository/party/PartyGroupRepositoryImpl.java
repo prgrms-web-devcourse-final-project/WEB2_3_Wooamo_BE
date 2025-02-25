@@ -1,6 +1,7 @@
 package com.api.stuv.domain.party.repository.party;
 
-import com.api.stuv.domain.party.dto.response.AdminPartyGroupResponse;
+import com.api.stuv.domain.admin.dto.response.AdminPartyAuthDetailResponse;
+import com.api.stuv.domain.admin.dto.response.AdminPartyGroupResponse;
 import com.api.stuv.domain.party.dto.response.PartyGroupResponse;
 import com.api.stuv.domain.party.entity.PartyStatus;
 import com.api.stuv.domain.party.entity.QGroupMember;
@@ -103,6 +104,19 @@ public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
         return factory.select(pg.countDistinct())
                 .from(pg)
                 .join(gm).on(pg.id.eq(gm.groupId))
+                .fetchOne();
+    }
+
+    @Override
+    public AdminPartyAuthDetailResponse findPartyGroupById(Long partyId) {
+        return factory.select(Projections.constructor(AdminPartyAuthDetailResponse.class,
+                        pg.name,
+                        pg.context,
+                        pg.startDate,
+                        pg.endDate,
+                        Expressions.nullExpression(List.class)))
+                .from(pg)
+                .where(pg.id.eq(partyId))
                 .fetchOne();
     }
 }
