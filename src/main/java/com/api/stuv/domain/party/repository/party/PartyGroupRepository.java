@@ -1,4 +1,4 @@
-package com.api.stuv.domain.party.repository;
+package com.api.stuv.domain.party.repository.party;
 
 import com.api.stuv.domain.party.entity.PartyGroup;
 import org.springframework.data.jpa.repository.JpaRepository;

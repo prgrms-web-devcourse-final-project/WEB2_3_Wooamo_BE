@@ -10,7 +10,7 @@ import com.api.stuv.domain.image.repository.ImageFileRepository;
 import com.api.stuv.domain.image.service.ImageService;
 import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.domain.party.dto.response.AdminPartyGroupResponse;
-import com.api.stuv.domain.party.repository.PartyGroupRepository;
+import com.api.stuv.domain.party.repository.party.PartyGroupRepository;
 import com.api.stuv.domain.shop.entity.Costume;
 import com.api.stuv.domain.shop.repository.CostumeRepository;
 import com.api.stuv.global.response.PageResponse;

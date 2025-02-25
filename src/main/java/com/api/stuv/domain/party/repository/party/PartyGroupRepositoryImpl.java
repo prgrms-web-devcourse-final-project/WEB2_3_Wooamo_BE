@@ -1,10 +1,11 @@
-package com.api.stuv.domain.party.repository;
+package com.api.stuv.domain.party.repository.party;
 
 import com.api.stuv.domain.party.dto.response.AdminPartyGroupResponse;
 import com.api.stuv.domain.party.dto.response.PartyGroupResponse;
 import com.api.stuv.domain.party.entity.PartyStatus;
 import com.api.stuv.domain.party.entity.QGroupMember;
 import com.api.stuv.domain.party.entity.QPartyGroup;
+import com.api.stuv.domain.party.entity.QQuestConfirm;
 import com.api.stuv.global.response.PageResponse;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
@@ -26,6 +27,7 @@ public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
     private final JPAQueryFactory factory;
     private final QPartyGroup pg = QPartyGroup.partyGroup;
     private final QGroupMember gm = QGroupMember.groupMember;
+    private final QQuestConfirm qc = QQuestConfirm.questConfirm;
 
     @Override
     public PageResponse<PartyGroupResponse> findPendingGroupsByName(String name, Pageable pageable) {
@@ -33,7 +35,7 @@ public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
                 .select(Projections.constructor(PartyGroupResponse.class,
                         pg.id,
                         pg.name,
-                        pg.usersCount,
+                        pg.recruitCap,
                         gm.id.count(),
                         pg.startDate,
                         Expressions.nullExpression(LocalDate.class)))
@@ -42,7 +44,7 @@ public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
                 .where(pg.startDate.gt(LocalDate.now())
                         .and(name != null ? pg.name.contains(name) : null))
                 .orderBy(pg.startDate.desc())
-                .groupBy(pg.id, pg.name, pg.usersCount, pg.startDate);
+                .groupBy(pg.id, pg.name, pg.recruitCap, pg.startDate);
 
         return PageResponse.applyPage(query, pageable, countPendingGroupsByName(name));
     }
@@ -62,7 +64,7 @@ public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
         return factory.select(Projections.constructor(PartyGroupResponse.class,
                         pg.id,
                         pg.name,
-                        pg.usersCount,
+                        pg.recruitCap,
                         gm.id.count(),
                         Expressions.nullExpression(LocalDate.class),
                         pg.endDate))
@@ -72,7 +74,7 @@ public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
                         .and(pg.endDate.goe(LocalDate.now()))
                         .and(pg.id.eq(userId)))
                 .orderBy(pg.endDate.desc())
-                .groupBy(pg.id, pg.name, pg.usersCount, pg.endDate)
+                .groupBy(pg.id, pg.name, pg.recruitCap, pg.endDate)
                 .fetch();
     }
 
@@ -82,7 +84,7 @@ public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
                 .select(Projections.constructor(AdminPartyGroupResponse.class,
                         pg.id,
                         pg.name,
-                        pg.usersCount,
+                        pg.recruitCap,
                         gm.id.count(),
                         pg.startDate,
                         pg.endDate,
@@ -92,7 +94,7 @@ public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
                 .from(pg)
                 .join(gm).on(pg.id.eq(gm.groupId))
                 .orderBy(pg.createdAt.desc())
-                .groupBy(pg.id, pg.name, pg.usersCount, pg.startDate, pg.endDate, pg.status);
+                .groupBy(pg.id, pg.name, pg.recruitCap, pg.startDate, pg.endDate, pg.status);
 
         return PageResponse.applyPage(query, pageable, countAllPartyGroupsWithApproved());
     }

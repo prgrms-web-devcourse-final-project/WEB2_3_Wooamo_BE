@@ -1,4 +1,4 @@
-package com.api.stuv.domain.party.repository;
+package com.api.stuv.domain.party.repository.party;
 
 import com.api.stuv.domain.party.dto.response.AdminPartyGroupResponse;
 import com.api.stuv.domain.party.dto.response.PartyGroupResponse;

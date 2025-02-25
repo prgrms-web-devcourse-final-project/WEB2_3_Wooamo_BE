@@ -1,6 +1,7 @@
 package com.api.stuv.domain.party.repository;
 
 import com.api.stuv.domain.party.dto.response.PartyGroupResponse;
+import com.api.stuv.domain.party.repository.party.PartyGroupRepository;
 import com.api.stuv.domain.party.service.PartyService;
 import com.api.stuv.global.response.PageResponse;
 import com.querydsl.jpa.impl.JPAQuery;

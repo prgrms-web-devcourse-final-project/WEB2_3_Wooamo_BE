@@ -3,23 +3,15 @@ package com.api.stuv.domain.admin.service;
 import com.api.stuv.domain.party.dto.response.AdminPartyGroupResponse;
 import com.api.stuv.domain.party.entity.PartyGroup;
 import com.api.stuv.domain.party.entity.PartyStatus;
-import com.api.stuv.domain.party.repository.PartyGroupRepository;
+import com.api.stuv.domain.party.repository.party.PartyGroupRepository;
 import com.api.stuv.global.response.PageResponse;
-import jakarta.persistence.EntityManager;
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.*;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -49,7 +41,7 @@ public class AdminServiceTest {
         );
 
         List<AdminPartyGroupResponse> responseList = groups.stream()
-                .map(pg -> new AdminPartyGroupResponse(pg.getId(), pg.getName(), pg.getUsersCount(), 2L, pg.getStartDate(), pg.getEndDate(), pg.getStatus().getText()))
+                .map(pg -> new AdminPartyGroupResponse(pg.getId(), pg.getName(), pg.getRecruitCap(), 2L, pg.getStartDate(), pg.getEndDate(), pg.getStatus().getText()))
                 .toList();
 
         Page<AdminPartyGroupResponse> mockPage = new PageImpl<>(responseList, pageable, responseList.size());
