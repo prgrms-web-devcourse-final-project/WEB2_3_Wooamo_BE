@@ -9,7 +9,7 @@ public enum EntityType {
     BOARD("게시글","board"),
     EVENT("이벤트","event"),
     CONFIRM("인증","confirm"),
-    COSTUME("코스튬","costume/costume");
+    COSTUME("코스튬","costume");
 
     private final String text;
     private final String path;

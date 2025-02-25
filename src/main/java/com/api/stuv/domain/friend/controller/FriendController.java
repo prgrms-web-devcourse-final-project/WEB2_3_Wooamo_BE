@@ -25,10 +25,10 @@ public class FriendController {
 
     // TODO: 알람 기능 추가시 알람 생성 로직 추가
     @Operation(summary = "친구 요청 API", description = "특정 유저에게 친구 요청을 합니다.")
-    @PostMapping("/request/{friendId}")
-    public ResponseEntity<ApiResponse<FriendFollowResponse>> requestFriend(@PathVariable Long friendId) {
+    @PostMapping("/request/{receiverId}")
+    public ResponseEntity<ApiResponse<FriendFollowResponse>> requestFriend(@PathVariable Long receiverId) {
         return ResponseEntity.ok()
-                .body(ApiResponse.success(friendService.requestFriend(tokenUtil.getUserId(), friendId)));
+                .body(ApiResponse.success(friendService.requestFriend(tokenUtil.getUserId(), receiverId)));
     }
 
     @Operation(summary = "친구 수락 API", description = "특정 친구 요청을 수락 합니다.")

@@ -42,14 +42,13 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
                 s3ImageService.generateImageFile(EntityType.COSTUME, costumeDetails.get(i.id), costumeDetails.get(i.newFilename));
     }
 
-
-    //TODO: 후에 프로필 이미지 불러오기 추가해주세요!
     @Override
     public MyInformationResponse getUserByMyId(Long myId) {
         Tuple informationDetails = jpaQueryFactory
-                .select(u.id, u.context, u.blogLink, u.nickname, u.point)
+                .select(u.id, u.context, u.blogLink, u.nickname, u.point, i.newFilename)
                 .from(u)
-                .where(u.id.eq(myId))
+                .leftJoin(i).on(u.costumeId.eq(i.entityId).and(i.entityType.eq(EntityType.COSTUME)))
+                .where(u.id.eq(myId).and(u.costumeId.eq(i.entityId)))
                 .fetchOne();
 
         return new MyInformationResponse(
@@ -57,19 +56,24 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
                 informationDetails.get(u.context),
                 informationDetails.get(u.blogLink),
                 informationDetails.get(u.nickname),
-                informationDetails.get(u.point)
+                informationDetails.get(u.point),
+                s3ImageService.generateImageFile(
+                        EntityType.COSTUME,
+                        informationDetails.get(u.costumeId),
+                        informationDetails.get(i.newFilename))
         );
     }
 
   @Override
    public UserInformationResponse getUserInformation(Long userId, Long myId) {
        Tuple informationDetails = jpaQueryFactory
-               .select(u.id, u.context, u.blogLink, u.nickname, f.status)
+               .select(u.id, u.context, u.blogLink, u.nickname, f.status, u.costumeId, i.newFilename)
                .from(u)
                .leftJoin(f).on
                        (f.userId.eq(userId).and(f.friendId.eq(myId))
                        .or(f.friendId.eq(userId).and(f.userId.eq(myId))))
-               .where(u.id.eq(userId))
+               .leftJoin(i).on(u.costumeId.eq(i.entityId).and(i.entityType.eq(EntityType.COSTUME)))
+               .where(u.id.eq(userId).and(u.costumeId.eq(i.entityId)))
                .fetchOne();
 
        if(informationDetails == null) {
@@ -86,6 +90,11 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
                informationDetails.get(u.context),
                informationDetails.get(u.blogLink),
                informationDetails.get(u.nickname),
+               s3ImageService.generateImageFile(
+                       EntityType.COSTUME,
+                       informationDetails.get(u.costumeId),
+                       informationDetails.get(i.newFilename)
+               ),
                status
        );
     }
