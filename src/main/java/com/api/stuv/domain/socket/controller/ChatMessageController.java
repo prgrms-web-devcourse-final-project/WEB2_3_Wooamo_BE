@@ -37,4 +37,22 @@ public class ChatMessageController {
         }
     }
 
+    @MessageMapping("/chat/read")
+    public void updateReadBy(@Payload ReadMessageDto readMessageDto,
+                             @Header(value = "page", required = false) Integer page,
+                             @Header(value = "size", required = false) Integer size) {
+
+        int pageValue = (page != null) ? page : 0;
+        int sizeValue = (size != null) ? size : 10;
+
+        // 읽음 처리 업데이트
+        chatMessageService.markMessagesAsRead(readMessageDto.getRoomId(), readMessageDto.getUserId());
+
+        // 업데이트 후, 해당 채팅방의 전체 메시지 목록을 다시 가져옴
+        List<ChatMessageResponseDto> updatedMessages = chatMessageService.getMessagesByRoomIdPagination(readMessageDto.getRoomId(),pageValue,sizeValue);
+
+        // 모든 구독자에게 최신 메시지 목록을 전송하여 읽음 상태 갱신
+        messagingTemplate.convertAndSend("/topic/messages/" + readMessageDto.getRoomId(), updatedMessages);
+    }
+
 }

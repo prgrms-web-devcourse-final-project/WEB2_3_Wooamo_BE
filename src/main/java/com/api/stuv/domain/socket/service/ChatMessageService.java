@@ -24,7 +24,7 @@ public class ChatMessageService {
     private final ChatRoomRepository chatRoomRepository;
 
     public List<ChatMessageResponseDto> getMessagesByRoomIdPagination(String roomId, int page, int size) {
-        Pageable pageable = PageRequest.of(0, 10);
+        Pageable pageable = PageRequest.of(page, size);
         List<ChatMessageResponseDto> messages = chatMessageRepository.findByRoomIdOrderByCreatedAtDesc(roomId, pageable)
                 .getContent().stream()
                 .map(ChatMessageResponseDto::fromEntity)
