@@ -56,4 +56,13 @@ public class ChatMessageService {
         return savedMessage;
     }
 
+    // 특정 senderId가 포함된 채팅방의 roomId 목록 조회
+    public List<String> getRoomIdsBySenderId(Long senderId) {
+        List<ChatRoom> chatRooms = chatRoomRepository.findByMembersContaining(senderId);
+        return chatRooms.stream()
+                .map(ChatRoom::getRoomId)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
 }

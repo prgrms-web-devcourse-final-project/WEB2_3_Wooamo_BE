@@ -20,6 +20,11 @@ import java.util.List;
 public class ChatController {
     private final ChatMessageService chatMessageService;
 
+    @GetMapping("/rooms/{senderId}")
+    public List<String> getRoomsBySenderId(@PathVariable Long senderId) {
+        return chatMessageService.getRoomIdsBySenderId(senderId);
+    }
+
     @GetMapping("/rooms/{roomId}/messages")
     public ResponseEntity<List<ChatMessageResponseDto>> getMessagesByRoomIdPage(
             @PathVariable String roomId,
