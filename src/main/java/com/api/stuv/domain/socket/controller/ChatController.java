@@ -1,12 +1,8 @@
 package com.api.stuv.domain.socket.controller;
 
 import com.api.stuv.domain.socket.dto.ChatMessageResponseDto;
-import com.api.stuv.domain.socket.entity.ChatMessage;
 import com.api.stuv.domain.socket.service.ChatMessageService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
