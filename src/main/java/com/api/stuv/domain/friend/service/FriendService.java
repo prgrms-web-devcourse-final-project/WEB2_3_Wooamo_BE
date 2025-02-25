@@ -24,12 +24,12 @@ public class FriendService {
 
     // TODO: 알림 기능 추가시 알림 생성 로직 추가
     @Transactional
-    public FriendFollowResponse requestFriend(Long userId, Long friendId) {
-        if ( userRepository.isDuplicateIds(Arrays.asList(userId, friendId)) != 2 ) throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
+    public FriendFollowResponse requestFriend(Long userId, Long receiverId) {
+        if ( userRepository.isDuplicateIds(Arrays.asList(userId, receiverId)) != 2 ) throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
 
-        if (friendRepository.isFriendshipDuplicate(userId, friendId) > 0) throw new DuplicateException(ErrorCode.FRIEND_REQUEST_ALREADY_EXIST);
+        if (friendRepository.isFriendshipDuplicate(userId, receiverId) > 0) throw new DuplicateException(ErrorCode.FRIEND_REQUEST_ALREADY_EXIST);
 
-        return FriendFollowResponse.from(friendRepository.save(Friend.init(userId, friendId)));
+        return FriendFollowResponse.from(friendRepository.save(Friend.init(userId, receiverId)));
     }
 
     @Transactional
