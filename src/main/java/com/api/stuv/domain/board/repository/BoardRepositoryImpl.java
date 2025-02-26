@@ -48,7 +48,8 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
                         b.id.as("boardId"),
                         b.title,
                         b.boardType,
-                        b.confirmedCommentId,
+                        b.context,
+                        b.confirmedCommentId.isNotNull(),
                         TemplateUtils.timeFormater(b.createdAt),
                         imageSubQuery
                 )
@@ -62,7 +63,8 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
                         tuple.get(b.id.as("boardId")),
                         tuple.get(b.title),
                         tuple.get(b.boardType),
-                        Boolean.TRUE.equals(tuple.get(b.confirmedCommentId.isNotNull())),
+                        tuple.get(b.context),
+                        tuple.get(b.confirmedCommentId.isNotNull()),
                         tuple.get(TemplateUtils.timeFormater(b.createdAt)),
                         tuple.get(imageSubQuery) == null ? null : s3ImageService.generateImageFile(
                                 EntityType.BOARD, tuple.get(b.id),tuple.get(imageSubQuery))

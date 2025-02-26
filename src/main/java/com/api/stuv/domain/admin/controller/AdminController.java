@@ -1,8 +1,10 @@
 package com.api.stuv.domain.admin.controller;
 
-import com.api.stuv.domain.admin.dto.CostumeRequest;
+import com.api.stuv.domain.admin.dto.request.CostumeRequest;
+import com.api.stuv.domain.admin.dto.response.AdminPartyAuthDetailResponse;
+import com.api.stuv.domain.image.dto.ImageResponse;
 import com.api.stuv.domain.admin.service.AdminService;
-import com.api.stuv.domain.party.dto.response.AdminPartyGroupResponse;
+import com.api.stuv.domain.admin.dto.response.AdminPartyGroupResponse;
 import com.api.stuv.global.response.ApiResponse;
 import com.api.stuv.global.response.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,6 +17,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDate;
 
 @RestController
 @RequiredArgsConstructor
@@ -60,5 +64,24 @@ public class AdminController {
             @RequestParam(required = false, defaultValue = "10") int size
     ) {
         return ResponseEntity.ok().body(ApiResponse.success(adminService.getAllPartyGroupsWithApprovedStatus(PageRequest.of(page, size))));
+    }
+
+    @GetMapping(value = "/party/{partyId}")
+    @Operation(summary = "팟 인증 상세 조회 API", description = "팟 인증 상세를 조회합니다.")
+    public ResponseEntity<ApiResponse<AdminPartyAuthDetailResponse>> getPartyAuthDetailWithMembers (
+            @PathVariable Long partyId,
+            @RequestParam(required = false) LocalDate date
+            ) {
+        return ResponseEntity.ok().body(ApiResponse.success(adminService.getPartyAuthDetailWithMembers(partyId, date)));
+    }
+
+    @GetMapping(value = "/party/{partyId}/{memberId}")
+    @Operation(summary = "날짜별 회원 팟 인증 사진 조회 API", description = "날짜별 회원 팟 인증 사진을 조회합니다.")
+    public ResponseEntity<ApiResponse<ImageResponse>> getGroupMemberConfirmImageByDate (
+            @PathVariable Long partyId,
+            @PathVariable Long memberId,
+            @RequestParam LocalDate date
+    ) {
+        return ResponseEntity.ok().body(ApiResponse.success(adminService.getGroupMemberConfirmImageByDate(partyId, memberId, date)));
     }
 }

@@ -5,8 +5,11 @@ import com.querydsl.core.types.ExpressionException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.support.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.time.format.DateTimeParseException;
 
 @Slf4j
 @RestControllerAdvice
@@ -20,6 +23,32 @@ public class GlobalExceptionHandler {
                 .status(errorCode.getStatus())
                 .body(ApiResponse.error(errorCode.getMessage()));
     }
+
+    // 타입 변환 관련 예외
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
+        ErrorCode errorCode = ErrorCode.ARGUMENT_TYPE_MISMATCH;
+        String paramName = e.getMethodParameter().getParameterName();
+        Class<?> requiredTypeClass = e.getMethodParameter().getParameterType();
+        String requiredType = requiredTypeClass.getSimpleName();
+        String errorMessage = String.format("%s (파라미터명: %s, 요구 타입: %s)",
+                errorCode.getMessage(), paramName, requiredType);
+        log.error("[ERROR] methodArgumentTypeMismatchException - {}", e.getMessage());
+        return ResponseEntity
+                .status(errorCode.getStatus())
+                .body(ApiResponse.error(errorMessage));
+    }
+
+    // 날짜 변환 관련 예외
+    @ExceptionHandler(DateTimeParseException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDateTimeParseException(DateTimeParseException e) {
+        ErrorCode errorCode = ErrorCode.DATE_FORMAT_MISMATCH;
+        log.error("[ERROR] dateTimeParseException - {}", e.getMessage());
+        return ResponseEntity
+                .status(errorCode.getStatus())
+                .body(ApiResponse.error(errorCode.getMessage()));
+    }
+
 
     @ExceptionHandler(ExpressionException.class)
     protected ResponseEntity<ApiResponse<Void>> handleExpressionException(ExpressionException e) {
