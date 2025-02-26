@@ -27,9 +27,13 @@ public class FriendService {
     // TODO: 알림 기능 추가시 알림 생성 로직 추가
     @Transactional
     public FriendFollowResponse requestFriend(Long userId, Long receiverId) {
+        if ( userId.equals(receiverId) ) throw new BadRequestException(ErrorCode.FRIEND_REQUEST_SELF);
         if ( userRepository.isDuplicateIds(Arrays.asList(userId, receiverId)) != 2 ) throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
 
-        if (friendRepository.isFriendshipDuplicate(userId, receiverId) > 0) throw new DuplicateException(ErrorCode.FRIEND_REQUEST_ALREADY_EXIST);
+        FriendStatus status = friendRepository.isFriendshipDuplicate(userId, receiverId);
+        if ( status != null )
+            if (status.equals(FriendStatus.PENDING)) throw new DuplicateException(ErrorCode.FRIEND_REQUEST_ALREADY_EXIST);
+            else if (status.equals(FriendStatus.ACCEPTED)) throw new DuplicateException(ErrorCode.FRIEND_REQUEST_ALREADY_ACCEPTED);
 
         return FriendFollowResponse.from(friendRepository.save(Friend.init(userId, receiverId)));
     }
@@ -60,7 +64,7 @@ public class FriendService {
     @Transactional
     public void deleteFriend(Long userId, Long friendId) {
         Friend friend = friendRepository.findById(friendId).orElseThrow(() -> new NotFoundException(ErrorCode.FRIEND_NOT_FOUND));
-        if ( !friend.getStatus().equals(FriendStatus.ACCEPTED) ) throw new NotFoundException(ErrorCode.FRIEND_NOT_FOUND);
+        if ( friend.getStatus() == null ) throw new NotFoundException(ErrorCode.FRIEND_NOT_FOUND);
         if ( !(friend.getUserId().equals(userId) || friend.getFriendId().equals(userId)) ) throw new AccessDeniedException(ErrorCode.FRIEND_DELETE_NOT_AUTHORIZED);
         friendRepository.delete(friend);
     }
