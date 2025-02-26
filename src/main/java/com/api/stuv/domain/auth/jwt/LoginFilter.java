@@ -2,6 +2,7 @@ package com.api.stuv.domain.auth.jwt;
 
 import com.api.stuv.domain.auth.dto.CustomUserDetails;
 import com.api.stuv.domain.user.dto.request.LoginRequest;
+import com.api.stuv.global.exception.AccessDeniedException;
 import com.api.stuv.global.exception.BadRequestException;
 import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.response.ApiResponse;
@@ -41,11 +42,18 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         // 필터 경로를 "/api/user/login"으로 설정
         setFilterProcessesUrl("/api/user/login");
+
+
     }
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         try{
+            String requestMethod = request.getMethod();
+            if (!requestMethod.equals("POST")) {
+                throw new AccessDeniedException(ErrorCode.METHOD_NOT_ALLOWED);
+            }
+
             LoginRequest loginRequest = new ObjectMapper().readValue(request.getInputStream(), LoginRequest.class);
 
             String email = loginRequest.email();
