@@ -25,23 +25,16 @@ public class ChatMessageService {
     
     //메세지 불러오기
     public List<ChatMessageResponse> getMessagesByRoomIdPagination(String roomId, Pageable pageable) {
-
-        List<ChatMessageResponse> messages = chatMessageRepository.findByRoomIdOrderByCreatedAtDesc(roomId, pageable)
+        return chatMessageRepository.findByRoomIdOrderByCreatedAtDesc(roomId, pageable)
                 .getContent().stream()
                 .map(ChatMessageResponse::from)
                 .collect(Collectors.toList());
-
-        if (messages.isEmpty()) {
-            throw new NotFoundException(ErrorCode.CHAT_MESSAGE_NOT_FOUND);
-        }
-
-        return messages;
     }
 
     // 메시지 저장
     @Transactional
     public ChatMessage saveMessage(ChatMessageRequest request) {
-        ChatRoom chatRoom = chatRoomRepository.findByRoomId(request.roomId())
+        chatRoomRepository.findByRoomId(request.roomId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.CHAT_ROOM_NOT_FOUND));
 
         return chatMessageRepository.save(
