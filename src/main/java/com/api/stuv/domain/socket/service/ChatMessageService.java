@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,10 +26,16 @@ public class ChatMessageService {
     
     //메세지 불러오기
     public List<ChatMessageResponse> getMessagesByRoomIdPagination(String roomId, Pageable pageable) {
-        return chatMessageRepository.findByRoomIdOrderByCreatedAtDesc(roomId, pageable)
-                .getContent().stream()
+        List<ChatMessageResponse> messages = chatMessageRepository
+                .findByRoomIdOrderByCreatedAtDesc(roomId, pageable)
+                .getContent()
+                .stream()
                 .map(ChatMessageResponse::from)
                 .collect(Collectors.toList());
+
+        Collections.reverse(messages);
+
+        return messages;
     }
 
     // 메시지 저장

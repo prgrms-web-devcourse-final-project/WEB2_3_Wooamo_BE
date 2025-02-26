@@ -36,7 +36,6 @@ public class ChatController {
 
         return ResponseEntity.ok()
                 .body(ApiResponse.success(chatMessageService.getMessagesByRoomIdPagination(
-                roomId,
-                PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt")))));
+                roomId, PageRequest.of(page, size))));
     }
 }

@@ -120,7 +120,7 @@ public class ChatMessageController {
 
         List<ChatMessageResponse> updatedMessages = chatMessageService.getMessagesByRoomIdPagination(
                 readMessageRequest.roomId(),
-                PageRequest.of(pageValue, sizeValue, Sort.by(Sort.Direction.ASC, "createdAt")));
+        PageRequest.of(pageValue, sizeValue));
 
         messagingTemplate.convertAndSend("/topic/messages/" + readMessageRequest.roomId(), updatedMessages);
     }
