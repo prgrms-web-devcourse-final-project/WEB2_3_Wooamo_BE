@@ -2,6 +2,7 @@ package com.api.stuv.domain.admin.controller;
 
 import com.api.stuv.domain.admin.dto.request.CostumeRequest;
 import com.api.stuv.domain.admin.dto.response.AdminPartyAuthDetailResponse;
+import com.api.stuv.domain.image.dto.ImageResponse;
 import com.api.stuv.domain.admin.service.AdminService;
 import com.api.stuv.domain.admin.dto.response.AdminPartyGroupResponse;
 import com.api.stuv.global.response.ApiResponse;
@@ -72,5 +73,15 @@ public class AdminController {
             @RequestParam(required = false) LocalDate date
             ) {
         return ResponseEntity.ok().body(ApiResponse.success(adminService.getPartyAuthDetailWithMembers(partyId, date)));
+    }
+
+    @GetMapping(value = "/party/{partyId}/{memberId}")
+    @Operation(summary = "날짜별 회원 팟 인증 사진 조회 API", description = "날짜별 회원 팟 인증 사진을 조회합니다.")
+    public ResponseEntity<ApiResponse<ImageResponse>> getGroupMemberConfirmImageByDate (
+            @PathVariable Long partyId,
+            @PathVariable Long memberId,
+            @RequestParam LocalDate date
+    ) {
+        return ResponseEntity.ok().body(ApiResponse.success(adminService.getGroupMemberConfirmImageByDate(partyId, memberId, date)));
     }
 }
