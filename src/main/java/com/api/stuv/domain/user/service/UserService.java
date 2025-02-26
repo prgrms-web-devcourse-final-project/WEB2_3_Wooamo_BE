@@ -3,6 +3,7 @@ package com.api.stuv.domain.user.service;
 import com.api.stuv.domain.auth.util.TokenUtil;
 import com.api.stuv.domain.user.dto.request.*;
 import com.api.stuv.domain.user.dto.response.ModifyProfileResponse;
+import com.api.stuv.domain.user.dto.response.UserBoardListResponse;
 import com.api.stuv.domain.user.dto.response.UserInformationResponse;
 import com.api.stuv.domain.user.dto.response.MyInformationResponse;
 import com.api.stuv.domain.user.entity.User;
@@ -24,6 +25,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.List;
 
 
 @Service
@@ -143,5 +145,14 @@ public class UserService {
 
         ModifyProfileResponse modifyProfileResponse = new ModifyProfileResponse(userId);
         return modifyProfileResponse;
+    }
+
+    public List<UserBoardListResponse> getUserBoardList(){
+        Long userId = tokenUtil.getUserId();
+
+        List<UserBoardListResponse> userBoardList = userRepository.getUserBoardList(userId);
+
+        return userBoardList;
+
     }
 }
