@@ -32,6 +32,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Objects;
 
 
 @Service
@@ -170,19 +171,12 @@ public class UserService {
 
         List<LocalTime> studyTimeList = studyTimeRepository.findStudyTimeByUserIdAndStudyDate(userId);
 
-        for(LocalTime studyTime : studyTimeList){
-            if(studyTime == null){
-                totalTime = 0L;
-                break;
-            }
-            totalTime += studyTime.toSecondOfDay();
-        }
+        totalTime = studyTimeList.stream()
+                .filter(Objects::nonNull)
+                .mapToLong(LocalTime::toSecondOfDay)
+                .sum();
 
-        if(totalTime > 10800L){
-            userQuestState = new UserQuestStateResponse("보상 받기");
-        } else {
-            userQuestState = new UserQuestStateResponse("진행중");
-        }
+        userQuestState = new UserQuestStateResponse(totalTime > 10800L ? "보상 받기" : "진행중");
 
         return userQuestState;
     }
