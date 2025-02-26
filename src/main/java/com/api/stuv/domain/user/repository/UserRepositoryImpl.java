@@ -89,20 +89,25 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
 
     @Override
     public List<UserBoardListResponse> getUserBoardList(Long userId) {
-        List<UserBoardListResponse> query = jpaQueryFactory
-                .select(b.id.as("boardId"), b.title, b.context, b.boardType, b.createdAt, i.newFilename)
-                .from(b).leftJoin(i)
-                .on(b.id.eq(i.entityId).and(i.entityType.eq(EntityType.BOARD)))
+        List<Tuple> results = jpaQueryFactory
+                .select(b.id, b.title, b.context, b.boardType, b.createdAt, i.newFilename)
+                .from(b)
+                .leftJoin(i).on(b.id.eq(i.entityId).and(i.entityType.eq(EntityType.BOARD)))
                 .where(b.userId.eq(userId))
-                .fetch()
-                .stream()
+                .fetch();
+
+        List<UserBoardListResponse> query = results.stream()
                 .map(tuple -> new UserBoardListResponse(
-                        tuple.get(b.id.as("boardId")),
+                        tuple.get(b.id),
                         tuple.get(b.title),
                         tuple.get(b.context),
                         tuple.get(b.boardType),
                         tuple.get(TemplateUtils.timeFormater(b.createdAt)),
-                        tuple.get(i.newFilename)
+                        s3ImageService.generateImageFile(
+                                EntityType.BOARD,
+                                tuple.get(b.id),
+                                tuple.get(i.newFilename)
+                        )
                 ))
                 .toList();
 
