@@ -132,13 +132,6 @@ public class UserController {
                 .body(ApiResponse.success());
     }
 
-    @Operation(summary = "개인 퀘스트 진행여부 조회 API", description = "개인의 일일 퀘스트 진행 상황을 조회합니다")
-    @GetMapping("/quest")
-    private  ResponseEntity<ApiResponse<UserQuestStateResponse>> userQuestState(){
-        return ResponseEntity.ok()
-                .body(ApiResponse.success(userService.userQuestState()));
-    }
-
     @Operation(summary = "본인 작성 게시글 조회 API", description = "본인이 작성했던 글 목록을 조회하는 API 입니다.")
     @GetMapping("/board")
     private ResponseEntity<ApiResponse<List<UserBoardListResponse>>> getUserBoardList() {
@@ -153,4 +146,5 @@ public class UserController {
         return ResponseEntity.ok()
                 .body(ApiResponse.success(userService.userQuestState()));
     }
+
 }
