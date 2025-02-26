@@ -85,7 +85,7 @@ public class BoardService {
         List<ImageFile> imageFiles = imageFileRepository.findAllByEntityIdAndEntityType(boardId, EntityType.BOARD);
         if (imageFiles!=null && !imageFiles.isEmpty()) {
             for(ImageFile imageFile : imageFiles) {
-//                s3ImageService.deleteImageFile(EntityType.BOARD, boardId, imageFile.getNewFilename());
+                s3ImageService.deleteImageFile(EntityType.BOARD, boardId, imageFile.getNewFilename());
                 imageFileRepository.deleteByNewFilename(imageFile.getNewFilename());
             }
         }
@@ -106,7 +106,7 @@ public class BoardService {
     @Transactional(readOnly = true)
     public PageResponse<CommentResponse> getCommentList(Long boardId, Pageable pageable) {
         if ( !boardRepository.existsById(boardId) ) throw new NotFoundException(ErrorCode.BOARD_NOT_FOUND);
-        return commentRepository.getCommentList(boardId, pageable, "http://localhost:8080/api/v1/costume/");
+        return commentRepository.getCommentList(boardId, pageable);
     }
 
     // TODO: 이후 알림 기능 추가

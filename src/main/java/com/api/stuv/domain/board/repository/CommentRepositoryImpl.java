@@ -30,7 +30,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
     private final QImageFile i = QImageFile.imageFile;
 
     @Override
-    public PageResponse<CommentResponse> getCommentList(Long boardId, Pageable pageable, String imageUrl) {
+    public PageResponse<CommentResponse> getCommentList(Long boardId, Pageable pageable) {
         Long confirmedCommentId = jpaQueryFactory.select(b.confirmedCommentId).from(b).where(b.id.eq(boardId)).fetchOne();
         List<CommentResponse> response = jpaQueryFactory
                 .select(c.id,
