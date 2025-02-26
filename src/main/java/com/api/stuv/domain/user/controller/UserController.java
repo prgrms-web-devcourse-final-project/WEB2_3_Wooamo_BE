@@ -146,4 +146,11 @@ public class UserController {
         return ResponseEntity.ok()
                 .body(ApiResponse.success(userService.getUserBoardList()));
     }
+
+    @Operation(summary = "개인 퀘스트 진행여부 조회 API", description = "개인의 일일 퀘스트 진행 상황을 조회합니다")
+    @GetMapping("/quest")
+    private  ResponseEntity<ApiResponse<UserQuestStateResponse>> userQuestState(){
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(userService.userQuestState()));
+    }
 }
