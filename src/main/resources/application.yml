@@ -1,3 +1,7 @@
+info:
+  app:
+    name: STUV
+    company: 우리들은 아무것도 모른다
 frontend:
   server: ${FE_BASE:http://localhost:3000}
 spring:
@@ -23,6 +27,23 @@ server:
   servlet:
     session:
       timeout: 0
+management:
+  server:
+    port: 8080
+  info:
+    java:
+      enabled: true
+    os:
+      enabled: true
+    env:
+      enabled: true
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: "health, info, loggers, metrics, prometheus"
 ---
 spring:
   config:
