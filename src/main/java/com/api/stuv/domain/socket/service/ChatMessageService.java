@@ -1,19 +1,19 @@
 package com.api.stuv.domain.socket.service;
 
-import com.api.stuv.domain.socket.dto.ChatMessageRequestDto;
-import com.api.stuv.domain.socket.dto.ChatMessageResponseDto;
+import com.api.stuv.domain.socket.dto.ChatMessageRequest;
+import com.api.stuv.domain.socket.dto.ChatMessageResponse;
 import com.api.stuv.domain.socket.entity.ChatMessage;
 import com.api.stuv.domain.socket.entity.ChatRoom;
 import com.api.stuv.domain.socket.repository.ChatMessageRepository;
 import com.api.stuv.domain.socket.repository.ChatRoomRepository;
+import com.api.stuv.global.exception.ErrorCode;
+import com.api.stuv.global.exception.NotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,47 +22,52 @@ import java.util.stream.Collectors;
 public class ChatMessageService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
+    
+    //메세지 불러오기
+    public List<ChatMessageResponse> getMessagesByRoomIdPagination(String roomId, Pageable pageable) {
 
-    public List<ChatMessageResponseDto> getMessagesByRoomIdPagination(String roomId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        List<ChatMessageResponseDto> messages = chatMessageRepository.findByRoomIdOrderByCreatedAtDesc(roomId, pageable)
+        List<ChatMessageResponse> messages = chatMessageRepository.findByRoomIdOrderByCreatedAtDesc(roomId, pageable)
                 .getContent().stream()
-                .map(ChatMessageResponseDto::fromEntity)
+                .map(ChatMessageResponse::from)
                 .collect(Collectors.toList());
 
-        Collections.reverse(messages);
+        if (messages.isEmpty()) {
+            throw new NotFoundException(ErrorCode.CHAT_MESSAGE_NOT_FOUND);
+        }
 
         return messages;
     }
 
     // 메시지 저장
     @Transactional
-    public ChatMessage saveMessage(ChatMessageRequestDto requestDto) {
-        ChatRoom chatRoom = chatRoomRepository.findByRoomId(requestDto.getRoomId());
-        if (chatRoom == null) {
-            throw new IllegalArgumentException("채팅방을 찾을 수 없습니다: " + requestDto.getRoomId());
-        }
+    public ChatMessage saveMessage(ChatMessageRequest request) {
+        ChatRoom chatRoom = chatRoomRepository.findByRoomId(request.roomId())
+                .orElseThrow(() -> new NotFoundException(ErrorCode.CHAT_ROOM_NOT_FOUND));
 
-        ChatMessage savedMessage = chatMessageRepository.save(
+        return chatMessageRepository.save(
                 ChatMessage.builder()
-                        .roomId(requestDto.getRoomId())
-                        .senderId(requestDto.getSenderId())
-                        .message(requestDto.getMessage())
-                        .readBy(requestDto.getReadBy())
+                        .roomId(request.roomId())
+                        .senderId(request.senderId())
+                        .message(request.message())
+                        .readBy(request.readBy())
                         .createdAt(LocalDateTime.now())
                         .build()
         );
-
-        return savedMessage;
     }
 
     // 특정 senderId가 포함된 채팅방의 roomId 목록 조회
     public List<String> getRoomIdsBySenderId(Long senderId) {
-        List<ChatRoom> chatRooms = chatRoomRepository.findByMembersContaining(senderId);
-        return chatRooms.stream()
+        List<String> roomIds = chatRoomRepository.findByMembersContaining(senderId)
+                .stream()
                 .map(ChatRoom::getRoomId)
                 .distinct()
                 .collect(Collectors.toList());
+
+        if (roomIds.isEmpty()) {
+            throw new NotFoundException(ErrorCode.CHAT_ROOM_NOT_FOUND);
+        }
+
+        return roomIds;
     }
 
     // roomId에 해당하는 메시지들을 읽음 상태로 업데이트

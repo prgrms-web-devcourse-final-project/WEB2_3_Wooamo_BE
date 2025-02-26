@@ -1,19 +1,25 @@
 package com.api.stuv.domain.socket.controller;
 
-import com.api.stuv.domain.socket.dto.ChatMessageRequestDto;
-import com.api.stuv.domain.socket.dto.ChatMessageResponseDto;
-import com.api.stuv.domain.socket.dto.ReadMessageDto;
+
+import com.api.stuv.domain.socket.dto.ChatMessageResponse;
+import com.api.stuv.domain.socket.dto.ChatMessageRequest;
+import com.api.stuv.domain.socket.dto.ReadMessageResponse;
+import com.api.stuv.domain.socket.dto.ReadMessageRequest;
+
 import com.api.stuv.domain.socket.entity.ChatMessage;
 import com.api.stuv.domain.socket.service.ChatMessageService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,21 +27,19 @@ import java.util.concurrent.ConcurrentMap;
 
 @Controller
 @RequiredArgsConstructor
+@Tag(name = "ChatMessage", description = "메세지 관련 WebSocket API")
 public class ChatMessageController {
     private final ChatMessageService chatMessageService;
     private final SimpMessagingTemplate messagingTemplate;
     private static final Logger logger = LoggerFactory.getLogger(ChatMessageController.class);
-
-    // roomId 방에 접속한 사용자 ID 저장
     private final ConcurrentMap<String, List<Long>> roomSessions = new ConcurrentHashMap<>();
 
-    // 사용자가 방에 들어올 때 등록
+    @Operation(summary = "채팅방 입장", description = "사용자가 채팅방에 입장할 때 등록합니다.")
     @MessageMapping("/chat/join")
-    public void addUserToRoom(@Payload ReadMessageDto readMessageDto) {
-        String roomId = readMessageDto.getRoomId();
-        Long userId = readMessageDto.getUserId();
+    public void addUserToRoom(@Payload ReadMessageRequest  readMessageRequest) {
+        String roomId = readMessageRequest.roomId();
+        Long userId = readMessageRequest.userId();
 
-        // 사용자가 다른 방에 참여 중이면 해당 방에서 삭제
         roomSessions.forEach((rooms, users) -> {
             if (!rooms.equals(roomId) && users.contains(userId)) {
                 users.remove(userId);
@@ -55,15 +59,14 @@ public class ChatMessageController {
         }
         logger.info("현재 채팅방 사용자: {}", roomSessions);
 
-        // 사용자가 입장하면 해당 방의 모든 메시지를 읽음 처리
         chatMessageService.markMessagesAsRead(roomId, userId);
     }
 
-    // 사용자가 방에서 나갈 때 삭제
+    @Operation(summary = "채팅방 퇴장", description = "사용자가 채팅방에서 나갈 때 삭제합니다.")
     @MessageMapping("/chat/leave")
-    public void removeUserFromRoom(@Payload ReadMessageDto readMessageDto) {
-        String roomId = readMessageDto.getRoomId();
-        Long userId = readMessageDto.getUserId();
+    public void removeUserFromRoom(@Payload ReadMessageRequest  readMessageRequest) {
+        String roomId = readMessageRequest.roomId();
+        Long userId = readMessageRequest.userId();
 
         List<Long> users = roomSessions.get(roomId);
         if (users != null) {
@@ -77,40 +80,49 @@ public class ChatMessageController {
         logger.info("현재 채팅방 사용자: {}", roomSessions);
     }
 
+    @Operation(summary = "메시지 전송", description = "채팅방에 메시지를 전송합니다.")
     @MessageMapping("/chat/send")
-    public void sendMessage(@Payload ChatMessageRequestDto message) {
-        if (message.getRoomId() != null) { // roomId를 기준으로 메시지를 전송
-            logger.info("메시지 전송 [{} -> {}]: {}", message.getSenderId(), message.getRoomId(), message.getMessage());
+    public void sendMessage(@Payload ChatMessageRequest message) {
+        if (message.roomId() != null) { // roomId를 기준으로 메시지를 전송
+            logger.info("메시지 전송 [{} -> {}]: {}", message.senderId(), message.roomId(), message.message());
 
             // 현재 방에 있는 모든 사용자 가져오기
-            List<Long> usersInRoom = roomSessions.getOrDefault(message.getRoomId(), Collections.emptyList());
-            message.setReadBy(new ArrayList<>(new HashSet<>(usersInRoom)));
-            ChatMessage savedMessage = chatMessageService.saveMessage(message);
+            List<Long> usersInRoom = roomSessions.getOrDefault(message.roomId(), Collections.emptyList());
+            List<Long> readByList = new ArrayList<>(new HashSet<>(usersInRoom));
+
+            ChatMessage savedMessage = chatMessageService.saveMessage(
+                    new ChatMessageRequest(
+                            message.roomId(),
+                            message.senderId(),
+                            message.message(),
+                            readByList
+                    )
+            );
 
             // TODO: 저장 후 전체 메시지 목록을 조회하여 브로드캐스트 (읽음 상태도 포함)
-//            List<ChatMessage> messages = chatMessageService.findByRoomIdOrderByCreatedAtAsc(message.getRoomId());
+//          List<ChatMessage> messages = chatMessageService.findByRoomIdOrderByCreatedAtAsc(message.roomId());
 
             // 저장된 메시지를 채팅방 구독자에게 전송
-            messagingTemplate.convertAndSend("/topic/messages/" + message.getRoomId(), savedMessage);
+            messagingTemplate.convertAndSend("/topic/messages/" + message.roomId(), savedMessage);
         }
     }
 
+    @Operation(summary = "읽음 상태 업데이트", description = "채팅방의 메시지를 읽음 처리로 변경합니다.")
     @MessageMapping("/chat/read")
-    public void updateReadBy(@Payload ReadMessageDto readMessageDto,
+    public void updateReadBy(@Payload ReadMessageRequest readMessageRequest,
                              @Header(value = "page", required = false) Integer page,
                              @Header(value = "size", required = false) Integer size) {
 
         int pageValue = (page != null) ? page : 0;
         int sizeValue = (size != null) ? size : 10;
 
-        // 읽음 처리 업데이트
-        chatMessageService.markMessagesAsRead(readMessageDto.getRoomId(), readMessageDto.getUserId());
+        chatMessageService.markMessagesAsRead(readMessageRequest.roomId(), readMessageRequest.userId());
 
-        // 업데이트 후, 해당 채팅방의 전체 메시지 목록을 다시 가져옴
-        List<ChatMessageResponseDto> updatedMessages = chatMessageService.getMessagesByRoomIdPagination(readMessageDto.getRoomId(),pageValue,sizeValue);
+        List<ChatMessageResponse> updatedMessages = chatMessageService.getMessagesByRoomIdPagination(
+                readMessageRequest.roomId(),
+                PageRequest.of(pageValue, sizeValue, Sort.by(Sort.Direction.ASC, "createdAt")));
 
-        // 모든 구독자에게 최신 메시지 목록을 전송하여 읽음 상태 갱신
-        messagingTemplate.convertAndSend("/topic/messages/" + readMessageDto.getRoomId(), updatedMessages);
+        messagingTemplate.convertAndSend("/topic/messages/" + readMessageRequest.roomId(), updatedMessages);
     }
 
 }
