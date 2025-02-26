@@ -1,6 +1,6 @@
 services:
   springboot:
-    image: "stuv-app:latest"
+    image: "stuv-app"
     container_name: stuv-app
     restart: always
     env_file:
