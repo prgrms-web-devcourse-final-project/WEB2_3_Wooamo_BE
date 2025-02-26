@@ -29,7 +29,7 @@ public class QuestConfirmRepositoryImpl implements QuestConfirmRepositoryCustom 
                         .and(i.entityType.eq(EntityType.CONFIRM)))
                 .where(qc.memberId.eq(memberId)
                         .and(qc.confirmDate.eq(date)))
-                .fetchOne();
+                .fetchFirst();
         if (result == null) throw new NotFoundException(ErrorCode.CONFIRM_IMAGE_NOT_FOUND);
         return new ImageResponse(s3ImageService.generateImageFile(EntityType.CONFIRM, result.get(qc.memberId), result.get(i.newFilename)));
     }
