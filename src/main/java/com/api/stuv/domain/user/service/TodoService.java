@@ -7,7 +7,11 @@ import com.api.stuv.domain.user.dto.response.AddTodoResponse;
 import com.api.stuv.domain.user.dto.response.GetTodoListResponse;
 import com.api.stuv.domain.user.entity.TodoList;
 import com.api.stuv.domain.user.repository.TodoListRepository;
+import com.api.stuv.global.exception.BadRequestException;
+import com.api.stuv.global.exception.ErrorCode;
+import com.api.stuv.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,10 +26,17 @@ public class TodoService {
     public AddTodoResponse addTodoList(AddTodoRequest addTodoRequest){
         Long userId = tokenUtil.getUserId();
 
+        if(userId == null){
+            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
+        }
+
         TodoList todoList = addTodoRequest.from(addTodoRequest, userId);
         todoListRepository.save(todoList);
 
         Long todoId = todoList.getId();
+        if(todoId == null){
+            throw new BadRequestException(ErrorCode.TODO_SAVE_FAILED);
+        }
 
         AddTodoResponse addTodoResponse = new AddTodoResponse(todoId);
 
@@ -34,8 +45,14 @@ public class TodoService {
 
     public List<GetTodoListResponse> getTodoList(){
         Long userId = tokenUtil.getUserId();
+        if(userId == null){
+            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
+        }
 
         List<TodoList> todoList = todoListRepository.getTodoListByUserId(userId);
+        if(todoList == null){
+            throw new NotFoundException(ErrorCode.TODOLIST_NOT_FOUND);
+        }
 
         List<GetTodoListResponse> todoListResponses = todoListRepository.getTodoListByUserId(userId)
                 .stream()
@@ -47,16 +64,27 @@ public class TodoService {
 
     public void deleteTodoList(Long todoId){
         Long userId = tokenUtil.getUserId();
+        if(userId == null){
+            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
+        }
 
         TodoList todolist = todoListRepository.findTodoListByUserIdAndTodoId(userId, todoId);
-
+        if(todolist == null){
+            throw new NotFoundException(ErrorCode.TODO_NOT_FOUND);
+        }
         todoListRepository.delete(todolist);
     }
 
     public void modifyTodoList(Long todoId, ModifyTodoRequest modifyTodoRequest){
         Long userId = tokenUtil.getUserId();
+        if(userId == null){
+            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
+        }
 
         TodoList todolist = todoListRepository.findTodoListByUserIdAndTodoId(userId, todoId);
+        if(todolist == null){
+            throw new NotFoundException(ErrorCode.TODO_NOT_FOUND);
+        }
         todolist.updateTodoList(modifyTodoRequest);
 
         todoListRepository.save(todolist);
