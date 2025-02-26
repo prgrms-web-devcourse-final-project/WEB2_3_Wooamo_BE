@@ -6,7 +6,7 @@ public record UserBoardListResponse(
         Long boardId,
         String title,
         String context,
-        String boardtype,
+        String boardType,
         String createAt,
         String image
 ) {
