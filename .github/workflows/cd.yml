@@ -44,9 +44,10 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      - name: Dockerfile 사용하여 이미지 빌드&push
+      - name: Docker-compose 사용하여 이미지 빌드&push
         run: |
-          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/stuv-app:latest .
+          docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+          docker-compose -f docker-compose.yml build
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/stuv-app:latest
 
   deploy:
@@ -64,10 +65,9 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           envs: ENV_VARS
           script: |
-            sudo docker-compose stop
-            sudo docker-compose rm -f
-            sudo docker rmi ${{ secrets.DOCKER_HUB_USERNAME }}/stuv-app:latest
             cd /home/ubuntu/WEB2_3_Wooamo_BE
+            sudo docker compose down
+            sudo docker compose rm -f
+            sudo docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/stuv-app
             echo "$ENV_VARS" > src/main/resources/.env
-            sudo docker-compose pull
-            sudo docker-compose --env-file ./src/main/resources/.env up -d
+            sudo docker compose --env-file ./src/main/resources/.env up -d
