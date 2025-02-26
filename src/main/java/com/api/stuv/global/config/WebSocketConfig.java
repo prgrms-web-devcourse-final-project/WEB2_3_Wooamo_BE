@@ -18,8 +18,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/queue");  // 1대1 메시지 전달 경로
-        registry.setApplicationDestinationPrefixes("/app");  // 클라이언트가 메시지 보낼 경로
-        registry.setUserDestinationPrefix("/user"); // 특정 사용자에게 메시지 전송을 위한 접두사
+        registry.setApplicationDestinationPrefixes("/app");
+        registry.enableSimpleBroker("/topic");
     }
 }

@@ -73,7 +73,7 @@ public class BoardService {
             s3ImageService.deleteImageFile(EntityType.BOARD, boardId, fileName);
             imageFileRepository.deleteByNewFilename(fileName);
         }
-        for (MultipartFile file : files) imageService.handleImage(boardId, file, EntityType.BOARD);
+        if (files != null && !files.isEmpty()) for (MultipartFile file : files) imageService.handleImage(boardId, file, EntityType.BOARD);
         return Map.of("boardId", boardId);
     }
 
@@ -85,7 +85,7 @@ public class BoardService {
         List<ImageFile> imageFiles = imageFileRepository.findAllByEntityIdAndEntityType(boardId, EntityType.BOARD);
         if (imageFiles!=null && !imageFiles.isEmpty()) {
             for(ImageFile imageFile : imageFiles) {
-                s3ImageService.deleteImageFile(EntityType.BOARD, boardId, imageFile.getNewFilename());
+//                s3ImageService.deleteImageFile(EntityType.BOARD, boardId, imageFile.getNewFilename());
                 imageFileRepository.deleteByNewFilename(imageFile.getNewFilename());
             }
         }
@@ -113,7 +113,7 @@ public class BoardService {
     @Transactional
     public void createComment(Long userId, Long boardId, String content) {
         if (!boardRepository.existsById(boardId)) throw new NotFoundException(ErrorCode.BOARD_NOT_FOUND);
-        commentRepository.save(Comment.create(userId, boardId, content));
+        commentRepository.save(Comment.create(boardId, userId, content));
     }
 
     // TODO: 이후 알림 기능 추가

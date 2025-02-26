@@ -47,7 +47,8 @@ public enum ErrorCode {
     FRIEND_REQUEST_ALREADY_EXIST(400, -4003, "이미 친구 요청을 보냈습니다."),
     FRIEND_REQUEST_NOT_AUTHORIZED(403, -4004, "해당 친구 요청에 대한 수락 권한이 없습니다."),
     FRIEND_DELETE_NOT_AUTHORIZED(403, -4006, "해당 친구 삭제 권한이 없습니다."),
-    FRIEND_REQUEST_ALREADY_ACCEPTED(400, -4005, "이미 친구 요청을 수락했습니다."),
+    FRIEND_REQUEST_ALREADY_ACCEPTED(400, -4005, "해당 유저와는 이미 친구 상태입니다."),
+    FRIEND_REQUEST_SELF(400, -4007, "자기 자신에게 친구 요청을 보낼 수 없습니다."),
 
     // BOARD
     BOARD_NOT_FOUND(404, -5000, "해당 게시글을 찾을 수 없습니다."),
@@ -71,6 +72,9 @@ public enum ErrorCode {
     TODOLIST_NOT_FOUND(409, -9000, "TODOLIST가 없습니다."),
     TODO_NOT_FOUND(404, -900, "해당 TODO를 찾을 수 없습니다."),
     TODO_SAVE_FAILED(400, -9002, "TODO 저장에 실패했습니다."),
+
+    // CHAT SOCKET
+    CHAT_ROOM_NOT_FOUND(404, -10000, "채팅방을 찾을 수 없습니다."),
 
     // PARTY
     PARTY_NOT_FOUND(404, -9000, "해당 팟을 팢을 수 없습니다."),

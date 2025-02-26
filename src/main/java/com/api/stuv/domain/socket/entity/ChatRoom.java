@@ -1,26 +1,25 @@
 package com.api.stuv.domain.socket.entity;
 
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+
 import jakarta.persistence.PrePersist;
-import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 @Builder
-@Document(collection = "chat_message")
-public class ChatMessage {
+@Document(collection = "chat_room") // MongoDB 컬렉션 이름 지정
+public class ChatRoom {
 
     @Id
     private String id;
@@ -28,13 +27,11 @@ public class ChatMessage {
     @Field("room_id")
     private String roomId;
 
-    @Field("sender_id")
-    private Long senderId;
+    @Field("room_type")
+    private String roomType;
 
-    private String message;
-
-    @Field("read_by")
-    private List<Long> readBy = new ArrayList<>();
+    @Field("members")
+    private List<Long> members;
 
     @Field("created_at")
     private LocalDateTime createdAt;
@@ -47,10 +44,10 @@ public class ChatMessage {
     }
 
     @PersistenceConstructor
-    public ChatMessage(String roomId, Long senderId, String message) {
+    public ChatRoom(String roomId, String roomType, List<Long> members, LocalDateTime createdAt) {
         this.roomId = roomId;
-        this.senderId = senderId;
-        this.message = message;
-        this.readBy = new ArrayList<>();
+        this.roomType = roomType;
+        this.members = members;
+        this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
     }
 }
