@@ -4,6 +4,7 @@ import com.api.stuv.domain.auth.util.TokenUtil;
 import com.api.stuv.domain.timer.repository.StudyTimeRepository;
 import com.api.stuv.domain.user.dto.request.*;
 import com.api.stuv.domain.user.dto.response.ModifyProfileResponse;
+import com.api.stuv.domain.user.dto.response.UserBoardListResponse;
 import com.api.stuv.domain.user.dto.response.UserInformationResponse;
 import com.api.stuv.domain.user.dto.response.MyInformationResponse;
 import com.api.stuv.domain.user.dto.response.UserQuestStateResponse;
@@ -184,5 +185,14 @@ public class UserService {
         }
 
         return userQuestState;
+    }
+
+    public List<UserBoardListResponse> getUserBoardList(){
+        Long userId = tokenUtil.getUserId();
+
+        List<UserBoardListResponse> userBoardList = userRepository.getUserBoardList(userId);
+
+        return userBoardList;
+
     }
 }
