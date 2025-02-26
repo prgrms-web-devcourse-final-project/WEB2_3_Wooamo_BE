@@ -54,7 +54,7 @@ public class BoardService {
     @Transactional
     public Map<String, Long> createBoard(Long userId, BoardRequest boardRequest, List<MultipartFile> files) {
         Long boardId = boardRepository.save(BoardRequest.from(userId, boardRequest)).getId();
-        for (MultipartFile file : files) imageService.handleImage(boardId, file, EntityType.BOARD);
+        if (files != null && !files.isEmpty()) {for (MultipartFile file : files) imageService.handleImage(boardId, file, EntityType.BOARD);}
         return Map.of("boardId", boardId);
     }
 
@@ -83,7 +83,7 @@ public class BoardService {
         if (!Objects.equals(board.getUserId(), userId)) throw new AccessDeniedException(ErrorCode.BOARD_NOT_AUTHORIZED);
         List<Comment> comments = commentRepository.findAllByBoardId(boardId);
         List<ImageFile> imageFiles = imageFileRepository.findAllByEntityIdAndEntityType(boardId, EntityType.BOARD);
-        if (!imageFiles.isEmpty()) {
+        if (imageFiles!=null && !imageFiles.isEmpty()) {
             for(ImageFile imageFile : imageFiles) {
                 s3ImageService.deleteImageFile(EntityType.BOARD, boardId, imageFile.getNewFilename());
                 imageFileRepository.deleteByNewFilename(imageFile.getNewFilename());
