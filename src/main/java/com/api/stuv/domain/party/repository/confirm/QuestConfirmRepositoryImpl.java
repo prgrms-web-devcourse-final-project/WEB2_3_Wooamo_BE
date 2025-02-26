@@ -7,6 +7,7 @@ import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.domain.party.entity.QQuestConfirm;
 import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
+import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
@@ -22,19 +23,14 @@ public class QuestConfirmRepositoryImpl implements QuestConfirmRepositoryCustom 
 
     @Override
     public ImageResponse findGroupMemberConfirmImageByDate(Long memberId, LocalDate date) {
-        return factory.select(qc.memberId, i.newFilename)
+        Tuple result = factory.select(qc.memberId, i.newFilename)
                 .from(qc)
-                .leftJoin(i).on(qc.memberId.eq(i.entityId)
+                .join(i).on(qc.memberId.eq(i.entityId)
                         .and(i.entityType.eq(EntityType.CONFIRM)))
                 .where(qc.memberId.eq(memberId)
                         .and(qc.confirmDate.eq(date)))
-                .fetch()
-                .stream()
-                .map(tp -> {
-                    if (tp.get(i.newFilename) == null) throw new NotFoundException(ErrorCode.CONFIRM_IMAGE_NOT_FOUND);
-                    return new ImageResponse(s3ImageService.generateImageFile(EntityType.CONFIRM, tp.get(qc.memberId), tp.get(i.newFilename)));
-                })
-                .findFirst()
-                .orElseThrow(() -> new NotFoundException(ErrorCode.CONFIRM_IMAGE_NOT_FOUND));
+                .fetchOne();
+        if (result == null) throw new NotFoundException(ErrorCode.CONFIRM_IMAGE_NOT_FOUND);
+        return new ImageResponse(s3ImageService.generateImageFile(EntityType.CONFIRM, result.get(qc.memberId), result.get(i.newFilename)));
     }
 }
