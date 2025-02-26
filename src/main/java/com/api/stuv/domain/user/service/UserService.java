@@ -1,13 +1,16 @@
 package com.api.stuv.domain.user.service;
 
 import com.api.stuv.domain.auth.util.TokenUtil;
+import com.api.stuv.domain.timer.repository.StudyTimeRepository;
 import com.api.stuv.domain.user.dto.request.*;
 import com.api.stuv.domain.user.dto.response.ModifyProfileResponse;
 import com.api.stuv.domain.user.dto.response.UserBoardListResponse;
 import com.api.stuv.domain.user.dto.response.UserInformationResponse;
 import com.api.stuv.domain.user.dto.response.MyInformationResponse;
+import com.api.stuv.domain.user.dto.response.UserQuestStateResponse;
 import com.api.stuv.domain.user.entity.User;
 import com.api.stuv.domain.user.entity.UserCostume;
+import com.api.stuv.domain.user.repository.PointHistoryRepository;
 import com.api.stuv.domain.user.repository.UserCostumeRepository;
 import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.BadRequestException;
@@ -25,7 +28,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Objects;
 
 
 @Service
@@ -33,6 +40,8 @@ import java.util.List;
 public class UserService {
     private final UserRepository userRepository;
     private final UserCostumeRepository userCostumeRepository;
+    private final StudyTimeRepository studyTimeRepository;
+    private final PointHistoryRepository pointHistoryRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final EmailProvider  emailProvider;
     private final RedisService redisService;
@@ -145,6 +154,31 @@ public class UserService {
 
         ModifyProfileResponse modifyProfileResponse = new ModifyProfileResponse(userId);
         return modifyProfileResponse;
+    }
+
+    public UserQuestStateResponse userQuestState(){
+        Long userId = tokenUtil.getUserId();
+        Long totalTime = 0L;
+        UserQuestStateResponse userQuestState;
+
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfDay = today.atStartOfDay();         // 오늘 00:00:00
+        LocalDateTime endOfDay = today.atTime(LocalTime.MAX);    // 오늘 23:59:59.999999
+
+        if(pointHistoryRepository.findByUserIdAndTransactionType(userId, startOfDay, endOfDay) != null){
+            return new UserQuestStateResponse("보상 완료");
+        }
+
+        List<LocalTime> studyTimeList = studyTimeRepository.findStudyTimeByUserIdAndStudyDate(userId);
+
+        totalTime = studyTimeList.stream()
+                .filter(Objects::nonNull)
+                .mapToLong(LocalTime::toSecondOfDay)
+                .sum();
+
+        userQuestState = new UserQuestStateResponse(totalTime > 10800L ? "보상 받기" : "진행중");
+
+        return userQuestState;
     }
 
     public List<UserBoardListResponse> getUserBoardList(){
