@@ -1,36 +1,56 @@
 package com.api.stuv.domain.socket.entity;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.PrePersist;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Document(collection = "chat_message") // MongoDB 컬렉션 이름 지정
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+@Builder
+@Document(collection = "chat_message")
 public class ChatMessage {
+
     @Id
-    private String id; // ObjectId
-    private Long groupId; // 채팅방 ID
-    private Long receiverId; // 받는 사람 ID
-    private Long senderId; // 보낸 사람 ID
-    private String message; // 메시지 내용
-    private Long readCount; // 읽음 횟수
+    private String id;
 
-    @CreatedDate
-    private LocalDateTime createdAt; // 생성 시간
+    @Field("room_id")
+    private String roomId;
 
-    @Builder
-    public ChatMessage(Long groupId, Long receiverId, Long senderId, String message, Long readCount) {
-        this.groupId = groupId;
-        this.receiverId = receiverId;
+    @Field("sender_id")
+    private Long senderId;
+
+    private String message;
+
+    @Field("read_by")
+    private List<Long> readBy = new ArrayList<>();
+
+    @Field("created_at")
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    public void prePersist() {
+        if (this.createdAt == null) {
+            this.createdAt = LocalDateTime.now();
+        }
+    }
+
+    @PersistenceConstructor
+    public ChatMessage(String roomId, Long senderId, String message) {
+        this.roomId = roomId;
         this.senderId = senderId;
         this.message = message;
-        this.readCount = readCount;
+        this.readBy = new ArrayList<>();
     }
 }

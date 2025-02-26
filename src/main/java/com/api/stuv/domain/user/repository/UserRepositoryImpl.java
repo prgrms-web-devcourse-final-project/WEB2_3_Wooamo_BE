@@ -1,46 +1,33 @@
 package com.api.stuv.domain.user.repository;
 
+import com.api.stuv.domain.board.dto.BoardResponse;
+import com.api.stuv.domain.board.entity.QBoard;
 import com.api.stuv.domain.friend.entity.QFriend;
 import com.api.stuv.domain.image.entity.EntityType;
 import com.api.stuv.domain.image.entity.QImageFile;
 import com.api.stuv.domain.image.service.S3ImageService;
-import com.api.stuv.domain.shop.entity.QCostume;
+import com.api.stuv.domain.user.dto.response.UserBoardListResponse;
 import com.api.stuv.domain.user.dto.response.UserInformationResponse;
 import com.api.stuv.domain.user.dto.response.MyInformationResponse;
 import com.api.stuv.domain.user.entity.QUser;
-import com.api.stuv.domain.user.dto.response.MyInformationResponse;
-import com.api.stuv.domain.user.entity.QUser;
-import com.api.stuv.domain.user.entity.QUserCostume;
 import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
+import com.api.stuv.global.util.email.common.TemplateUtils;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 public class UserRepositoryImpl implements UserRepositoryCustom{
     private final JPAQueryFactory jpaQueryFactory;
     private final S3ImageService s3ImageService;
     private final QUser u = QUser.user;
-    private final QUserCostume uc = QUserCostume.userCostume;
-    private final QCostume c = QCostume.costume;
     private final QImageFile i = QImageFile.imageFile;
     private final QFriend f = QFriend.friend;
+    private final QBoard b = QBoard.board;
 
-    // userCostumeId = users 테이블의 costume_Id
-    @Override
-    public String getUserProfile(Long userCostumeId) {
-        Tuple costumeDetails = jpaQueryFactory
-                .select(i.id, i.newFilename)
-                .from(uc).leftJoin(c).on(uc.costumeId.eq(c.id))
-                .leftJoin(i).on(c.id.eq(i.entityId).and(i.entityType.eq(EntityType.COSTUME)))
-                .where(uc.id.eq(userCostumeId))
-                .fetchOne();
-
-        return ( costumeDetails == null )
-                ? null : // TODO: 프로필을 찾지 못한 경우 or 유저가 프로필을 선택하지 않았을 떄의 기본 프로필을 null 대신 써주세요
-                s3ImageService.generateImageFile(EntityType.COSTUME, costumeDetails.get(i.id), costumeDetails.get(i.newFilename));
-    }
 
     @Override
     public MyInformationResponse getUserByMyId(Long myId) {
@@ -64,7 +51,8 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
         );
     }
 
-  @Override
+
+    @Override
    public UserInformationResponse getUserInformation(Long userId, Long myId) {
        Tuple informationDetails = jpaQueryFactory
                .select(u.id, u.context, u.blogLink, u.nickname, f.status, u.costumeId, i.newFilename)
@@ -99,5 +87,25 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
        );
     }
 
+    @Override
+    public List<UserBoardListResponse> getUserBoardList(Long userId) {
+        List<UserBoardListResponse> query = jpaQueryFactory
+                .select(b.id.as("boardId"), b.title, b.context, b.boardType, b.createdAt, i.newFilename)
+                .from(b).leftJoin(i)
+                .on(b.id.eq(i.entityId).and(i.entityType.eq(EntityType.BOARD)))
+                .where(b.userId.eq(userId))
+                .fetch()
+                .stream()
+                .map(tuple -> new UserBoardListResponse(
+                        tuple.get(b.id.as("boardId")),
+                        tuple.get(b.title),
+                        tuple.get(b.context),
+                        tuple.get(b.boardType),
+                        tuple.get(TemplateUtils.timeFormater(b.createdAt)),
+                        tuple.get(i.newFilename)
+                ))
+                .toList();
 
+        return query;
+    }
 }

@@ -1,13 +1,9 @@
 package com.api.stuv.domain.user.controller;
 
-import com.api.stuv.domain.auth.util.TokenUtil;
-import com.api.stuv.domain.user.dto.request.EmailCertificationRequest;
-import com.api.stuv.domain.user.dto.request.ModifyProfileRequest;
-import com.api.stuv.domain.user.dto.request.UserRequest;
-import com.api.stuv.domain.user.dto.response.ModifyProfileResponse;
-import com.api.stuv.domain.user.dto.response.MyInformationResponse;
-import com.api.stuv.domain.user.dto.response.UserInformationResponse;
+import com.api.stuv.domain.user.dto.request.*;
+import com.api.stuv.domain.user.dto.response.*;
 import com.api.stuv.domain.user.service.KakaoService;
+import com.api.stuv.domain.user.service.TodoService;
 import com.api.stuv.domain.user.service.UserService;
 import com.api.stuv.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "User API", description = "유저 인증 관련 API")
@@ -26,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final UserService userService;
     private final KakaoService kakaoService;
-    private final TokenUtil tokenUtil;
+    private final TodoService todoService;
 
     @Operation(summary = "인증메일 전송 API", description = "인증 메일을 전송합니다.")
     @PostMapping("/auth/send")
@@ -75,8 +73,6 @@ public class UserController {
     @Operation(summary = "타인 정보 가져오기 API", description = "타인의 정보를 가져옵니다.")
     @GetMapping("/{userId}")
     private ResponseEntity<ApiResponse<UserInformationResponse>> getUserInformation(@PathVariable("userId") Long userId){
-        //Long myId = tokenUtil.getUserId();
-
         return ResponseEntity.ok()
                 .body(ApiResponse.success(userService.getUserInformation(userId)));
 
@@ -85,8 +81,6 @@ public class UserController {
     @Operation(summary = "내 정보 가져오기 API", description = "본인의 정보를 가져옵니다.")
     @GetMapping
     private ResponseEntity<ApiResponse<MyInformationResponse>> getMyInformation(){
-        //Long myId = tokenUtil.getUserId();
-
         return ResponseEntity.ok()
                 .body(ApiResponse.success(userService.getMyInformation()));
     }
@@ -102,4 +96,55 @@ public class UserController {
         return ResponseEntity.ok()
                 .body(ApiResponse.success(userService.modifyProfile(modifyProfileRequest)));
     }
+
+    @Operation(summary = "투두리스트 추가 API", description = "오늘의 투두 리스트를 추가합니다.")
+    @PostMapping("/todo")
+    private ResponseEntity<ApiResponse<AddTodoResponse>> addTodoList(@RequestBody @Valid AddTodoRequest addTodoRequest){
+        System.out.println(addTodoRequest.todo());
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(todoService.addTodoList(addTodoRequest)));
+    }
+
+    @Operation(summary = "투두리스트 조회 API", description = "오늘의 투두 리스트를 조회합니다.")
+    @GetMapping("/todo")
+    private ResponseEntity<ApiResponse<List<GetTodoListResponse>>> addTodoList(){
+
+        return  ResponseEntity.ok()
+                .body(ApiResponse.success(todoService.getTodoList()));
+    }
+
+    @Operation(summary = "투두리스트 삭제 API", description = "오늘의 투두 리스트를 삭제합니다.")
+    @DeleteMapping("/todo/{todoId}")
+    private ResponseEntity<ApiResponse<Void>> deleteTodoList(@PathVariable("todoId") Long todoId) {
+        todoService.deleteTodoList(todoId);
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.success());
+    }
+
+    @Operation(summary = "투두리스트 수정 API", description = "오늘의 투두 리스트를 수정합니다.")
+    @PutMapping("/todo/{todoId}")
+    private ResponseEntity<ApiResponse<Void>> ModifyTodoList(@PathVariable("todoId") Long todoId, @RequestBody @Valid ModifyTodoRequest modifyTodoRequest) {
+        todoService.modifyTodoList(todoId, modifyTodoRequest);
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.success());
+    }
+
+    @Operation(summary = "본인 작성 게시글 조회 API", description = "본인이 작성했던 글 목록을 조회하는 API 입니다.")
+    @GetMapping("/board")
+    private ResponseEntity<ApiResponse<List<UserBoardListResponse>>> getUserBoardList() {
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(userService.getUserBoardList()));
+    }
+
+    @Operation(summary = "개인 퀘스트 진행여부 조회 API", description = "개인의 일일 퀘스트 진행 상황을 조회합니다")
+    @GetMapping("/quest")
+    private  ResponseEntity<ApiResponse<UserQuestStateResponse>> userQuestState(){
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(userService.userQuestState()));
+    }
+
 }

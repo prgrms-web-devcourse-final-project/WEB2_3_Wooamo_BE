@@ -54,7 +54,7 @@ public class BoardService {
     @Transactional
     public Map<String, Long> createBoard(Long userId, BoardRequest boardRequest, List<MultipartFile> files) {
         Long boardId = boardRepository.save(BoardRequest.from(userId, boardRequest)).getId();
-        for (MultipartFile file : files) imageService.handleImage(boardId, file, EntityType.BOARD);
+        if (files != null && !files.isEmpty()) {for (MultipartFile file : files) imageService.handleImage(boardId, file, EntityType.BOARD);}
         return Map.of("boardId", boardId);
     }
 
@@ -68,12 +68,12 @@ public class BoardService {
         Board board = boardRepository.findById(boardId).orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
         if (!Objects.equals(board.getUserId(), userId)) throw new AccessDeniedException(ErrorCode.BOARD_NOT_AUTHORIZED);
         board.update(request);
-        for (String existingImage : request.existingImages()) {
-            // TODO: S3에 있는 이미지 파일 삭제
-            imageFileRepository.deleteByNewFilename(existingImage);
+        for (String deletedImage : request.deletedImages()) {
+            String fileName = deletedImage.substring(deletedImage.lastIndexOf('/') + 1);
+            s3ImageService.deleteImageFile(EntityType.BOARD, boardId, fileName);
+            imageFileRepository.deleteByNewFilename(fileName);
         }
-        // TODO: S3에 이미지 파일 업로드
-        for (MultipartFile file : files) imageService.handleImage(boardId, file, EntityType.BOARD);
+        if (files != null && !files.isEmpty()) for (MultipartFile file : files) imageService.handleImage(boardId, file, EntityType.BOARD);
         return Map.of("boardId", boardId);
     }
 
@@ -83,9 +83,9 @@ public class BoardService {
         if (!Objects.equals(board.getUserId(), userId)) throw new AccessDeniedException(ErrorCode.BOARD_NOT_AUTHORIZED);
         List<Comment> comments = commentRepository.findAllByBoardId(boardId);
         List<ImageFile> imageFiles = imageFileRepository.findAllByEntityIdAndEntityType(boardId, EntityType.BOARD);
-        if (!imageFiles.isEmpty()) {
+        if (imageFiles!=null && !imageFiles.isEmpty()) {
             for(ImageFile imageFile : imageFiles) {
-                s3ImageService.deleteImageFile(EntityType.BOARD, boardId, imageFile.getNewFilename());
+//                s3ImageService.deleteImageFile(EntityType.BOARD, boardId, imageFile.getNewFilename());
                 imageFileRepository.deleteByNewFilename(imageFile.getNewFilename());
             }
         }
@@ -113,7 +113,7 @@ public class BoardService {
     @Transactional
     public void createComment(Long userId, Long boardId, String content) {
         if (!boardRepository.existsById(boardId)) throw new NotFoundException(ErrorCode.BOARD_NOT_FOUND);
-        commentRepository.save(Comment.create(userId, boardId, content));
+        commentRepository.save(Comment.create(boardId, userId, content));
     }
 
     // TODO: 이후 알림 기능 추가
