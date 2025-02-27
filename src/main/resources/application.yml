@@ -77,9 +77,8 @@ kakao:
   authentication:
     method: POST
     grant-type: authorization_code
-app:
-  base:
-    fe: ${FE_BASE}
+frontend:
+  server: ${FRONTEND_SERVER:http://localhost:3000}
 ---
 spring:
   config:

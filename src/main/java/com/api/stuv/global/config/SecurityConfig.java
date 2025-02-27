@@ -24,7 +24,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 @Configuration
 @RequiredArgsConstructor
@@ -33,7 +32,7 @@ public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
 
-    @Value("${app.base.fe}")
+    @Value("${frontend.server}")
     private String frontInstance;
 
     //복호화
