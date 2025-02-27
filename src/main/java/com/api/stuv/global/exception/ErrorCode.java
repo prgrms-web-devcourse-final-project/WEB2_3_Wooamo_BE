@@ -84,7 +84,8 @@ public enum ErrorCode {
     CONFIRM_NOT_FOUND(404, -11002, "해당 회원의 인증을 찾을 수 없습니다."),
 
     //TIMER
-    TIMER_NOT_EXIST(404, -12000, "저장된 타이머가 없습니다.")
+    TIMER_NOT_EXIST(404, -12000, "저장된 타이머가 없습니다."),
+    NOT_FOUND_CATEGORY(404, -12001, "타이머 카테고리를 찾을 수 없습니다.")
     ;
 
     private final int status;

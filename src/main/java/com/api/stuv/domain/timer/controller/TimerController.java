@@ -38,4 +38,13 @@ public class TimerController {
         return ResponseEntity.ok()
                 .body(ApiResponse.success(timerService.addTimerCatetory(addTimerCatetoryRequest)));
     }
+
+    @Transactional
+    @Operation(summary = "타이머 카테고리 삭제 API", description = "타이머를 저장한 카테고리를 삭제합니다")
+    @DeleteMapping("/category/{categoryId}")
+    public ResponseEntity<ApiResponse<Void>> deleteTimerCategory(@PathVariable("categoryId")  Long categoryId) {
+        timerService.deleteTimerCatetory(categoryId);
+        return ResponseEntity.ok()
+                .body(ApiResponse.success());
+    }
 }
