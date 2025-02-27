@@ -193,6 +193,7 @@ public class UserService {
     }
 
 
+    @Transactional
     public void userQuestReward() {
         Long userId = tokenUtil.getUserId();
         Long totalTime = 0L;
@@ -224,7 +225,7 @@ public class UserService {
         }
         userRepository.save(user);
 
-        PointHistory pointHistory = new PointHistory(userId, HistoryType.PERSONAL, point, "개인 퀘스트 달성 보상");
+        PointHistory pointHistory = new PointHistory(userId, HistoryType.PERSONAL, point, HistoryType.PERSONAL.getText());
         pointHistoryRepository.save(pointHistory);
 
     }
