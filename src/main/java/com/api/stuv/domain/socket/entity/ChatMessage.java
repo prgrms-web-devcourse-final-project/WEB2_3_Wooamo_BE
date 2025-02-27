@@ -1,5 +1,6 @@
 package com.api.stuv.domain.socket.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.PrePersist;
@@ -34,10 +35,10 @@ public class ChatMessage {
     private String message;
 
     @Field("read_by")
-    @Builder.Default
     private List<Long> readBy = new ArrayList<>();
 
     @Field("created_at")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
 
     @PrePersist
