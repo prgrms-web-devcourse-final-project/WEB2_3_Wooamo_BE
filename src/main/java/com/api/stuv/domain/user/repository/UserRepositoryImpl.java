@@ -5,6 +5,7 @@ import com.api.stuv.domain.friend.entity.QFriend;
 import com.api.stuv.domain.image.entity.EntityType;
 import com.api.stuv.domain.image.entity.QImageFile;
 import com.api.stuv.domain.image.service.S3ImageService;
+import com.api.stuv.domain.user.dto.response.GetCostume;
 import com.api.stuv.domain.user.dto.response.UserBoardListResponse;
 import com.api.stuv.domain.user.dto.response.UserInformationResponse;
 import com.api.stuv.domain.user.dto.response.MyInformationResponse;
@@ -115,5 +116,32 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
                 .toList();
 
         return query;
+    }
+
+    @Override
+    public List<GetCostume> getUserCostume(Long userId) {
+        List<Tuple> list = jpaQueryFactory
+                .select(uc.costumeId, i.newFilename)
+                .from(uc)
+                .join(i).on(i.entityType.eq(EntityType.COSTUME).and(i.entityId.eq(uc.costumeId)))
+                .where(uc.userId.eq(userId))
+                .fetch();
+
+        if(list.isEmpty()) {
+            throw new NotFoundException(ErrorCode.COSTUME_NOT_FOUND);
+        }
+
+        List<GetCostume> query = list.stream()
+                .map(tuple -> new GetCostume(
+                        tuple.get(uc.costumeId),
+                        s3ImageService.generateImageFile(
+                                EntityType.COSTUME,
+                                tuple.get(uc.costumeId),
+                                tuple.get(i.newFilename)
+                        )
+                ))
+                .toList();
+
+        return List.of();
     }
 }
