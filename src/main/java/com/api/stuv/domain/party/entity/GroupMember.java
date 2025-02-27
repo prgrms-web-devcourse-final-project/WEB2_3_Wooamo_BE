@@ -27,4 +27,11 @@ public class GroupMember {
 
     @Column(precision = 10)
     private BigDecimal bettingPoint;
+
+    @PrePersist
+    public void prePersist() {
+        if (questStatus == null) {
+            this.questStatus = QuestStatus.PROGRESS;
+        }
+    }
 }

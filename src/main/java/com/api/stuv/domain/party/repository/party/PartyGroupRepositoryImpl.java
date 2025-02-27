@@ -24,11 +24,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
 
-    private static final Logger log = LoggerFactory.getLogger(PartyGroupRepositoryImpl.class);
     private final JPAQueryFactory factory;
     private final QPartyGroup pg = QPartyGroup.partyGroup;
     private final QGroupMember gm = QGroupMember.groupMember;
-    private final QQuestConfirm qc = QQuestConfirm.questConfirm;
 
     @Override
     public PageResponse<PartyGroupResponse> findPendingGroupsByName(String name, Pageable pageable) {
@@ -118,5 +116,13 @@ public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
                 .from(pg)
                 .where(pg.id.eq(partyId))
                 .fetchOne();
+    }
+
+    @Override
+    public void updatePartyStatusForPartyGroup(Long partyId, PartyStatus partyStatus) {
+        factory.update(pg)
+                .set(pg.status, partyStatus)
+                .where(pg.id.eq(partyId))
+                .execute();
     }
 }
