@@ -95,7 +95,7 @@ public class AdminController {
             @RequestBody ConfirmRequest request
     ) {
         if (request.date() == null || request.auth() == null) throw new ValidationException();
-        adminService.changGroupMemberConfirmedStatusByDate(partyId, memberId, request);
+        adminService.changeGroupMemberConfirmedStatusByDate(partyId, memberId, request);
 
         return ResponseEntity.ok().body(ApiResponse.success());
     }

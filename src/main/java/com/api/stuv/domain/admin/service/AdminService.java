@@ -100,7 +100,7 @@ public class AdminService {
     }
 
     @Transactional
-    public void changGroupMemberConfirmedStatusByDate(Long partyId, Long memberId, ConfirmRequest request) {
+    public void changeGroupMemberConfirmedStatusByDate(Long partyId, Long memberId, ConfirmRequest request) {
         PartyGroup party = partyGroupRepository.findById(partyId).orElseThrow(() -> new NotFoundException(ErrorCode.PARTY_NOT_FOUND));
 
         if (request.date().isBefore(party.getStartDate()) || request.date().isAfter(party.getEndDate())) throw new DateOutOfRangeException(ErrorCode.PARTY_INVALID_DATE);

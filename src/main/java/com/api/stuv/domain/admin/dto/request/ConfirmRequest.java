@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 public record ConfirmRequest(
-        @NotNull LocalDate date,
-        @NotNull Boolean auth
+        LocalDate date,
+        Boolean auth
 ) {
 }
