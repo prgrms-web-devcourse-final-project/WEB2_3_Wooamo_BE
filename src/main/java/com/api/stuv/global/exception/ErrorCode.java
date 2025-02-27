@@ -17,6 +17,7 @@ public enum ErrorCode {
     USER_NOT_FOUND(404, -1007, "존재하지 않는 사용자입니다."),
     DATA_ACCESS_API(401, -1008, "데이터를 받아오지 못했습니다"),
     QUEST_ALREADY_REWARD(400, -1009, "보상을 이미 받았습니다."),
+    REWARD_CONDITION_NOT_MET(403, -1010, "보상을 받을 조건이 충족되지 않았습니다."),
 
     // TOKEN
     EMPTY_JWT_TOKEN(400, -2000, "JWT 토큰이 없습니다."),
