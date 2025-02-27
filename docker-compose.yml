@@ -4,7 +4,7 @@ services:
     container_name: stuv-app
     restart: always
     env_file:
-      - ./src/main/resources/.env
+      - /home/ubuntu/env/.env
 
     build:
       context: .

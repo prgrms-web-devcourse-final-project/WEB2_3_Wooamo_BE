@@ -3,6 +3,7 @@ name: CD
 on:
   push:
     branches:
+      - main
       - develop
 
 permissions: write-all
@@ -32,10 +33,13 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: 환경 설정
+        run: |
+          echo "${{ secrets.ENV_VARS }}" > src/main/resources/.env
+
       - name: Gradle 명령 실행을 위한 권한 부여
         run: chmod +x gradlew
 
-      # todo : .env 없이 build가 되는 문제 => 근데 docker hub에는 env 없이 push 되어야 함.
       - name: Gradle build 수행
         run: ./gradlew clean build -x test
 
@@ -69,5 +73,4 @@ jobs:
             sudo docker compose stop
             sudo docker compose rm -f
             sudo docker rmi gpemvjtmxm/stuv-app:latest
-            echo "$ENV_VARS" > src/main/resources/.env
-            sudo docker compose --env-file ./src/main/resources/.env up -d
+            sudo docker compose --env-file /home/ubuntu/env/.env up -d
