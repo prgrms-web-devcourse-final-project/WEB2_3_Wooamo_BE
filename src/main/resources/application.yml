@@ -1,3 +1,5 @@
+frontend:
+  server: ${FRONTEND_SERVER:http://localhost:3000}
 spring:
   application:
     name: stuv
@@ -77,8 +79,6 @@ kakao:
   authentication:
     method: POST
     grant-type: authorization_code
-frontend:
-  server: ${FRONTEND_SERVER:http://localhost:3000}
 ---
 spring:
   config:
