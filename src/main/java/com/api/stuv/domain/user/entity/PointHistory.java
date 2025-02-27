@@ -3,6 +3,7 @@ package com.api.stuv.domain.user.entity;
 import com.api.stuv.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -30,4 +31,12 @@ public class PointHistory extends BaseTimeEntity {
 
     @Column(nullable = false)
     private String reason;
+
+    @Builder
+    public PointHistory(Long userId, HistoryType transactionType, BigDecimal amount, String reason) {
+        this.userId = userId;
+        this.transactionType = transactionType;
+        this.amount = amount;
+        this.reason = reason;
+    }
 }
