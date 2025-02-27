@@ -4,6 +4,8 @@ import com.api.stuv.domain.timer.dto.response.TimerListResponse;
 import com.api.stuv.domain.timer.entity.QStudyTime;
 import com.api.stuv.domain.timer.entity.QTimer;
 import com.api.stuv.domain.user.entity.QUser;
+import com.api.stuv.global.exception.ErrorCode;
+import com.api.stuv.global.exception.NotFoundException;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,10 @@ public class StudyTimeRepositoryImpl implements StudyTimeRepositoryCustom {
                 .on(st.categoryId.eq(t.id))
                 .where(st.userId.eq(userId))
                 .fetch();
+
+        if(resultList.isEmpty()){
+            throw new NotFoundException(ErrorCode.TIMER_NOT_EXIST);
+        }
 
         List<TimerListResponse> query = resultList.stream()
                 .map(tuple -> new TimerListResponse(
