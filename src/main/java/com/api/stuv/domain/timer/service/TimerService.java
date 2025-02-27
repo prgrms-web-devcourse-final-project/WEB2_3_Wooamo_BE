@@ -42,4 +42,18 @@ public class TimerService {
         AddTimerCatetoryResponse addTimerCatetoryResponse = new AddTimerCatetoryResponse(timer.getId());
         return addTimerCatetoryResponse;
     }
+
+    public void deleteTimerCatetory(Long categoryId) {
+        Long userId = tokenUtil.getUserId();
+        if(userId == null){
+            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        Timer timer = timerRepository.findByUserIdAndId(userId, categoryId);
+        if(timer == null){
+            throw new NotFoundException(ErrorCode.NOT_FOUND_CATEGORY);
+        }
+
+        timerRepository.delete(timer);
+    }
 }
