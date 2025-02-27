@@ -15,10 +15,7 @@ import com.api.stuv.domain.user.entity.UserCostume;
 import com.api.stuv.domain.user.repository.PointHistoryRepository;
 import com.api.stuv.domain.user.repository.UserCostumeRepository;
 import com.api.stuv.domain.user.repository.UserRepository;
-import com.api.stuv.global.exception.BadRequestException;
-import com.api.stuv.global.exception.DuplicateException;
-import com.api.stuv.global.exception.ErrorCode;
-import com.api.stuv.global.exception.NotFoundException;
+import com.api.stuv.global.exception.*;
 import com.api.stuv.global.service.RedisService;
 import com.api.stuv.global.util.email.RandomCode;
 import com.api.stuv.global.util.email.RandomName;
@@ -134,7 +131,7 @@ public class UserService {
         Long myId = tokenUtil.getUserId();
         UserInformationResponse information = userRepository.getUserInformation(userId, myId);
 
-      return information;
+        return information;
     }
 
     public MyInformationResponse getMyInformation(){
@@ -169,8 +166,6 @@ public class UserService {
 
     public UserQuestStateResponse userQuestState(){
         Long userId = tokenUtil.getUserId();
-        Long totalTime = 0L;
-        UserQuestStateResponse userQuestState;
 
         LocalDate today = LocalDate.now();
         LocalDateTime startOfDay = today.atStartOfDay();         // 오늘 00:00:00
@@ -180,27 +175,21 @@ public class UserService {
             return new UserQuestStateResponse("보상 완료");
         }
 
-        List<LocalTime> studyTimeList = studyTimeRepository.findStudyTimeByUserIdAndStudyDate(userId);
-
-        totalTime = studyTimeList.stream()
+        List<Long> studyTimeList = studyTimeRepository.findStudyTimeByUserIdAndStudyDate(userId);
+        long totalTime = (studyTimeList != null)
+                ? studyTimeList.stream()
                 .filter(Objects::nonNull)
-                .mapToLong(LocalTime::toSecondOfDay)
-                .sum();
+                .mapToLong(Long::longValue)
+                .sum()
+                : 0L;
 
-        userQuestState = new UserQuestStateResponse(totalTime > 10800L ? "보상 받기" : "진행중");
-
-        return userQuestState;
+        return new UserQuestStateResponse(totalTime > 10800L ? "보상 받기" : "진행중");
     }
 
 
     @Transactional
     public void userQuestReward() {
         Long userId = tokenUtil.getUserId();
-        Long totalTime = 0L;
-
-        if(userId == null){
-            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
-        }
 
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
@@ -212,22 +201,24 @@ public class UserService {
             throw new DuplicateException(ErrorCode.QUEST_ALREADY_REWARD);
         }
 
-        List<LocalTime> studyTimeList = studyTimeRepository.findStudyTimeByUserIdAndStudyDate(userId);
-
-        totalTime = studyTimeList.stream()
+        List<Long> studyTimeList = studyTimeRepository.findStudyTimeByUserIdAndStudyDate(userId);
+        long totalTime = (studyTimeList != null)
+                ? studyTimeList.stream()
                 .filter(Objects::nonNull)
-                .mapToLong(LocalTime::toSecondOfDay)
-                .sum();
+                .mapToLong(Long::longValue)
+                .sum()
+                : 0L;
 
         BigDecimal point = new BigDecimal(5);
         if(totalTime > 10800L){
             user.updatePoint(point);
+            userRepository.save(user);
+
+            PointHistory pointHistory = new PointHistory(userId, HistoryType.PERSONAL, point, HistoryType.PERSONAL.getText());
+            pointHistoryRepository.save(pointHistory);
+        } else {
+            throw new BadRequestException(ErrorCode.REWARD_CONDITION_NOT_MET);
         }
-        userRepository.save(user);
-
-        PointHistory pointHistory = new PointHistory(userId, HistoryType.PERSONAL, point, HistoryType.PERSONAL.getText());
-        pointHistoryRepository.save(pointHistory);
-
     }
 
 }
