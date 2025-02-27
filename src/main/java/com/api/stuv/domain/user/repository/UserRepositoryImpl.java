@@ -1,6 +1,5 @@
 package com.api.stuv.domain.user.repository;
 
-import com.api.stuv.domain.board.dto.BoardResponse;
 import com.api.stuv.domain.board.entity.QBoard;
 import com.api.stuv.domain.friend.entity.QFriend;
 import com.api.stuv.domain.image.entity.EntityType;
