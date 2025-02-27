@@ -16,7 +16,6 @@ public enum ErrorCode {
     INVALID_PASSWORD(400, -1006, "아이디 또는 비밀번호가 올바르지 않습니다."),
     USER_NOT_FOUND(404, -1007, "존재하지 않는 사용자입니다."),
     DATA_ACCESS_API(401, -1008, "데이터를 받아오지 못했습니다"),
-    QUEST_ALREADY_REWARD(400, -1009, "보상을 이미 받았습니다."),
 
     // TOKEN
     EMPTY_JWT_TOKEN(400, -2000, "JWT 토큰이 없습니다."),
@@ -39,8 +38,9 @@ public enum ErrorCode {
     INVALID_PAGE_NUMBER(400, -3009, "올바르지 않은 페이지 번호입니다."),
     HTTP_API_ERROR(400, -3010, "HTTP API에서 오류가 발생했습니다."),
     JSON_PARSING_ERROR(400, -3011, "JSON 파싱이 잘못되었습니다."),
-    ARGUMENT_TYPE_MISMATCH(400, -3012, "파라미터의 값이 올바르지 않습니다."),
+    ARGUMENT_TYPE_MISMATCH(400, -3012, "올바르지 않은 파라미터입니다."),
     DATE_FORMAT_MISMATCH(400, -3013, "날짜 형식이 올바르지 않습니다. (yyyy-MM-dd)"),
+    INVALID_ARGUMENT_METHOD(400, -3014, "데이터 유효성 검증에 실패했습니다."),
 
     // FRIEND
     FRIEND_NOT_FOUND(404, -4000, "해당 친구를 찾을 수 없습니다."),
@@ -78,9 +78,9 @@ public enum ErrorCode {
     CHAT_ROOM_NOT_FOUND(404, -10000, "채팅방을 찾을 수 없습니다."),
 
     // PARTY
-    PARTY_NOT_FOUND(404, -9000, "해당 팟을 팢을 수 없습니다."),
-    PARTY_INVALID_DATE(400, -9001, "해당 날짜는 팟의 인증 기간이 아닙니다."),
-    CONFIRM_IMAGE_NOT_FOUND(404, -9002, "해당 회원의 인증 이미지를 찾을 수 없습니다."),
+    PARTY_NOT_FOUND(404, -11000, "해당 팟을 팢을 수 없습니다."),
+    PARTY_INVALID_DATE(400, -11001, "해당 날짜는 팟의 인증 기간이 아닙니다."),
+    CONFIRM_NOT_FOUND(404, -11002, "해당 회원의 인증을 찾을 수 없습니다."),
 
     //TIMER
     TIMER_NOT_EXIST(404, -12000, "저장된 타이머가 없습니다.")
