@@ -159,6 +159,14 @@ public class UserService {
         return modifyProfileResponse;
     }
 
+    public List<UserBoardListResponse> getUserBoardList(){
+        Long userId = tokenUtil.getUserId();
+
+        List<UserBoardListResponse> userBoardList = userRepository.getUserBoardList(userId);
+
+        return userBoardList;
+    }
+
     public UserQuestStateResponse userQuestState(){
         Long userId = tokenUtil.getUserId();
         Long totalTime = 0L;
@@ -184,13 +192,6 @@ public class UserService {
         return userQuestState;
     }
 
-    public List<UserBoardListResponse> getUserBoardList(){
-        Long userId = tokenUtil.getUserId();
-
-        List<UserBoardListResponse> userBoardList = userRepository.getUserBoardList(userId);
-
-        return userBoardList;
-    }
 
     public void userQuestReward() {
         Long userId = tokenUtil.getUserId();
@@ -227,4 +228,5 @@ public class UserService {
         pointHistoryRepository.save(pointHistory);
 
     }
+
 }
