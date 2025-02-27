@@ -40,11 +40,11 @@ public class ChatMessageService {
 
     // 메시지 저장
     @Transactional
-    public ChatMessage saveMessage(ChatMessageRequest request) {
+    public ChatMessageResponse  saveMessage(ChatMessageRequest request) {
         chatRoomRepository.findByRoomId(request.roomId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.CHAT_ROOM_NOT_FOUND));
 
-        return chatMessageRepository.save(
+        ChatMessage savedMessage = chatMessageRepository.save(
                 ChatMessage.builder()
                         .roomId(request.roomId())
                         .senderId(request.senderId())
@@ -53,6 +53,8 @@ public class ChatMessageService {
                         .createdAt(LocalDateTime.now())
                         .build()
         );
+
+        return ChatMessageResponse.from(savedMessage);
     }
 
     // 특정 senderId가 포함된 채팅방의 roomId 목록 조회

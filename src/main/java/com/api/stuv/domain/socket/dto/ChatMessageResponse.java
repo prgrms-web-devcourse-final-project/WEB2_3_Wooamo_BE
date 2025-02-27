@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record ChatMessageResponse(
-        String id,
         String roomId,
         Long senderId,
         String message,
@@ -17,7 +16,6 @@ public record ChatMessageResponse(
 ) {
     public static ChatMessageResponse from(ChatMessage chatMessage){
         return new ChatMessageResponse(
-                chatMessage.getId(),
                 chatMessage.getRoomId(),
                 chatMessage.getSenderId(),
                 chatMessage.getMessage(),

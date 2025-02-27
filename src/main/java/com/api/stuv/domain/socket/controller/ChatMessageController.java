@@ -90,7 +90,7 @@ public class ChatMessageController {
             List<Long> usersInRoom = roomSessions.getOrDefault(message.roomId(), Collections.emptyList());
             List<Long> readByList = new ArrayList<>(new HashSet<>(usersInRoom));
 
-            ChatMessage savedMessage = chatMessageService.saveMessage(
+            ChatMessageResponse savedMessage = chatMessageService.saveMessage(
                     new ChatMessageRequest(
                             message.roomId(),
                             message.senderId(),

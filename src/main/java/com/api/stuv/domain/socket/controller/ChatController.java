@@ -20,7 +20,7 @@ import java.util.List;
 public class ChatController {
     private final ChatMessageService chatMessageService;
 
-    @Operation(summary = "멤버 요청 API", description = "같은 방 멤버를 요청합니다.")
+    @Operation(summary = "채팅방 목록 API", description = "user가 포함된 채팅방 목록을 가져옵니다.")
     @GetMapping("/{senderId}")
     public ResponseEntity<ApiResponse<List<String>>> getRoomsBySenderId(@PathVariable Long senderId) {
         return ResponseEntity.ok()
