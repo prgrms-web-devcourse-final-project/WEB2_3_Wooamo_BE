@@ -9,7 +9,7 @@ import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.domain.user.entity.QUser;
 import com.api.stuv.domain.user.entity.QUserCostume;
 import com.api.stuv.global.response.PageResponse;
-import com.api.stuv.global.util.email.common.TemplateUtils;
+import com.api.stuv.global.util.common.TemplateUtils;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

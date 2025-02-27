@@ -10,6 +10,7 @@ import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalTime;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -22,7 +23,7 @@ public class StudyTimeRepositoryImpl implements StudyTimeRepositoryCustom {
     @Override
     public List<TimerListResponse> findAllStudyTimeByUserId(Long userId) {
         List<Tuple> resultList = jpaQueryFactory
-                .select(st.id, st.categoryId, t.name, st.studyDate, st.studyTime)
+                .select(t.id ,st.categoryId, t.name, st.studyDate, st.studyTime)
                 .from(st)
                 .join(t)
                 .on(st.categoryId.eq(t.id))
@@ -33,16 +34,14 @@ public class StudyTimeRepositoryImpl implements StudyTimeRepositoryCustom {
             throw new NotFoundException(ErrorCode.TIMER_NOT_EXIST);
         }
 
-        List<TimerListResponse> query = resultList.stream()
+        return resultList.stream()
                 .map(tuple -> new TimerListResponse(
-                        tuple.get(st.id),
+                        tuple.get(t.id),
                         tuple.get(st.categoryId),
                         tuple.get(t.name),
                         tuple.get(st.studyDate),
-                        tuple.get(st.studyTime)
+                        LocalTime.ofSecondOfDay(tuple.get(st.studyTime))
                 ))
                 .toList();
-
-        return query;
     }
 }

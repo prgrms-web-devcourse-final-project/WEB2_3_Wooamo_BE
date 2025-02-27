@@ -1,6 +1,7 @@
 package com.api.stuv.domain.timer.controller;
 
 import com.api.stuv.domain.timer.dto.request.AddTimerCatetoryRequest;
+import com.api.stuv.domain.timer.dto.request.StudyTimeRequest;
 import com.api.stuv.domain.timer.dto.response.AddTimerCatetoryResponse;
 import com.api.stuv.domain.timer.dto.response.TimerListResponse;
 import com.api.stuv.domain.timer.service.TimerService;
@@ -36,6 +37,16 @@ public class TimerController {
     public ResponseEntity<ApiResponse<AddTimerCatetoryResponse>> addTimerCategory(@RequestBody @Valid AddTimerCatetoryRequest addTimerCatetoryRequest) {
 
         return ResponseEntity.ok()
-                .body(ApiResponse.success(timerService.addTimerCatetory(addTimerCatetoryRequest)));
+                .body(ApiResponse.success(timerService.addTimerCategory(addTimerCatetoryRequest)));
+    }
+
+    @Operation(summary = "타이머 공부시간 저장 API", description = "타이머의 공부시간을 저장합니다.")
+    @PostMapping("/{categoryId}")
+    public ResponseEntity<ApiResponse<Void>> recordStudyTime(
+            @PathVariable Long categoryId,
+            @RequestBody StudyTimeRequest request
+    ) {
+        timerService.recordStudyTime(categoryId, request.convertTimeToSeconds());
+        return ResponseEntity.ok().body(ApiResponse.success());
     }
 }
