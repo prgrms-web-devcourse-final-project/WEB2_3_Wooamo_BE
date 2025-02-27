@@ -8,6 +8,8 @@ import com.api.stuv.domain.user.dto.response.UserBoardListResponse;
 import com.api.stuv.domain.user.dto.response.UserInformationResponse;
 import com.api.stuv.domain.user.dto.response.MyInformationResponse;
 import com.api.stuv.domain.user.dto.response.UserQuestStateResponse;
+import com.api.stuv.domain.user.entity.HistoryType;
+import com.api.stuv.domain.user.entity.PointHistory;
 import com.api.stuv.domain.user.entity.User;
 import com.api.stuv.domain.user.entity.UserCostume;
 import com.api.stuv.domain.user.repository.PointHistoryRepository;
@@ -27,6 +29,7 @@ import org.springframework.security.core.token.TokenService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -156,6 +159,14 @@ public class UserService {
         return modifyProfileResponse;
     }
 
+    public List<UserBoardListResponse> getUserBoardList(){
+        Long userId = tokenUtil.getUserId();
+
+        List<UserBoardListResponse> userBoardList = userRepository.getUserBoardList(userId);
+
+        return userBoardList;
+    }
+
     public UserQuestStateResponse userQuestState(){
         Long userId = tokenUtil.getUserId();
         Long totalTime = 0L;
@@ -181,12 +192,42 @@ public class UserService {
         return userQuestState;
     }
 
-    public List<UserBoardListResponse> getUserBoardList(){
+
+    @Transactional
+    public void userQuestReward() {
         Long userId = tokenUtil.getUserId();
+        Long totalTime = 0L;
 
-        List<UserBoardListResponse> userBoardList = userRepository.getUserBoardList(userId);
+        if(userId == null){
+            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
+        }
 
-        return userBoardList;
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfDay = today.atStartOfDay();         // 오늘 00:00:00
+        LocalDateTime endOfDay = today.atTime(LocalTime.MAX);    // 오늘 23:59:59.999999
+
+        if(pointHistoryRepository.findByUserIdAndTransactionType(userId, startOfDay, endOfDay) != null){
+            throw new DuplicateException(ErrorCode.QUEST_ALREADY_REWARD);
+        }
+
+        List<LocalTime> studyTimeList = studyTimeRepository.findStudyTimeByUserIdAndStudyDate(userId);
+
+        totalTime = studyTimeList.stream()
+                .filter(Objects::nonNull)
+                .mapToLong(LocalTime::toSecondOfDay)
+                .sum();
+
+        BigDecimal point = new BigDecimal(5);
+        if(totalTime > 10800L){
+            user.updatePoint(point);
+        }
+        userRepository.save(user);
+
+        PointHistory pointHistory = new PointHistory(userId, HistoryType.PERSONAL, point, HistoryType.PERSONAL.getText());
+        pointHistoryRepository.save(pointHistory);
 
     }
+
 }
