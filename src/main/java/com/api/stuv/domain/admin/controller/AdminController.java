@@ -1,20 +1,25 @@
 package com.api.stuv.domain.admin.controller;
 
+import com.api.stuv.domain.admin.dto.request.ConfirmRequest;
 import com.api.stuv.domain.admin.dto.request.CostumeRequest;
 import com.api.stuv.domain.admin.dto.response.AdminPartyAuthDetailResponse;
 import com.api.stuv.domain.image.dto.ImageResponse;
 import com.api.stuv.domain.admin.service.AdminService;
 import com.api.stuv.domain.admin.dto.response.AdminPartyGroupResponse;
+import com.api.stuv.global.exception.ValidationException;
 import com.api.stuv.global.response.ApiResponse;
 import com.api.stuv.global.response.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,6 +31,7 @@ import java.time.LocalDate;
 @Tag(name = "Admin", description = "관리자 API")
 public class AdminController {
 
+    private static final Logger log = LoggerFactory.getLogger(AdminController.class);
     private final AdminService adminService;
 
     @PostMapping(value = "/costume", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -71,7 +77,7 @@ public class AdminController {
     public ResponseEntity<ApiResponse<AdminPartyAuthDetailResponse>> getPartyAuthDetailWithMembers (
             @PathVariable Long partyId,
             @RequestParam(required = false) LocalDate date
-            ) {
+    ) {
         return ResponseEntity.ok().body(ApiResponse.success(adminService.getPartyAuthDetailWithMembers(partyId, date)));
     }
 
@@ -83,5 +89,18 @@ public class AdminController {
             @RequestParam LocalDate date
     ) {
         return ResponseEntity.ok().body(ApiResponse.success(adminService.getGroupMemberConfirmImageByDate(partyId, memberId, date)));
+    }
+
+    @PatchMapping(value = "/party/{partyId}/{memberId}")
+    @Operation(summary = "팟 날짜별 인증 이미지에 대한 승인 여부 처리 API", description = "팟 날짜별 인증 이미지에 대한 승인 여부를 처리합니다.")
+    public ResponseEntity<ApiResponse<Void>> changeGroupMemberConfirmedStatusByDate(
+            @PathVariable Long partyId,
+            @PathVariable Long memberId,
+            @RequestBody ConfirmRequest request
+    ) {
+        if (request.date() == null || request.auth() == null) throw new ValidationException();
+        adminService.changGroupMemberConfirmedStatusByDate(partyId, memberId, request);
+
+        return ResponseEntity.ok().body(ApiResponse.success());
     }
 }

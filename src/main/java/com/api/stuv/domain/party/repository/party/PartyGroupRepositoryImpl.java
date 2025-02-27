@@ -119,4 +119,12 @@ public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
                 .where(pg.id.eq(partyId))
                 .fetchOne();
     }
+
+    @Override
+    public void updatePartyStatusForPartyGroup(Long partyId, PartyStatus partyStatus) {
+        factory.update(pg)
+                .set(pg.status, partyStatus)
+                .where(pg.id.eq(partyId))
+                .execute();
+    }
 }

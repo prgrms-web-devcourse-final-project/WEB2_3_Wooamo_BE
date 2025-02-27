@@ -23,8 +23,15 @@ public class GroupMember {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private QuestStatus questStatus;
+    private QuestStatus questStatus = QuestStatus.PROGRESS;
 
     @Column(precision = 10)
     private BigDecimal bettingPoint;
+
+    @PrePersist
+    public void prePersist() {
+        if (questStatus == null) {
+            this.questStatus = QuestStatus.PROGRESS;
+        }
+    }
 }
