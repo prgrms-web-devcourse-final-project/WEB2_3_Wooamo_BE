@@ -3,11 +3,7 @@ package com.api.stuv.domain.user.service;
 import com.api.stuv.domain.auth.util.TokenUtil;
 import com.api.stuv.domain.timer.repository.StudyTimeRepository;
 import com.api.stuv.domain.user.dto.request.*;
-import com.api.stuv.domain.user.dto.response.ModifyProfileResponse;
-import com.api.stuv.domain.user.dto.response.UserBoardListResponse;
-import com.api.stuv.domain.user.dto.response.UserInformationResponse;
-import com.api.stuv.domain.user.dto.response.MyInformationResponse;
-import com.api.stuv.domain.user.dto.response.UserQuestStateResponse;
+import com.api.stuv.domain.user.dto.response.*;
 import com.api.stuv.domain.user.entity.HistoryType;
 import com.api.stuv.domain.user.entity.PointHistory;
 import com.api.stuv.domain.user.entity.User;
@@ -227,6 +223,18 @@ public class UserService {
 
         PointHistory pointHistory = new PointHistory(userId, HistoryType.PERSONAL, point, HistoryType.PERSONAL.getText());
         pointHistoryRepository.save(pointHistory);
+
+    }
+
+    public List<GetCostume> getUserCostume() {
+        Long userId = tokenUtil.getUserId();
+        if(userId == null){
+            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        List<GetCostume> costumeList = userRepository.getUserCostume(userId);
+
+        return costumeList;
 
     }
 
