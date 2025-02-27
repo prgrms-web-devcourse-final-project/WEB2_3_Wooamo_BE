@@ -123,7 +123,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
         List<Tuple> list = jpaQueryFactory
                 .select(uc.costumeId, i.newFilename)
                 .from(uc)
-                .join(i).on(i.entityType.eq(EntityType.COSTUME).and(i.entityId.eq(uc.costumeId)))
+                .leftJoin(i).on(i.entityType.eq(EntityType.COSTUME).and(i.entityId.eq(uc.costumeId)))
                 .where(uc.userId.eq(userId))
                 .fetch();
 
@@ -142,6 +142,6 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
                 ))
                 .toList();
 
-        return List.of();
+        return query;
     }
 }
