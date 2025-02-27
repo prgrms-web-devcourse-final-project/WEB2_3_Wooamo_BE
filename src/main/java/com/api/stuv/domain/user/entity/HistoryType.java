@@ -10,4 +10,8 @@ public enum HistoryType {
     CHARGE("충전");
 
     private final String text;
+
+    public String getText() {
+        return text;
+    }
 }

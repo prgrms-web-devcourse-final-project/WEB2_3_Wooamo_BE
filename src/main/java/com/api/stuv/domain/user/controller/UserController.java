@@ -147,4 +147,13 @@ public class UserController {
                 .body(ApiResponse.success(userService.userQuestState()));
     }
 
+    @Operation(summary = "개인 퀘스트 보상 받기 API", description = "개인의 일일 퀘스트 보상을 받습니다.")
+    @PostMapping("/reward")
+    private ResponseEntity<ApiResponse<Void>> userQuestReward() {
+        userService.userQuestReward();
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.success());
+    }
+
 }
