@@ -67,4 +67,8 @@ public class User extends BaseTimeEntity {
     public void updatePoint(BigDecimal point) {
         this.point = this.point.add(point);
     }
+
+    public void changeUserCostume(Long costumeId) {
+        this.costumeId = costumeId;
+    }
 }

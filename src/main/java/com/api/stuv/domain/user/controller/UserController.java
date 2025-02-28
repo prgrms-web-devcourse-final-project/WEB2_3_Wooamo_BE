@@ -168,4 +168,11 @@ public class UserController {
         return ResponseEntity.ok()
                 .body(ApiResponse.success(userService.getUserCostume()));
     }
+
+    @Operation(summary = "코스튬 변경 API", description = "사용자의 코스튬 목록을 조회합니다.")
+    @PostMapping("/costume/{costumeId}")
+    public ResponseEntity<ApiResponse<ChangeUserCostume>> changeUserCostume(@PathVariable("costumeId") Long costumeId) {
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(userService.changeUserCostume(costumeId)));
+    }
 }
