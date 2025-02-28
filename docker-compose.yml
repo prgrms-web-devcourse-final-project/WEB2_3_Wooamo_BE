@@ -1,10 +1,10 @@
 services:
   springboot:
-    image: "stuv-app"
+    image: gpemvjtmxm/stuv-app:latest
     container_name: stuv-app
     restart: always
     env_file:
-      - ./src/main/resources/.env
+      - /home/ubuntu/env/.env
 
     build:
       context: .
