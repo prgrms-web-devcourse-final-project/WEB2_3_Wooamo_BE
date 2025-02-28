@@ -35,6 +35,9 @@ public class SecurityConfig {
     @Value("${frontend.server}")
     private String frontInstance;
 
+    @Value("${ip}")
+    private String ip1;
+
     //복호화
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -50,7 +53,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", frontInstance));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", frontInstance, "http://"+ip1));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type", "access"));
         configuration.setExposedHeaders(Arrays.asList("Authorization", "Set-Cookie", "access"));

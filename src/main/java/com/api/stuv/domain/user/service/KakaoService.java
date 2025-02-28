@@ -73,7 +73,12 @@ public class KakaoService {
 
         //응답 설정
         response.setHeader("access", access);
-        response.addCookie(createCookie("refresh", refresh));
+        String refreshTokenCookie = String.format(
+                "refresh=%s; Max-Age=86400; Path=/; SameSite=None; Secure",
+                refresh
+        );
+        response.addHeader("Set-Cookie", refreshTokenCookie);
+
         response.setStatus(HttpStatus.OK.value());
 
         return "로그인";
