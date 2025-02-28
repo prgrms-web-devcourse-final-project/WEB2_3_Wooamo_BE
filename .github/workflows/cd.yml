@@ -5,15 +5,11 @@ on:
     branches:
       - main
       - develop
-  pull_request:
-    types:
-      - closed
 
 permissions: write-all
 
 jobs:
   build:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     runs-on: ubuntu-latest
     env:
       SPRING_PROFILES_ACTIVE: prod
@@ -63,7 +59,7 @@ jobs:
     needs: build
 
     steps:
-      - name: SSH 로 EC2 접속
+      - name: SSH로 EC2 접속
         uses: appleboy/ssh-action@v0.1.3
         env:
           ENV_VARS: ${{ secrets.ENV_VARS }}
