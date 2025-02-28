@@ -11,9 +11,7 @@ public record ChatMessageResponse(
         String roomId,
         Long senderId,
         String message,
-        Integer readByCount,
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-        LocalDateTime createdAt
+        Integer readByCount
 ) {
     public static ChatMessageResponse from(ChatMessage chatMessage){
         List<Long> readBy = chatMessage.getReadBy();
@@ -23,8 +21,7 @@ public record ChatMessageResponse(
                 chatMessage.getRoomId(),
                 chatMessage.getSenderId(),
                 chatMessage.getMessage(),
-                count,
-                chatMessage.getCreatedAt()
+                count
                 );
     }
 }

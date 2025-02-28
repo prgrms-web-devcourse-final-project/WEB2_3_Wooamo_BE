@@ -58,8 +58,7 @@ public class ChatMessageService {
                             chatMessage.getRoomId(),
                             chatMessage.getSenderId(),
                             chatMessage.getMessage(),
-                            unreadCount,
-                            chatMessage.getCreatedAt()
+                            unreadCount
                     );
                 })
                 .collect(Collectors.toList());
@@ -93,8 +92,7 @@ public class ChatMessageService {
                 response.roomId(),
                 response.senderId(),
                 response.message(),
-                unreadCount,
-                response.createdAt()
+                unreadCount
         );
     }
 
