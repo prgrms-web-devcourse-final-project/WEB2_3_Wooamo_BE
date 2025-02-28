@@ -19,10 +19,10 @@ public class Payment extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 20, nullable = false, unique = true)
+    @Column(nullable = false, unique = true)
     private String orderId;
 
-    @Column(length = 20, nullable = false, unique = true)
+    @Column(length = 64, unique = true)
     private String paymentKey;
 
     @Column(nullable = false)
@@ -34,12 +34,20 @@ public class Payment extends BaseTimeEntity {
     @Column(precision = 10, nullable = false)
     private BigDecimal point;
 
+    @Column(nullable = false)
+    private Boolean isPaymentSuccess;
+
     @Builder
-    public Payment(String orderId, String paymentKey, Long userId, BigDecimal amount, BigDecimal point) {
+    public Payment(String orderId, String paymentKey, Long userId, BigDecimal amount, BigDecimal point, Boolean isPaymentSuccess) {
         this.orderId = orderId;
         this.paymentKey = paymentKey;
         this.userId = userId;
         this.amount = amount;
         this.point = point;
+        this.isPaymentSuccess = isPaymentSuccess;
     }
+
+    public void setIsPaymentSuccess(Boolean isPaymentSuccess) { this.isPaymentSuccess = isPaymentSuccess; }
+    public void setPaymentKey(String paymentKey) { this.paymentKey = paymentKey; }
+
 }
