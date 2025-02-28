@@ -188,6 +188,8 @@ public class KakaoService {
         cookie.setMaxAge(24*60*60);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
+        cookie.setSecure(true);
+        cookie.setAttribute("SameSite", "None");
 
         return cookie;
     }
