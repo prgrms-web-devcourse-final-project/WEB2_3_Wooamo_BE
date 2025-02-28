@@ -60,7 +60,7 @@ public class ReissueController {
     private Cookie createCookie(String key, String value) {
         Cookie cookie = new Cookie(key, value);
         cookie.setMaxAge(24*60*60);
-        cookie.setHttpOnly(true);
+        cookie.setHttpOnly(false);
         cookie.setPath("/");
         cookie.setSecure(true);
         cookie.setAttribute("SameSite", "None");
