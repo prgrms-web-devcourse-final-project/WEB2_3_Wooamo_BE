@@ -108,13 +108,9 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         //응답 설정
         response.setHeader("access", access);
+        response.addCookie(createCookie("refresh", refresh));
 
-        String refreshTokenCookie = String.format(
-                "refresh=%s; Max-Age=86400; Path=/; SameSite=None; Secure",
-                refresh
-        );
-        response.addHeader("Set-Cookie", refreshTokenCookie);
-
+        //response.addHeader("Set-Cookie", refreshTokenCookie);
         response.setStatus(HttpStatus.OK.value());
         response.setContentType("application/json;charset=UTF-8");
         response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.success()));
@@ -130,7 +126,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private Cookie createCookie(String key, String value) {
         Cookie cookie = new Cookie(key, value);
         cookie.setMaxAge(24*60*60);
-        cookie.setHttpOnly(true);
+        //cookie.setHttpOnly(true);
         cookie.setPath("/");
         cookie.setSecure(true);
         cookie.setAttribute("SameSite", "None");
