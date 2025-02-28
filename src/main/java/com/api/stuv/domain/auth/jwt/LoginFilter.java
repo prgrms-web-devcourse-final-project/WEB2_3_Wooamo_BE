@@ -110,7 +110,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.setHeader("access", access);
         response.addCookie(createCookie("refresh", refresh));
 
-        //response.addHeader("Set-Cookie", refreshTokenCookie);
         response.setStatus(HttpStatus.OK.value());
         response.setContentType("application/json;charset=UTF-8");
         response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.success()));
