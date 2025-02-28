@@ -79,6 +79,7 @@ kakao:
   authentication:
     method: POST
     grant-type: authorization_code
+url: ${BE_BASE}
 ---
 spring:
   config:
