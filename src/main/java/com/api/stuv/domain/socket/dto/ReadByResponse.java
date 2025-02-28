@@ -5,8 +5,8 @@ import com.api.stuv.domain.socket.entity.ChatMessage;
 import java.util.List;
 
 public record ReadByResponse(
-        String id,
-        String room_id,
+        String chatId,
+        String roomId,
         Integer readByCount
 ) {
     public static ReadByResponse from(ChatMessage chatMessage) {
