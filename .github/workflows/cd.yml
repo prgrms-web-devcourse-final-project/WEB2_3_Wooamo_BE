@@ -74,4 +74,5 @@ jobs:
             sudo docker compose stop
             sudo docker compose rm -f
             sudo docker rmi gpemvjtmxm/stuv-app:latest
+            sudo docker compose pull
             sudo docker compose --env-file /home/ubuntu/env/.env up -d
