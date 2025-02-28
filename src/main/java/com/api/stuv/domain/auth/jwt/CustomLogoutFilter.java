@@ -92,18 +92,13 @@ public class CustomLogoutFilter extends GenericFilterBean {
         redisService.delete(refresh);
 
         //Refresh 토큰 Cookie 값 0
-//        Cookie cookie = new Cookie("refresh", null);
-//        cookie.setMaxAge(0);
-//        cookie.setPath("/");
-//        cookie.setSecure(true);    // 기존에 Secure가 있었다면 유지
-//        cookie.setAttribute("SameSite", "None"); // SameSite=None 추가
-        String refreshTokenCookie = String.format(
-                "refresh=%s; Max-Age=86400; Path=/; HttpOnly; SameSite=None; Secure",
-                null
-        );
-        response.addHeader("Set-Cookie", refreshTokenCookie);
+        Cookie cookie = new Cookie("refresh", null);
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        cookie.setSecure(true);    // 기존에 Secure가 있었다면 유지
+        cookie.setAttribute("SameSite", "None"); // SameSite=None 추가
 
-        //response.addCookie(cookie);
+        response.addCookie(cookie);
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("application/json;charset=UTF-8");
         response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.success()));
