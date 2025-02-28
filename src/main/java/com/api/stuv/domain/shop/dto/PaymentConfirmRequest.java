@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 
-public record TossPaymentConfirmRequest(
+public record PaymentConfirmRequest(
         @NotBlank(message = "고유 주문 번호를 입력해주세요")
         String orderId,
 
