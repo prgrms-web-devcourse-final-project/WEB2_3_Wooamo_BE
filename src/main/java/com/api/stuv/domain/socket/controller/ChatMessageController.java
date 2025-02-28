@@ -1,13 +1,12 @@
 package com.api.stuv.domain.socket.controller;
 
 
-import com.api.stuv.domain.socket.dto.ChatMessageResponse;
-import com.api.stuv.domain.socket.dto.ChatMessageRequest;
-import com.api.stuv.domain.socket.dto.ReadMessageResponse;
-import com.api.stuv.domain.socket.dto.ReadMessageRequest;
+import com.api.stuv.domain.socket.dto.*;
 
 import com.api.stuv.domain.socket.entity.ChatMessage;
 import com.api.stuv.domain.socket.service.ChatMessageService;
+import com.api.stuv.domain.socket.service.ChatRoomMemberService;
+import com.api.stuv.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -33,6 +33,7 @@ public class ChatMessageController {
     private final SimpMessagingTemplate messagingTemplate;
     private static final Logger logger = LoggerFactory.getLogger(ChatMessageController.class);
     private final ConcurrentMap<String, List<Long>> roomSessions = new ConcurrentHashMap<>();
+
 
     @Operation(summary = "채팅방 입장", description = "사용자가 채팅방에 입장할 때 등록합니다.")
     @MessageMapping("/chat/join")
@@ -90,7 +91,7 @@ public class ChatMessageController {
             List<Long> usersInRoom = roomSessions.getOrDefault(message.roomId(), Collections.emptyList());
             List<Long> readByList = new ArrayList<>(new HashSet<>(usersInRoom));
 
-            ChatMessage savedMessage = chatMessageService.saveMessage(
+            ChatMessageResponse savedMessage = chatMessageService.saveMessage(
                     new ChatMessageRequest(
                             message.roomId(),
                             message.senderId(),
@@ -99,11 +100,8 @@ public class ChatMessageController {
                     )
             );
 
-            // TODO: 저장 후 전체 메시지 목록을 조회하여 브로드캐스트 (읽음 상태도 포함)
-//          List<ChatMessage> messages = chatMessageService.findByRoomIdOrderByCreatedAtAsc(message.roomId());
-
             // 저장된 메시지를 채팅방 구독자에게 전송
-            messagingTemplate.convertAndSend("/topic/messages/" + message.roomId(), savedMessage);
+            messagingTemplate.convertAndSend("/topic/messages/" + message.roomId(), ApiResponse.success(savedMessage));
         }
     }
 
@@ -118,11 +116,13 @@ public class ChatMessageController {
 
         chatMessageService.markMessagesAsRead(readMessageRequest.roomId(), readMessageRequest.userId());
 
-        List<ChatMessageResponse> updatedMessages = chatMessageService.getMessagesByRoomIdPagination(
+        List<ReadByResponse> updatedReadByList = chatMessageService.getReadByForMessages(
                 readMessageRequest.roomId(),
-        PageRequest.of(pageValue, sizeValue));
+                PageRequest.of(pageValue, sizeValue)
+        );
 
-        messagingTemplate.convertAndSend("/topic/messages/" + readMessageRequest.roomId(), updatedMessages);
+        messagingTemplate.convertAndSend("/topic/read/" + readMessageRequest.roomId(), ApiResponse.success((updatedReadByList)));
     }
+
 
 }
