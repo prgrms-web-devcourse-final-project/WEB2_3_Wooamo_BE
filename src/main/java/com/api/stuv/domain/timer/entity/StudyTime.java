@@ -5,28 +5,22 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Getter
 @Entity
 @Table(name = "study_times")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@IdClass(StudyTimeId.class)
 public class StudyTime {
+    @Id private Long userId;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Id private Long categoryId;
 
-    private Long userId;
+    @Id private LocalDate studyDate;
 
-    private Long categoryId;
+    private Long studyTime;
 
-    private LocalDate studyDate;
-
-    private LocalTime studyTime;
-
-    @Builder
-    public StudyTime(Long userId, Long categoryId, LocalDate studyDate, LocalTime studyTime) {
+    public StudyTime(Long userId, Long categoryId, LocalDate studyDate, Long studyTime) {
         this.userId = userId;
         this.categoryId = categoryId;
         this.studyDate = studyDate;

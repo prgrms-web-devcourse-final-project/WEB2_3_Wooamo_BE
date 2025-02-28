@@ -11,7 +11,7 @@ import com.api.stuv.domain.user.entity.QUserCostume;
 import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
 import com.api.stuv.global.response.PageResponse;
-import com.api.stuv.global.util.email.common.TemplateUtils;
+import com.api.stuv.global.util.common.TemplateUtils;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;

@@ -13,7 +13,7 @@ import com.api.stuv.domain.user.entity.QUser;
 import com.api.stuv.domain.user.entity.QUserCostume;
 import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
-import com.api.stuv.global.util.email.common.TemplateUtils;
+import com.api.stuv.global.util.common.TemplateUtils;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
     @Override
     public MyInformationResponse getUserByMyId(Long myId) {
         Tuple informationDetails = jpaQueryFactory
-                .select(u.id, u.context, u.blogLink, u.nickname, u.point, i.newFilename, uc.costumeId)
+                .select(u.id, u.context, u.blogLink, u.nickname, u.point, u.role, i.newFilename, uc.costumeId)
                 .from(u)
                 .leftJoin(uc).on(u.costumeId.eq(uc.id))
                 .leftJoin(i).on(uc.costumeId.eq(i.entityId).and(i.entityType.eq(EntityType.COSTUME)))
@@ -47,6 +47,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
                 informationDetails.get(u.blogLink),
                 informationDetails.get(u.nickname),
                 informationDetails.get(u.point),
+                informationDetails.get(u.role),
                 s3ImageService.generateImageFile(
                         EntityType.COSTUME,
                         informationDetails.get(uc.costumeId),

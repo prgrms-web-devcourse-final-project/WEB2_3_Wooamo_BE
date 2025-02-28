@@ -1,4 +1,4 @@
-package com.api.stuv.global.util.email.common;
+package com.api.stuv.global.util.common;
 
 import com.querydsl.core.types.dsl.DateTimePath;
 import com.querydsl.core.types.dsl.Expressions;
