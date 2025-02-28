@@ -1,6 +1,10 @@
 package com.api.stuv.domain.user.service;
 
 import com.api.stuv.domain.auth.util.TokenUtil;
+import com.api.stuv.domain.image.entity.EntityType;
+import com.api.stuv.domain.image.entity.ImageFile;
+import com.api.stuv.domain.image.repository.ImageFileRepository;
+import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.domain.timer.repository.StudyTimeRepository;
 import com.api.stuv.domain.user.dto.request.*;
 import com.api.stuv.domain.user.dto.response.*;
@@ -29,6 +33,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 
 @Service
@@ -41,8 +46,10 @@ public class UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final EmailProvider  emailProvider;
     private final RedisService redisService;
+    private final S3ImageService s3ImageService;
     private final RandomName randomName;
     private final TokenUtil tokenUtil;
+    private final ImageFileRepository imageFileRepository;
 
     public void registerUser(UserRequest userRequest) {
         String email = userRequest.email();
@@ -226,7 +233,28 @@ public class UserService {
         List<GetCostume> costumeList = userRepository.getUserCostume(userId);
 
         return costumeList;
+    }
 
+    @Transactional
+    public ChangeUserCostume changeUserCostume(Long costumeId) {
+        Long userId = tokenUtil.getUserId();
+        if(userId == null){
+            throw new  NotFoundException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        user.changeUserCostume(costumeId);
+        userRepository.save(user);
+
+        ImageFile newFilename = imageFileRepository.findByEntityIdAndEntityType(costumeId, EntityType.COSTUME).orElseThrow(() ->  new NotFoundException(ErrorCode.COSTUME_NOT_FOUND));
+        String url = s3ImageService.generateImageFile(
+                        EntityType.COSTUME,
+                        costumeId,
+                        newFilename.getNewFilename());
+
+        ChangeUserCostume changeUserCostume = new ChangeUserCostume(url);
+
+        return changeUserCostume;
     }
 
 }
