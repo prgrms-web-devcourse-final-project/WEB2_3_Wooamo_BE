@@ -1,5 +1,5 @@
 frontend:
-  server: ${FE_BASE:http://localhost:3000}
+  server: ${FRONTEND_SERVER:http://localhost:3000}
 spring:
   application:
     name: stuv
