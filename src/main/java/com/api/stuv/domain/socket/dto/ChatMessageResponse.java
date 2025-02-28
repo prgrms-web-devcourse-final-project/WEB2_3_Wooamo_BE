@@ -7,19 +7,23 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record ChatMessageResponse(
+        String id,
         String roomId,
         Long senderId,
         String message,
-        List<Long> readBy,
+        Integer readByCount,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime createdAt
 ) {
     public static ChatMessageResponse from(ChatMessage chatMessage){
+        List<Long> readBy = chatMessage.getReadBy();
+        int count = (readBy != null) ? readBy.size() : 0;
         return new ChatMessageResponse(
+                chatMessage.getId(),
                 chatMessage.getRoomId(),
                 chatMessage.getSenderId(),
                 chatMessage.getMessage(),
-                chatMessage.getReadBy(),
+                count,
                 chatMessage.getCreatedAt()
                 );
     }
