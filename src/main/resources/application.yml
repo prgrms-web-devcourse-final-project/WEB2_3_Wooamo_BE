@@ -140,5 +140,5 @@ kakao:
   authentication:
     method: client_secret_post
     grant-type: authorization_code
-ip: ${IP1}
+ip: test
 ---
