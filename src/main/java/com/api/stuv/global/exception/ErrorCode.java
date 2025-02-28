@@ -79,7 +79,11 @@ public enum ErrorCode {
     // PARTY
     PARTY_NOT_FOUND(404, -9000, "해당 팟을 팢을 수 없습니다."),
     PARTY_INVALID_DATE(400, -9001, "해당 날짜는 팟의 인증 기간이 아닙니다."),
-    CONFIRM_IMAGE_NOT_FOUND(404, -9002, "해당 회원의 인증 이미지를 찾을 수 없습니다.")
+    CONFIRM_IMAGE_NOT_FOUND(404, -9002, "해당 회원의 인증 이미지를 찾을 수 없습니다."),
+
+    // PAYMENTS
+    PAYMENTS_MISMATCH(404, -10000, "결제 금액이 일치하지 않습니다."),
+    PAYMENTS_NOT_FOUND(400, -10001, "승인에 실패했습니다. 다시 시도해주세요")
     ;
 
     private final int status;
