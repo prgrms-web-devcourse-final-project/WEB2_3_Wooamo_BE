@@ -28,7 +28,7 @@ public class UserController {
     private final KakaoService kakaoService;
     private final TodoService todoService;
 
-    @Value("${url}")
+    @Value("${frontend.server}")
     private String url;
 
     @Operation(summary = "인증메일 전송 API", description = "인증 메일을 전송합니다.")
