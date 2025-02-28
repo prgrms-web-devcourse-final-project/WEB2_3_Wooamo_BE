@@ -114,6 +114,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
                 refresh
         );
         response.addHeader("Set-Cookie", refreshTokenCookie);
+
         response.setStatus(HttpStatus.OK.value());
         response.setContentType("application/json;charset=UTF-8");
         response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.success()));
@@ -126,14 +127,14 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.error("로그인에 실패했습니다.")));
     }
 
-//    private Cookie createCookie(String key, String value) {
-//        Cookie cookie = new Cookie(key, value);
-//        cookie.setMaxAge(24*60*60);
-//        cookie.setHttpOnly(true);
-//        cookie.setPath("/");
-//        cookie.setSecure(true);
-//        cookie.setAttribute("SameSite", "None");
-//
-//        return cookie;
-//    }
+    private Cookie createCookie(String key, String value) {
+        Cookie cookie = new Cookie(key, value);
+        cookie.setMaxAge(24*60*60);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setSecure(true);
+        cookie.setAttribute("SameSite", "None");
+
+        return cookie;
+    }
 }

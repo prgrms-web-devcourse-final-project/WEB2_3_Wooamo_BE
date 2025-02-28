@@ -103,7 +103,6 @@ public class CustomLogoutFilter extends GenericFilterBean {
         );
         response.addHeader("Set-Cookie", refreshTokenCookie);
 
-        //response.addCookie(cookie);
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("application/json;charset=UTF-8");
         response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.success()));
