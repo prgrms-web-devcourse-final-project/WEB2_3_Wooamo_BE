@@ -1,4 +1,4 @@
-package com.api.stuv.global.util.email;
+package com.api.stuv.global.util.scheduler;
 
 import com.api.stuv.domain.user.repository.TodoListRepository;
 import lombok.RequiredArgsConstructor;

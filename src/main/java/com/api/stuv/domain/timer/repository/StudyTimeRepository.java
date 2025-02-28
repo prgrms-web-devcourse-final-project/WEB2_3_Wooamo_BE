@@ -12,5 +12,5 @@ import java.util.List;
 public interface StudyTimeRepository extends JpaRepository<StudyTime, Long>, StudyTimeRepositoryCustom {
 
     @Query("SELECT studyTime FROM StudyTime WHERE userId = :userId AND studyDate = CURRENT DATE")
-    List<LocalTime> findStudyTimeByUserIdAndStudyDate(Long userId);
+    List<Long> findStudyTimeByUserIdAndStudyDate(Long userId);
 }
