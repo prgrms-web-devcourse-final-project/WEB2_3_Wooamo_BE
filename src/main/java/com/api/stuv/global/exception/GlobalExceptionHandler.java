@@ -33,7 +33,7 @@ public class GlobalExceptionHandler {
         String requiredType = requiredTypeClass.getSimpleName();
         String errorMessage = String.format("%s (파라미터명: %s, 요구 타입: %s)",
                 errorCode.getMessage(), paramName, requiredType);
-        log.error("[ERROR] methodArgumentTypeMismatchException - {}", e.getMessage());
+        log.error("[ERROR] handleMethodArgumentTypeMismatchException - {}", e.getMessage());
         return ResponseEntity
                 .status(errorCode.getStatus())
                 .body(ApiResponse.error(errorMessage));
@@ -43,12 +43,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DateTimeParseException.class)
     public ResponseEntity<ApiResponse<Void>> handleDateTimeParseException(DateTimeParseException e) {
         ErrorCode errorCode = ErrorCode.DATE_FORMAT_MISMATCH;
-        log.error("[ERROR] dateTimeParseException - {}", e.getMessage());
+        log.error("[ERROR] handleDateTimeParseException - {}", e.getMessage());
         return ResponseEntity
                 .status(errorCode.getStatus())
                 .body(ApiResponse.error(errorCode.getMessage()));
     }
-
 
     @ExceptionHandler(ExpressionException.class)
     protected ResponseEntity<ApiResponse<Void>> handleExpressionException(ExpressionException e) {
