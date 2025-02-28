@@ -75,7 +75,7 @@ public class KakaoService {
         response.setHeader("access", access);
         //response.addCookie(createCookie("refresh", refresh));
         String refreshTokenCookie = String.format(
-                "refresh=%s; Max-Age=86400; Path=/; HttpOnly; SameSite=None; Secure",
+                "refresh=%s; Max-Age=86400; Path=/; SameSite=None; Secure",
                 refresh
         );
         response.addHeader("Set-Cookie", refreshTokenCookie);

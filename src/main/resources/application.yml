@@ -79,7 +79,7 @@ kakao:
   authentication:
     method: POST
     grant-type: authorization_code
-
+ip: ${ip1}
 ---
 spring:
   config:

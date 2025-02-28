@@ -98,7 +98,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
 //        cookie.setSecure(true);    // 기존에 Secure가 있었다면 유지
 //        cookie.setAttribute("SameSite", "None"); // SameSite=None 추가
         String refreshTokenCookie = String.format(
-                "refresh=%s; Max-Age=86400; Path=/; HttpOnly; SameSite=None; Secure",
+                "refresh=%s; Max-Age=86400; Path=/; SameSite=None; Secure",
                 null
         );
         response.addHeader("Set-Cookie", refreshTokenCookie);
