@@ -1,36 +1,57 @@
 package com.api.stuv.domain.party.repository.confirm;
 
-import com.api.stuv.domain.image.dto.ImageResponse;
 import com.api.stuv.domain.image.entity.EntityType;
 import com.api.stuv.domain.image.entity.QImageFile;
-import com.api.stuv.domain.image.service.S3ImageService;
+import com.api.stuv.domain.party.entity.ConfirmStatus;
+import com.api.stuv.domain.party.entity.QGroupMember;
 import com.api.stuv.domain.party.entity.QQuestConfirm;
-import com.api.stuv.global.exception.ErrorCode;
-import com.api.stuv.global.exception.NotFoundException;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 public class QuestConfirmRepositoryImpl implements QuestConfirmRepositoryCustom {
 
     private final JPAQueryFactory factory;
-    private final S3ImageService s3ImageService;
     private final QQuestConfirm qc = QQuestConfirm.questConfirm;
+    private final QGroupMember gm = QGroupMember.groupMember;
     private final QImageFile i = QImageFile.imageFile;
 
     @Override
-    public ImageResponse findGroupMemberConfirmImageByDate(Long memberId, LocalDate date) {
-        Tuple result = factory.select(qc.memberId, i.newFilename)
+    public Tuple findGroupMemberConfirmImageByDate(Long partyId, Long memberId, LocalDate date) {
+        return factory.select(qc.memberId, i.newFilename)
                 .from(qc)
-                .join(i).on(qc.memberId.eq(i.entityId)
+                .join(gm).on(gm.id.eq(qc.memberId))
+                .join(i).on(qc.id.eq(i.entityId)
                         .and(i.entityType.eq(EntityType.CONFIRM)))
                 .where(qc.memberId.eq(memberId)
+                        .and(gm.groupId.eq(partyId))
                         .and(qc.confirmDate.eq(date)))
                 .fetchFirst();
-        if (result == null) throw new NotFoundException(ErrorCode.CONFIRM_IMAGE_NOT_FOUND);
-        return new ImageResponse(s3ImageService.generateImageFile(EntityType.CONFIRM, result.get(qc.memberId), result.get(i.newFilename)));
+    }
+
+    @Override
+    public void updateConfirmStatusByDate(Long memberId, ConfirmStatus status, LocalDate date) {
+        factory.update(qc)
+                .set(qc.confirmStatus, status)
+                .where(qc.memberId.eq(memberId)
+                        .and(qc.confirmDate.eq(date)))
+                .execute();
+    }
+
+    @Override
+    public boolean isSuccessStatusDuringPeriod(Long memberId, LocalDate startDate, LocalDate endDate) {
+        return Optional.ofNullable(
+                factory.select(qc.confirmDate.count()) // 성공한 인증 개수 조회
+                        .from(qc)
+                        .where(qc.memberId.eq(memberId)
+                                .and(qc.confirmDate.between(startDate, endDate))
+                                .and(qc.confirmStatus.eq(ConfirmStatus.SUCCESS))) // 성공한 경우만 카운트
+                        .fetchOne()
+        ).orElse(0L).equals(ChronoUnit.DAYS.between(startDate, endDate) + 1);
     }
 }

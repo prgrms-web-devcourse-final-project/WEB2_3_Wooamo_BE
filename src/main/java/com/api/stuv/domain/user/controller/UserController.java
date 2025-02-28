@@ -12,9 +12,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -25,6 +27,9 @@ public class UserController {
     private final UserService userService;
     private final KakaoService kakaoService;
     private final TodoService todoService;
+
+    @Value("${frontend.server}")
+    private String url;
 
     @Operation(summary = "인증메일 전송 API", description = "인증 메일을 전송합니다.")
     @PostMapping("/auth/send")
@@ -55,8 +60,8 @@ public class UserController {
 
     @Operation(summary = "카카오 로그인 API", description = "카카오 로그인 API 입니다.")
     @GetMapping("/kakaoLogin")
-    private ResponseEntity<ApiResponse<String>> kakaoLogin(@RequestParam("code") String code, HttpServletResponse response, HttpServletRequest request){
-
+    private ResponseEntity<ApiResponse<String>> kakaoLogin(@RequestParam("code") String code, HttpServletResponse response, HttpServletRequest request) throws IOException {
+        response.sendRedirect(url + "/");
         return ResponseEntity.ok()
                 .body(ApiResponse.success(kakaoService.kakaoLogin(code, response, request)));
     }
@@ -147,4 +152,20 @@ public class UserController {
                 .body(ApiResponse.success(userService.userQuestState()));
     }
 
+    @Operation(summary = "개인 퀘스트 보상 받기 API", description = "개인의 일일 퀘스트 보상을 받습니다.")
+    @PostMapping("/reward")
+    private ResponseEntity<ApiResponse<Void>> userQuestReward() {
+        userService.userQuestReward();
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.success());
+    }
+
+    @Operation(summary = "코스튬 조회 API", description = "사용자의 코스튬 목록을 조회합니다.")
+    @GetMapping("/costume")
+    public ResponseEntity<ApiResponse<List<GetCostume>>> getUserCostume() {
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(userService.getUserCostume()));
+    }
 }

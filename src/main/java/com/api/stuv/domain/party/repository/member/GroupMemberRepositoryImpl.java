@@ -6,14 +6,15 @@ import com.api.stuv.domain.image.entity.QImageFile;
 import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.domain.party.entity.QGroupMember;
 import com.api.stuv.domain.party.entity.QQuestConfirm;
+import com.api.stuv.domain.party.entity.QuestStatus;
 import com.api.stuv.domain.user.entity.QUser;
 import com.api.stuv.domain.user.entity.QUserCostume;
-import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 public class GroupMemberRepositoryImpl implements GroupMemberRepositoryCustom {
@@ -37,7 +38,7 @@ public class GroupMemberRepositoryImpl implements GroupMemberRepositoryCustom {
                 )
                 .from(gm)
                 .leftJoin(u).on(gm.userId.eq(u.id))
-                .leftJoin(uc).on(u.costumeId.eq(uc.costumeId))
+                .leftJoin(uc).on(u.costumeId.eq(uc.id))
                 .leftJoin(i).on(uc.costumeId.eq(i.entityId)
                         .and(i.entityType.eq(EntityType.COSTUME)))
                 .leftJoin(qc).on(gm.id.eq(qc.memberId))
@@ -51,5 +52,25 @@ public class GroupMemberRepositoryImpl implements GroupMemberRepositoryCustom {
                         tp.get(u.nickname),
                         tp.get(qc.confirmStatus.stringValue())
                 )).toList();
+    }
+
+    @Override
+    public void updateQuestStatusForMember(Long partyId, Long memberId, QuestStatus questStatus) {
+        factory.update(gm)
+                .set(gm.questStatus, questStatus)
+                .where(gm.groupId.eq(partyId)
+                        .and(gm.id.eq(memberId)))
+                .execute();
+    }
+
+    @Override
+    public boolean isMemberNotProgressByGroupId(Long partyId) {
+        return Optional.ofNullable(
+                factory.select(gm.count())
+                        .from(gm)
+                        .where(gm.groupId.eq(partyId)
+                                .and(gm.questStatus.eq(QuestStatus.PROGRESS))) // PROGRESS 상태가 있는지 확인
+                        .fetchOne()
+        ).orElse(0L) == 0;
     }
 }
