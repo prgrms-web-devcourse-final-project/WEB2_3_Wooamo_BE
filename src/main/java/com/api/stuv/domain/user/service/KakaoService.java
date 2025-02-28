@@ -72,12 +72,7 @@ public class KakaoService {
         redisService.save(refresh, email, Duration.ofDays(1));
 
         //응답 설정
-        response.setHeader("access", access);
-        String refreshTokenCookie = String.format(
-                "refresh=%s; Max-Age=86400; Path=/; SameSite=None; Secure",
-                refresh
-        );
-        response.addHeader("Set-Cookie", refreshTokenCookie);
+        response.addCookie(createCookie("refresh", refresh));
 
         response.setStatus(HttpStatus.OK.value());
 
@@ -191,7 +186,7 @@ public class KakaoService {
     private Cookie createCookie(String key, String value) {
         Cookie cookie = new Cookie(key, value);
         cookie.setMaxAge(24*60*60);
-        cookie.setHttpOnly(true);
+        //cookie.setHttpOnly(true);
         cookie.setPath("/");
         cookie.setSecure(true);
         cookie.setAttribute("SameSite", "None");
