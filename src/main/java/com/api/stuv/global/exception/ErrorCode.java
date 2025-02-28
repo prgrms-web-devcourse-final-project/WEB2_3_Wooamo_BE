@@ -86,7 +86,11 @@ public enum ErrorCode {
 
     //TIMER
     TIMER_NOT_EXIST(404, -12000, "저장된 타이머가 없습니다."),
-    CATEGORY_NOT_FOUND(404, -12001, "타이머 카테고리를 찾을 수 없습니다.")
+    CATEGORY_NOT_FOUND(404, -12001, "타이머 카테고리를 찾을 수 없습니다."),
+
+    // PAYMENTS
+    PAYMENTS_MISMATCH(404, -13000, "결제 금액이 일치하지 않습니다."),
+    PAYMENTS_NOT_FOUND(400, -13001, "승인에 실패했습니다. 다시 시도해주세요")
     ;
 
     private final int status;
