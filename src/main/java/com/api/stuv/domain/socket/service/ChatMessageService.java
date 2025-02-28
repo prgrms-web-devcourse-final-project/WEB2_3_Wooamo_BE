@@ -88,7 +88,7 @@ public class ChatMessageService {
         ChatMessageResponse response = ChatMessageResponse.from(savedMessage);
         int unreadCount = chatRoomMemberService.getRoomMemberCount(request.roomId()) - response.readByCount();
         return new ChatMessageResponse(
-                response.id(),
+                response.chatId(),
                 response.roomId(),
                 response.senderId(),
                 response.message(),
@@ -112,8 +112,8 @@ public class ChatMessageService {
                 .stream()
                 .map(ReadByResponse::from)
                 .map(r -> new ReadByResponse(
-                        r.id(),
-                        r.room_id(),
+                        r.chatId(),
+                        r.roomId(),
                         totalMembers - r.readByCount() // unreadCount 계산
                 ))
                 .collect(Collectors.toList());

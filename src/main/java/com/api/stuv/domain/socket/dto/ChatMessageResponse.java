@@ -1,13 +1,10 @@
 package com.api.stuv.domain.socket.dto;
 
 import com.api.stuv.domain.socket.entity.ChatMessage;
-import com.fasterxml.jackson.annotation.JsonFormat;
-
-import java.time.LocalDateTime;
 import java.util.List;
 
 public record ChatMessageResponse(
-        String id,
+        String chatId,
         String roomId,
         Long senderId,
         String message,
