@@ -147,4 +147,20 @@ public class UserController {
                 .body(ApiResponse.success(userService.userQuestState()));
     }
 
+    @Operation(summary = "개인 퀘스트 보상 받기 API", description = "개인의 일일 퀘스트 보상을 받습니다.")
+    @PostMapping("/reward")
+    private ResponseEntity<ApiResponse<Void>> userQuestReward() {
+        userService.userQuestReward();
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.success());
+    }
+
+    @Operation(summary = "코스튬 조회 API", description = "사용자의 코스튬 목록을 조회합니다.")
+    @GetMapping("/costume")
+    public ResponseEntity<ApiResponse<List<GetCostume>>> getUserCostume() {
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(userService.getUserCostume()));
+    }
 }

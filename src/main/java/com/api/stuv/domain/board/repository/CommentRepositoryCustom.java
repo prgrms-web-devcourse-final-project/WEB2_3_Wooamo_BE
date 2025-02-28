@@ -5,5 +5,5 @@ import com.api.stuv.global.response.PageResponse;
 import org.springframework.data.domain.Pageable;
 
 public interface CommentRepositoryCustom {
-    PageResponse<CommentResponse> getCommentList(Long boardId, Pageable pageable, String imageUrl);
+    PageResponse<CommentResponse> getCommentList(Long boardId, Pageable pageable);
 }

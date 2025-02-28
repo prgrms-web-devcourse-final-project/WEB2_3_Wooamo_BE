@@ -9,9 +9,8 @@ import java.time.LocalTime;
 import java.util.List;
 
 @Repository
-public interface StudyTimeRepository extends JpaRepository<StudyTime, Long> {
+public interface StudyTimeRepository extends JpaRepository<StudyTime, Long>, StudyTimeRepositoryCustom {
 
     @Query("SELECT studyTime FROM StudyTime WHERE userId = :userId AND studyDate = CURRENT DATE")
     List<LocalTime> findStudyTimeByUserIdAndStudyDate(Long userId);
-
 }
