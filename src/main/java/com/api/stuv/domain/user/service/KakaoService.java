@@ -170,13 +170,15 @@ public class KakaoService {
         KakaoUserRequest kakaoUser = getKakaoUser(accessToken);
 
         User user = userRepository.findBySocialId(kakaoUser.socialId());
+
         if(user != null){
             login(kakaoUser, response, request);
             return "로그인되었습니다.";
         }
         else{
             userService.registerKakaoUser(kakaoUser);
-            return "회원가입이 완료되었습니다.";
+            login(kakaoUser, response, request);
+            return "회원가입후 로그인 완료되었습니다.";
         }
 
     }
