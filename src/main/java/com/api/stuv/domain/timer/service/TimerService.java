@@ -143,6 +143,6 @@ public class TimerService {
                 formatSecondsToTime(
                         studyTimeRepository.sumTotalStudyTimeByDaily(userId, today)
                 )
-        )
+        );
     }
 }
