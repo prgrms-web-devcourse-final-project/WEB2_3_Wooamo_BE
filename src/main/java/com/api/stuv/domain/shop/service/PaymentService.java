@@ -13,8 +13,11 @@ import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.net.URI;
@@ -34,9 +37,11 @@ public class PaymentService {
     private final TokenUtil tokenUtil;
     public static final String TOSS_URL = "https://api.tosspayments.com/v1/payments/";
     private final UserRepository userRepository;
+    private static final Logger log = LoggerFactory.getLogger(PaymentService.class);
+    private static final HttpClient httpClient = HttpClient.newHttpClient();
 
     @Value("${payment.toss.test_secret_api_key}")
-    private String secreteKey;
+    private String secretKey;
 
     public PaymentService(PaymentRepository paymentRepository, TokenUtil tokenUtil, UserRepository userRepository) {
         this.paymentRepository = paymentRepository;
@@ -44,6 +49,7 @@ public class PaymentService {
         this.userRepository = userRepository;
     }
 
+    @Transactional
     public PaymentResponse requestPayments(PaymentRequest request) {
         String orderId = UUID.randomUUID().toString();
         Payment payment = Payment.builder()
@@ -57,6 +63,7 @@ public class PaymentService {
         return new PaymentResponse(payment.getOrderId(), payment.getAmount(), payment.getPoint());
     }
 
+    @Transactional
     public void requestConfirm(PaymentConfirmRequest request) throws IOException, InterruptedException {
         Payment payment = paymentRepository.findByOrderId(request.orderId());
         User user = userRepository.findById(tokenUtil.getUserId()).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
@@ -65,13 +72,11 @@ public class PaymentService {
         HttpResponse<String> response = requestConfirmPayments(request);
 
         if(response.statusCode() == 200){
-            payment.setIsPaymentSuccess(Boolean.TRUE); // true 변경
-            payment.setPaymentKey(request.paymentKey()); // payment 저장
-            paymentRepository.save(payment);
+            payment.setPaymentSuccess();
+            payment.setPaymentKey(request.paymentKey());
             user.updatePoint(request.point());
-            userRepository.save(user);
         } else {
-            requestCancelPayments(request.paymentKey(), "승인 실패");
+            log.error("Payment confirmation failed : {}", response.body());
             throw new PaymentsNotFoundException();
         }
     }
@@ -85,9 +90,10 @@ public class PaymentService {
         HttpRequest httpRequest = HttpRequest.newBuilder()
                 .uri(URI.create(TOSS_URL + "confirm"))
                 .header("Authorization", getAuthorization())
+                .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(requestBody)))
                 .build();
-        return HttpClient.newHttpClient().send(httpRequest, HttpResponse.BodyHandlers.ofString());
+        return httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
     }
 
     public void requestCancelPayments(String paymentKey, String cancelReason) throws IOException, InterruptedException{
@@ -97,10 +103,10 @@ public class PaymentService {
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString("{\"cancelReason\":\"" + cancelReason + "\"}"))
                 .build();
-        HttpClient.newHttpClient().send(httpRequest, HttpResponse.BodyHandlers.ofString());
+        httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
     }
 
     public String getAuthorization() {
-        return "Basic " + Base64.getEncoder().encodeToString((secreteKey + ":").getBytes(StandardCharsets.UTF_8));
+        return "Basic " + Base64.getEncoder().encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8));
     }
 }
