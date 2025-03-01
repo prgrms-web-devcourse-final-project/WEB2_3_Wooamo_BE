@@ -8,7 +8,7 @@ public record BoardDetailResponse(
         String nickname,
         String profile,
         String boardType,
-        String createAt,
+        String createdAt,
         Boolean isConfirm,
         String context,
         List<String> images
