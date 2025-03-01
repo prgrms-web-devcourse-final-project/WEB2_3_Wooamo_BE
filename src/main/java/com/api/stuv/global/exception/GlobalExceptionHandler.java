@@ -2,6 +2,7 @@ package com.api.stuv.global.exception;
 
 import com.api.stuv.global.response.ApiResponse;
 import com.querydsl.core.types.ExpressionException;
+import io.lettuce.core.RedisConnectionException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.ResponseEntity;
@@ -17,11 +18,10 @@ public class GlobalExceptionHandler {
     // DB 관련 예외
     @ExceptionHandler(DataAccessException.class)
     protected ResponseEntity<ApiResponse<Void>> handleDataAccessException(DataAccessException e) {
-        ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
         log.error("[ERROR] handleDataAccessException - {}", e.getMessage());
         return ResponseEntity
-                .status(errorCode.getStatus())
-                .body(ApiResponse.error(errorCode.getMessage()));
+                .status(ErrorCode.DATABASE_ERROR.getStatus())
+                .body(ApiResponse.error(ErrorCode.DATABASE_ERROR.getMessage()));
     }
 
     // 타입 변환 관련 예외
@@ -92,6 +92,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(e.getErrorCode().getStatus())
                 .body(ApiResponse.error(e.getErrorCode().getMessage()));
+    }
+
+    @ExceptionHandler(RedisConnectionException.class)
+    protected ResponseEntity<ApiResponse<Void>> handleRedisConnectionException(RedisConnectionException e) {
+        log.error("[ERROR] handleRedisConnectionException - {}", e.getMessage());
+        return ResponseEntity
+                .status(ErrorCode.REDIS_NOT_CONNECTED.getStatus())
+                .body(ApiResponse.error(ErrorCode.REDIS_NOT_CONNECTED.getMessage()));
     }
 
     // 그 외 예외
