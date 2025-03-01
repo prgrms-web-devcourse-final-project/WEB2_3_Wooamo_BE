@@ -46,6 +46,14 @@ public class ShopController {
         return ResponseEntity.ok().body(ApiResponse.success());
     }
 
+    @PostMapping(value = "/costume/random")
+    public ResponseEntity<ApiResponse<CostumeRandomResponse>> addRandomCostume(
+            @RequestBody @Valid CostumeRandomRequest costumeRandomRequest
+    ){
+        CostumeRandomResponse response = costumeService.purchaseRandomCostume(costumeRandomRequest.point());
+        return ResponseEntity.ok().body(ApiResponse.success(response));
+    }
+
     @PostMapping(value = "/payments")
     public ResponseEntity<ApiResponse<PaymentResponse>> requestPayments (
             @RequestBody @Valid PaymentRequest paymentRequest

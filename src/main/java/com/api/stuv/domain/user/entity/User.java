@@ -1,6 +1,6 @@
 package com.api.stuv.domain.user.entity;
 
-import com.api.stuv.domain.user.dto.request.ModifyProfileRequest;
+import com.api.stuv.domain.shop.exception.PointNotEnoughException;
 import com.api.stuv.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -69,6 +69,7 @@ public class User extends BaseTimeEntity {
     }
 
     public void subtractPoint(BigDecimal point) {
+        if(this.point.compareTo(point) < 0) { throw new PointNotEnoughException(); }
         this.point = this.point.subtract(point);
     }
 
