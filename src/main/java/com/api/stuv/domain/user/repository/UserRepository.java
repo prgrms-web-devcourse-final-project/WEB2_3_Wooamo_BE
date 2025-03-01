@@ -26,7 +26,4 @@ public interface UserRepository extends JpaRepository<User, Long>, UserRepositor
 
     Optional<User> findById(Long userId);
 
-    @Query("SELECT u.point FROM User u WHERE u.id = :userId")
-    BigDecimal findPointByUserId(Long userId);
-
 }

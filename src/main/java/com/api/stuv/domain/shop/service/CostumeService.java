@@ -42,9 +42,8 @@ public class CostumeService {
         User user = userRepository.findById(tokenUtil.getUserId()).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
         costumeRepository.findById(request.costumeId()).orElseThrow(() -> new NotFoundException(ErrorCode.COSTUME_NOT_FOUND));
         userCostumeRepository.findCostumeIdByUserId(user.getId(), request.costumeId()).ifPresent( userCostume -> { throw new CostumeAlreadyException(); });
-        if(userRepository.findPointByUserId(user.getId()).compareTo(request.point()) < 0){ throw new PointNotEnoughException(); }
+        if(user.getPoint().compareTo(request.point()) <0){ throw new PointNotEnoughException(); }
         user.subtractPoint(request.point());
-        UserCostume userCostume = UserCostume.builder().userId(user.getId()).costumeId(request.costumeId()).build();
-        userCostumeRepository.save(userCostume);
+        userCostumeRepository.save(new UserCostume(user.getId(), request.costumeId()));
     }
 }
