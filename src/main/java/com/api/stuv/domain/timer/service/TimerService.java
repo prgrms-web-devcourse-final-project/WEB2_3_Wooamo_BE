@@ -1,6 +1,7 @@
 package com.api.stuv.domain.timer.service;
 
 import com.api.stuv.domain.auth.util.TokenUtil;
+import com.api.stuv.domain.timer.dto.response.StudyDateTimeResponse;
 import com.api.stuv.domain.timer.dto.request.AddTimerCategoryRequest;
 import com.api.stuv.domain.timer.dto.response.AddTimerCategoryResponse;
 import com.api.stuv.domain.timer.dto.response.TimerListResponse;
@@ -15,8 +16,12 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
+import static com.api.stuv.domain.timer.util.TimerUtil.formatSecondsToTime;
 
 @Service
 @RequiredArgsConstructor
@@ -61,14 +66,6 @@ public class TimerService {
         return formatSecondsToTime(study);
     }
 
-    private String formatSecondsToTime(Long seconds) {
-        long hours = seconds / 3600;
-        long minutes = (seconds % 3600) / 60;
-        long secs = seconds % 60;
-
-        return String.format("%02d:%02d:%02d", hours, minutes, secs);
-    }
-
     public AddTimerCategoryResponse addTimerCategory(AddTimerCategoryRequest addTimerCategoryRequest) {
         Long userId = tokenUtil.getUserId();
         if(userId == null){
@@ -102,5 +99,21 @@ public class TimerService {
         }
 
         timerRepository.delete(timer);
+    }
+
+    public List<StudyDateTimeResponse> getMonthlyStudyRecord(int year, int month) {
+        LocalDate firstDay = LocalDate.of(year, month, 1);
+        LocalDate lastDay = YearMonth.of(year, month).atEndOfMonth();
+
+        Long userId = tokenUtil.getUserId();
+
+        Map<LocalDate, Long> studyMap = studyTimeRepository.sumTotalStudyTimeByDate(userId, firstDay, lastDay);
+
+        return firstDay.datesUntil(lastDay.plusDays(1))
+                .map(date -> new StudyDateTimeResponse(
+                        date,
+                        formatSecondsToTime(studyMap.getOrDefault(date, 0L))
+                ))
+                .toList();
     }
 }

@@ -5,6 +5,8 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class StudyTimeRepositoryImpl implements StudyTimeRepositoryCustom {
@@ -21,5 +23,24 @@ public class StudyTimeRepositoryImpl implements StudyTimeRepositoryCustom {
                         st.studyDate.eq(date)
                 )
                 .fetchOne();
+    }
+
+    @Override
+    public Map<LocalDate, Long> sumTotalStudyTimeByDate(Long userId, LocalDate startDate, LocalDate endDate) {
+        return factory.select(
+                        st.studyDate,
+                        st.studyTime.sum().coalesce(0L)
+                )
+                .from(st)
+                .where(st.userId.eq(userId)
+                        .and(st.studyDate.between(startDate, endDate)))
+                .groupBy(st.studyDate)
+                .orderBy(st.studyDate.asc())
+                .fetch()
+                .stream()
+                .collect(Collectors.toMap(
+                        tuple -> tuple.get(st.studyDate),
+                        tuple -> tuple.get(1, Long.class)
+                ));
     }
 }
