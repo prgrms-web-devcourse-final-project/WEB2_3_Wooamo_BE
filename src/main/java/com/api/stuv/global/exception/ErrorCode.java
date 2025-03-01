@@ -69,6 +69,8 @@ public enum ErrorCode {
 
     // COSTUME
     COSTUME_NOT_FOUND(404, -7000, "해당 코스튬을 찾을 수 없습니다."),
+    COSTUME_ALREADY_PRESENT(400, -7001, "이미 구매한 코스튬 입니다."),
+    COSTUME_NOT_PURCHASE(400, -7992, "구매할 수 있는 코스튬이 없습니다"),
 
     // IMAGE
     IMAGE_NAME_NOT_FOUND(404, -8000, "해당 이미지를 찾을 수 없습니다."),
@@ -92,7 +94,8 @@ public enum ErrorCode {
 
     // PAYMENTS
     PAYMENTS_MISMATCH(404, -13000, "결제 금액이 일치하지 않습니다."),
-    PAYMENTS_NOT_FOUND(400, -13001, "승인에 실패했습니다. 다시 시도해주세요")
+    PAYMENTS_NOT_FOUND(400, -13001, "승인에 실패했습니다. 다시 시도해주세요"),
+    POINT_NOT_ENOUGH(400, -13002, "포인트가 부족합니다.")
     ;
 
     private final int status;
