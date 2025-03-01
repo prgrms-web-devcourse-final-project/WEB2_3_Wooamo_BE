@@ -133,4 +133,16 @@ public class TimerService {
                 )
         );
     }
+
+    public StudyDateTimeResponse getDilyStudyRecord() {
+        LocalDate today = LocalDate.now();
+        Long userId = tokenUtil.getUserId();
+        userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+
+        return new StudyDateTimeResponse(
+                formatSecondsToTime(
+                        studyTimeRepository.sumTotalStudyTimeByDaily(userId, today)
+                )
+        )
+    }
 }

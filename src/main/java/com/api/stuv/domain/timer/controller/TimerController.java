@@ -78,4 +78,12 @@ public class TimerController {
                 timerService.getWeeklyStudyRecord()
         ));
     }
+
+    @Operation(summary = "회원 일간 공부 시간 조회 API", description = "회원이 하루 동안 공부한 시간을 조회합니다.")
+    @GetMapping("/time/daily")
+    public ResponseEntity<ApiResponse<StudyDateTimeResponse>> dailyStudyTime() {
+        return ResponseEntity.ok().body(ApiResponse.success(
+                timerService.getDilyStudyRecord()
+        ));
+    }
 }

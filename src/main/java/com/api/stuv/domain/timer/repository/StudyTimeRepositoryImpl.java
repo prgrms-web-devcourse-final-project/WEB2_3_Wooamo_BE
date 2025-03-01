@@ -54,4 +54,15 @@ public class StudyTimeRepositoryImpl implements StudyTimeRepositoryCustom {
                         .and(st.studyDate.between(startOfWeek, endOfWeek)))
                 .fetchOne();
     }
+
+    @Override
+    public Long sumTotalStudyTimeByDaily(Long userId, LocalDate today) {
+        return factory.select(
+                        st.studyTime.sum().coalesce(0L)
+                )
+                .from(st)
+                .where(st.userId.eq(userId)
+                        .and(st.studyDate.eq(today)))
+                .fetchOne();
+    }
 }
