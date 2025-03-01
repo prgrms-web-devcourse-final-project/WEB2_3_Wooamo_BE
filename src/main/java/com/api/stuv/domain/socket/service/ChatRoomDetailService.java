@@ -1,5 +1,6 @@
 package com.api.stuv.domain.socket.service;
 
+import com.api.stuv.domain.party.repository.party.PartyGroupRepository;
 import com.api.stuv.domain.socket.dto.ChatRoomResponse;
 import com.api.stuv.domain.socket.entity.ChatMessage;
 import com.api.stuv.domain.socket.entity.ChatRoom;
@@ -25,6 +26,7 @@ public class ChatRoomDetailService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
+    private final PartyGroupRepository partyGroupRepository;
 
     // 특정 senderId가 포함된 채팅방의 roomId 목록 조회
     public List<String> getRoomIdsBySenderId(Long senderId, Pageable pageable) {
@@ -53,14 +55,16 @@ public class ChatRoomDetailService {
                 .map(room -> {
                     ChatMessage latestMessage = chatMessageRepository.findTopByRoomIdOrderByCreatedAtDesc(room.getRoomId());
 
-                    String profileImageUrl = null;
-                    if ("PRIVATE".equals(room.getRoomType()) && latestMessage != null) {
-                        profileImageUrl = userRepository.getCostumeInfoByUserId(latestMessage.getSenderId());
+                    if ("PRIVATE".equals(room.getRoomType())) {
+                        String profileImageUrl = (latestMessage != null) ? userRepository.getCostumeInfoByUserId(latestMessage.getSenderId()) : null;
+                        return ChatRoomResponse.from(room, latestMessage, profileImageUrl, null);
+                    } else if ("GROUP".equals(room.getRoomType())) {
+                        String groupName = partyGroupRepository.findPartyGroupNameByUserId(senderId);
+                        return ChatRoomResponse.from(room, latestMessage, null, groupName);
                     }
-
-                    return ChatRoomResponse.from(room, latestMessage, profileImageUrl);
+                    return ChatRoomResponse.from(room, latestMessage, null, null);
                 })
-                .sorted(Comparator.comparing(ChatRoomResponse::createdAt, Comparator.reverseOrder())) // 최신 메시지 기준 내림차순 정렬
+                .sorted(Comparator.comparing(ChatRoomResponse::createdAt, Comparator.reverseOrder()))
                 .collect(Collectors.toList());
     }
 }
