@@ -68,6 +68,7 @@ public enum ErrorCode {
     // COSTUME
     COSTUME_NOT_FOUND(404, -7000, "해당 코스튬을 찾을 수 없습니다."),
     COSTUME_ALREADY_PRESENT(400, -7001, "이미 구매한 코스튬 입니다."),
+    COSTUME_NOT_PURCHASE(400, -7992, "구매할 수 있는 코스튬이 없습니다"),
 
     // IMAGE
     IMAGE_NAME_NOT_FOUND(404, -8000, "해당 이미지를 찾을 수 없습니다."),
