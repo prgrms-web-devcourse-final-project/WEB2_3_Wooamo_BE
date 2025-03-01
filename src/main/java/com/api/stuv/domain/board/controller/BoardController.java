@@ -87,8 +87,8 @@ public class BoardController {
     // TODO: 이후 알림 기능 추가
     @Operation(summary = "댓글 생성 API", description = "댓글을 생성합니다.")
     @PostMapping("/{boardId}/comment")
-    public ResponseEntity<ApiResponse<Void>> createComment(@PathVariable Long boardId, @RequestBody String context) {
-        boardService.createComment(tokenUtil.getUserId(), boardId, context);
+    public ResponseEntity<ApiResponse<Void>> createComment(@PathVariable Long boardId, @RequestBody CommentRequest request) {
+        boardService.createComment(tokenUtil.getUserId(), boardId, request.context());
         return ResponseEntity.ok().body(ApiResponse.success());
     }
   
