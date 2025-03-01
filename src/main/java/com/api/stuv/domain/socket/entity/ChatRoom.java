@@ -30,6 +30,9 @@ public class ChatRoom {
     @Field("room_type")
     private String roomType;
 
+    @Field("room_name")
+    private String roomName;
+
     @Field("members")
     private List<Long> members;
 
