@@ -35,9 +35,6 @@ public class SecurityConfig {
     @Value("${frontend.server}")
     private String frontInstance;
 
-    @Value("${ip}")
-    private String ip1;
-
     //복호화
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {

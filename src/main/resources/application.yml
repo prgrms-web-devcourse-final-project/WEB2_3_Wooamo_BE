@@ -1,5 +1,5 @@
 frontend:
-  server: ${FRONTEND_SERVER:http://localhost:3000}
+  server: ${FE_BASE:http://localhost:3000}
 spring:
   application:
     name: stuv
@@ -79,7 +79,6 @@ kakao:
   authentication:
     method: POST
     grant-type: authorization_code
-ip: ${IP1}
 ---
 spring:
   config:
@@ -140,5 +139,4 @@ kakao:
   authentication:
     method: client_secret_post
     grant-type: authorization_code
-ip: test
 ---
