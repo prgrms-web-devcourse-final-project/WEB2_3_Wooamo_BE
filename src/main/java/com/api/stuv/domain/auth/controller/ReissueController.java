@@ -61,7 +61,7 @@ public class ReissueController {
         Cookie cookie = new Cookie(key, value);
         cookie.setMaxAge(24*60*60);
         cookie.setHttpOnly(true);
-        cookie.setDomain("");
+        cookie.setDomain("localhost");
         cookie.setPath("/");
 
         return cookie;
