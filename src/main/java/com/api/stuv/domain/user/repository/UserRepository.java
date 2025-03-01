@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,5 +25,8 @@ public interface UserRepository extends JpaRepository<User, Long>, UserRepositor
     User findBySocialId(Long socialId);
 
     Optional<User> findById(Long userId);
+
+    @Query("SELECT u.point FROM User u WHERE u.id = :userId")
+    BigDecimal findPointByUserId(Long userId);
 
 }
