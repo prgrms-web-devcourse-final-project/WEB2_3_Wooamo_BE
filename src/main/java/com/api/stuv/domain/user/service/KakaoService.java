@@ -72,8 +72,8 @@ public class KakaoService {
         redisService.save(refresh, email, Duration.ofDays(1));
 
         //응답 설정
+        response.setHeader("access", access);
         response.addCookie(createCookie("refresh", refresh));
-
         response.setStatus(HttpStatus.OK.value());
 
         return "로그인";
@@ -188,7 +188,7 @@ public class KakaoService {
         cookie.setMaxAge(24*60*60);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
-//        cookie.setSecure(true);
+        cookie.setSecure(true);
         cookie.setAttribute("SameSite", "None");
 
         return cookie;
