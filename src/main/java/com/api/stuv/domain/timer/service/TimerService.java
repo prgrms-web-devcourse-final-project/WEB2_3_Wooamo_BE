@@ -108,7 +108,7 @@ public class TimerService {
         LocalDate lastDay = YearMonth.of(year, month).atEndOfMonth();
 
         Long userId = tokenUtil.getUserId();
-        userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        if (!userRepository.existsById(userId)) throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
 
         Map<LocalDate, Long> studyMap = studyTimeRepository.sumTotalStudyTimeByDate(userId, firstDay, lastDay);
 
@@ -125,7 +125,7 @@ public class TimerService {
         LocalDate startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         LocalDate endOfWeek = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
         Long userId = tokenUtil.getUserId();
-        userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        if (!userRepository.existsById(userId)) throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
 
         return new StudyDateTimeResponse(
                 formatSecondsToTime(
@@ -134,15 +134,11 @@ public class TimerService {
         );
     }
 
-    public StudyDateTimeResponse getDilyStudyRecord() {
+    public StudyDateTimeResponse getDailyStudyRecord() {
         LocalDate today = LocalDate.now();
         Long userId = tokenUtil.getUserId();
-        userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        if (!userRepository.existsById(userId)) throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
 
-        return new StudyDateTimeResponse(
-                formatSecondsToTime(
-                        studyTimeRepository.sumTotalStudyTimeByDaily(userId, today)
-                )
-        );
+        return studyTimeRepository.sumTotalStudyTimeByDaily(userId, today);
     }
 }

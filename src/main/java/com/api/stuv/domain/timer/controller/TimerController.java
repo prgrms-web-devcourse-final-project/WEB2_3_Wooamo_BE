@@ -10,7 +10,6 @@ import com.api.stuv.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -83,7 +82,7 @@ public class TimerController {
     @GetMapping("/time/daily")
     public ResponseEntity<ApiResponse<StudyDateTimeResponse>> dailyStudyTime() {
         return ResponseEntity.ok().body(ApiResponse.success(
-                timerService.getDilyStudyRecord()
+                timerService.getDailyStudyRecord()
         ));
     }
 }

@@ -1,12 +1,17 @@
 package com.api.stuv.domain.timer.repository;
 
+import com.api.stuv.domain.timer.dto.response.StudyDateTimeResponse;
 import com.api.stuv.domain.timer.entity.QStudyTime;
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.api.stuv.domain.timer.util.TimerUtil.formatSecondsToTime;
 
 @RequiredArgsConstructor
 public class StudyTimeRepositoryImpl implements StudyTimeRepositoryCustom {
@@ -56,13 +61,23 @@ public class StudyTimeRepositoryImpl implements StudyTimeRepositoryCustom {
     }
 
     @Override
-    public Long sumTotalStudyTimeByDaily(Long userId, LocalDate today) {
-        return factory.select(
+    public StudyDateTimeResponse sumTotalStudyTimeByDaily(Long userId, LocalDate today) {
+        Tuple result = factory.select(
+                        st.studyDate.coalesce(today),
                         st.studyTime.sum().coalesce(0L)
                 )
                 .from(st)
                 .where(st.userId.eq(userId)
                         .and(st.studyDate.eq(today)))
                 .fetchOne();
+
+        if (result == null) {
+            return new StudyDateTimeResponse(today, formatSecondsToTime(0L));
+        }
+
+        LocalDate studyDate = result.get(st.studyDate.coalesce(today));
+        Long studyTime = result.get(st.studyTime.sum().coalesce(0L));
+
+        return new StudyDateTimeResponse(studyDate, formatSecondsToTime(studyTime));
     }
 }
