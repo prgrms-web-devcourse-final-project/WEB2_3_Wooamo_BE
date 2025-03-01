@@ -1,8 +1,8 @@
 package com.api.stuv.domain.timer.controller;
 
-import com.api.stuv.domain.timer.dto.request.AddTimerCatetoryRequest;
+import com.api.stuv.domain.timer.dto.request.AddTimerCategoryRequest;
 import com.api.stuv.domain.timer.dto.request.StudyTimeRequest;
-import com.api.stuv.domain.timer.dto.response.AddTimerCatetoryResponse;
+import com.api.stuv.domain.timer.dto.response.AddTimerCategoryResponse;
 import com.api.stuv.domain.timer.dto.response.TimerListResponse;
 import com.api.stuv.domain.timer.service.TimerService;
 import com.api.stuv.global.response.ApiResponse;
@@ -24,7 +24,7 @@ public class TimerController {
     private final TimerService timerService;
 
     @Operation(summary = "타이머 목록 조회 API", description = "타이머 목록을 조회합니다")
-    @GetMapping("")
+    @GetMapping
     public ResponseEntity<ApiResponse<List<TimerListResponse>>> getTimerList() {
 
         return ResponseEntity.ok()
@@ -34,10 +34,10 @@ public class TimerController {
     @Transactional
     @Operation(summary = "타이머 카테고리 추가 API", description = "타이머를 저장할 카테고리를 추가합니다")
     @PostMapping("/category")
-    public ResponseEntity<ApiResponse<AddTimerCatetoryResponse>> addTimerCategory(@RequestBody @Valid AddTimerCatetoryRequest addTimerCatetoryRequest) {
+    public ResponseEntity<ApiResponse<AddTimerCategoryResponse>> addTimerCategory(@RequestBody AddTimerCategoryRequest addTimerCategoryRequest) {
 
         return ResponseEntity.ok()
-                .body(ApiResponse.success(timerService.addTimerCategory(addTimerCatetoryRequest)));
+                .body(ApiResponse.success(timerService.addTimerCategory(addTimerCategoryRequest)));
     }
 
     @Operation(summary = "타이머 공부시간 저장 API", description = "타이머의 공부시간을 저장합니다.")

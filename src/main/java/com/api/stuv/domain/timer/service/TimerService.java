@@ -1,13 +1,12 @@
 package com.api.stuv.domain.timer.service;
 
 import com.api.stuv.domain.auth.util.TokenUtil;
-import com.api.stuv.domain.timer.dto.request.AddTimerCatetoryRequest;
-import com.api.stuv.domain.timer.dto.response.AddTimerCatetoryResponse;
+import com.api.stuv.domain.timer.dto.request.AddTimerCategoryRequest;
+import com.api.stuv.domain.timer.dto.response.AddTimerCategoryResponse;
 import com.api.stuv.domain.timer.dto.response.TimerListResponse;
 import com.api.stuv.domain.timer.entity.Timer;
 import com.api.stuv.domain.timer.repository.StudyTimeRepository;
 import com.api.stuv.domain.timer.repository.TimerRepository;
-import com.api.stuv.domain.user.entity.User;
 import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
@@ -15,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -71,15 +69,15 @@ public class TimerService {
         return String.format("%02d:%02d:%02d", hours, minutes, secs);
     }
 
-    public AddTimerCatetoryResponse addTimerCategory(AddTimerCatetoryRequest  addTimerCatetoryRequest) {
+    public AddTimerCategoryResponse addTimerCategory(AddTimerCategoryRequest addTimerCategoryRequest) {
         Long userId = tokenUtil.getUserId();
         if(userId == null){
             throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
         }
 
-        Timer timer = AddTimerCatetoryRequest.from(addTimerCatetoryRequest, userId);
+        Timer timer = AddTimerCategoryRequest.from(addTimerCategoryRequest, userId);
         timerRepository.save(timer);
-        return new AddTimerCatetoryResponse(timer.getId());
+        return new AddTimerCategoryResponse(timer.getId());
     }
 
     public void recordStudyTime(Long categoryId, Long time) {
