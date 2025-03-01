@@ -35,7 +35,7 @@ public class ChatMessage {
     private String message;
 
     @Field("read_by")
-    @Builder.Default
+//    @Builder.Default
     private List<Long> readBy = new ArrayList<>();
 
     @Field("created_at")
