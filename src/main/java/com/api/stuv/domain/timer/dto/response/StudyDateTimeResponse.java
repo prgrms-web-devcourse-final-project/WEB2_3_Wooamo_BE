@@ -9,4 +9,7 @@ public record StudyDateTimeResponse(
         LocalDate studyDate,
         String studyTime
 ) {
+    public StudyDateTimeResponse(String studyTime) {
+        this(null, studyTime);
+    }
 }

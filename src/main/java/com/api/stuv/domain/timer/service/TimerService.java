@@ -15,8 +15,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -106,6 +108,7 @@ public class TimerService {
         LocalDate lastDay = YearMonth.of(year, month).atEndOfMonth();
 
         Long userId = tokenUtil.getUserId();
+        userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         Map<LocalDate, Long> studyMap = studyTimeRepository.sumTotalStudyTimeByDate(userId, firstDay, lastDay);
 
@@ -115,5 +118,19 @@ public class TimerService {
                         formatSecondsToTime(studyMap.getOrDefault(date, 0L))
                 ))
                 .toList();
+    }
+
+    public StudyDateTimeResponse getWeeklyStudyRecord() {
+        LocalDate today = LocalDate.now();
+        LocalDate startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate endOfWeek = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+        Long userId = tokenUtil.getUserId();
+        userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+
+        return new StudyDateTimeResponse(
+                formatSecondsToTime(
+                        studyTimeRepository.sumTotalStudyTimeByWeekly(userId, startOfWeek, endOfWeek)
+                )
+        );
     }
 }

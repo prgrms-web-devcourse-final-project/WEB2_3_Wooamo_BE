@@ -60,7 +60,7 @@ public class TimerController {
                 .body(ApiResponse.success());
     }
 
-    @Operation(summary = "회원 월간 공부시간 조회 API", description = "회원이 월간 동안 공부한 시간을 조회합니다.")
+    @Operation(summary = "회원 월간 공부 시간 조회 API", description = "회원이 월간 동안 공부한 시간을 조회합니다.")
     @GetMapping("/time/monthly")
     public ResponseEntity<ApiResponse<List<StudyDateTimeResponse>>> monthlyStudyTime(
             @RequestParam int year,
@@ -68,6 +68,14 @@ public class TimerController {
     ) {
         return ResponseEntity.ok().body(ApiResponse.success(
                 timerService.getMonthlyStudyRecord(year, month)
+        ));
+    }
+
+    @Operation(summary = "회원 주간 공부 시간 조회 API", description = "회원이 주간 동안 공부한 시간을 조회합니다.")
+    @GetMapping("/time/weekly")
+    public ResponseEntity<ApiResponse<StudyDateTimeResponse>> weeklyStudyTime() {
+        return ResponseEntity.ok().body(ApiResponse.success(
+                timerService.getWeeklyStudyRecord()
         ));
     }
 }

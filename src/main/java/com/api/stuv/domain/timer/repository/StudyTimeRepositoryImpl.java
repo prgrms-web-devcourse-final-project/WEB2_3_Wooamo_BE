@@ -43,4 +43,15 @@ public class StudyTimeRepositoryImpl implements StudyTimeRepositoryCustom {
                         tuple -> tuple.get(1, Long.class)
                 ));
     }
+
+    @Override
+    public Long sumTotalStudyTimeByWeekly(Long userId, LocalDate startOfWeek, LocalDate endOfWeek) {
+        return factory.select(
+                        st.studyTime.sum().coalesce(0L)
+                )
+                .from(st)
+                .where(st.userId.eq(userId)
+                        .and(st.studyDate.between(startOfWeek, endOfWeek)))
+                .fetchOne();
+    }
 }
