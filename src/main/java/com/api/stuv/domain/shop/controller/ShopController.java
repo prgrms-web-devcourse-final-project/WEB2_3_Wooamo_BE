@@ -1,9 +1,6 @@
 package com.api.stuv.domain.shop.controller;
 
-import com.api.stuv.domain.shop.dto.CostumeResponse;
-import com.api.stuv.domain.shop.dto.PaymentConfirmRequest;
-import com.api.stuv.domain.shop.dto.PaymentRequest;
-import com.api.stuv.domain.shop.dto.PaymentResponse;
+import com.api.stuv.domain.shop.dto.*;
 import com.api.stuv.domain.shop.service.CostumeService;
 import com.api.stuv.domain.shop.service.PaymentService;
 import com.api.stuv.global.response.ApiResponse;
@@ -39,6 +36,14 @@ public class ShopController {
     ) {
         return ResponseEntity.ok().body(ApiResponse.success(
                 costumeService.getCostume(costumeId)));
+    }
+
+    @PostMapping(value = "/costume")
+    public ResponseEntity<ApiResponse<Void>> addUserCostume(
+            @RequestBody @Valid CostumePurchaseRequest costumePurchaseRequest
+    ){
+        costumeService.purchaseCostume(costumePurchaseRequest);
+        return ResponseEntity.ok().body(ApiResponse.success());
     }
 
     @PostMapping(value = "/payments")
