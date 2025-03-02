@@ -5,6 +5,7 @@ import com.api.stuv.domain.socket.dto.*;
 
 import com.api.stuv.domain.socket.entity.ChatMessage;
 import com.api.stuv.domain.socket.service.ChatMessageService;
+import com.api.stuv.domain.socket.service.ChatRoomDetailService;
 import com.api.stuv.domain.socket.service.ChatRoomMemberService;
 import com.api.stuv.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,14 +31,15 @@ import java.util.concurrent.ConcurrentMap;
 @Tag(name = "ChatMessage", description = "메세지 관련 WebSocket API")
 public class ChatMessageController {
     private final ChatMessageService chatMessageService;
+    private final ChatRoomDetailService chatRoomDetailService;
     private final SimpMessagingTemplate messagingTemplate;
     private static final Logger logger = LoggerFactory.getLogger(ChatMessageController.class);
     private final ConcurrentMap<String, List<Long>> roomSessions = new ConcurrentHashMap<>();
-
+    private final Set<Long> listPageSubscribers = ConcurrentHashMap.newKeySet();
 
     @Operation(summary = "채팅방 입장", description = "사용자가 채팅방에 입장할 때 등록합니다.")
     @MessageMapping("/chat/join")
-    public void addUserToRoom(@Payload ReadMessageRequest  readMessageRequest) {
+    public void addUserToRoom(@Payload ReadMessageRequest readMessageRequest) {
         String roomId = readMessageRequest.roomId();
         Long userId = readMessageRequest.userId();
 
@@ -65,7 +67,7 @@ public class ChatMessageController {
 
     @Operation(summary = "채팅방 퇴장", description = "사용자가 채팅방에서 나갈 때 삭제합니다.")
     @MessageMapping("/chat/leave")
-    public void removeUserFromRoom(@Payload ReadMessageRequest  readMessageRequest) {
+    public void removeUserFromRoom(@Payload ReadMessageRequest readMessageRequest) {
         String roomId = readMessageRequest.roomId();
         Long userId = readMessageRequest.userId();
 
@@ -79,6 +81,33 @@ public class ChatMessageController {
 
         logger.info("{} 사용자가 채팅방 {}에서 나감", userId, roomId);
         logger.info("현재 채팅방 사용자: {}", roomSessions);
+    }
+
+    @Operation(summary = "채팅 목록 페이지 입장", description = "사용자가 채팅 목록 페이지에 들어올 때 등록합니다.")
+    @MessageMapping("/chat/list/join")
+    public void addUserToListPage(@Payload ReadMessageRequest readMessageRequest) {
+        Long userId = readMessageRequest.userId();
+        if (listPageSubscribers.add(userId)) {
+            logger.info("{} 사용자가 채팅방 목록 페이지에 입장했습니다.", userId);
+        } else {
+            logger.info("{} 사용자가 이미 채팅방 목록 페이지에 등록되어 있습니다.", userId);
+        }
+        logger.info("현재 목록 페이지 구독자: {}", listPageSubscribers);
+
+        List<ChatRoomResponse> roomList = chatRoomDetailService.getSortedRoomListBySenderId(
+                readMessageRequest.userId(),
+                PageRequest.of(0, 10)
+        );
+        messagingTemplate.convertAndSend("/topic/rooms/" + userId, ApiResponse.success(roomList));
+    }
+
+    @Operation(summary = "채팅 목록 페이지 퇴장", description = "사용자가 채팅 목록 페이지를 나갈 때 제거합니다.")
+    @MessageMapping("/chat/list/leave")
+    public void removeUserFromListPage(@Payload ReadMessageRequest readMessageRequest) {
+        Long userId = readMessageRequest.userId();
+        listPageSubscribers.remove(userId);
+        logger.info("{} 사용자가 채팅방 목록 페이지에서 나갔습니다.", userId);
+        logger.info("현재 목록 페이지 구독자: {}", listPageSubscribers);
     }
 
     @Operation(summary = "메시지 전송", description = "채팅방에 메시지를 전송합니다.")
@@ -102,6 +131,15 @@ public class ChatMessageController {
 
             // 저장된 메시지를 채팅방 구독자에게 전송
             messagingTemplate.convertAndSend("/topic/messages/" + message.roomId(), ApiResponse.success(savedMessage));
+
+            // 채팅 목록 페이지에 있는 모든 사용자에게 업데이트 전송
+            for (Long subscriberId : listPageSubscribers) {
+                List<ChatRoomResponse> roomList = chatRoomDetailService.getSortedRoomListBySenderId(
+                        subscriberId,
+                        PageRequest.of(0, 10)
+                );
+                messagingTemplate.convertAndSend("/topic/rooms/" + subscriberId, ApiResponse.success(roomList));
+            }
         }
     }
 
