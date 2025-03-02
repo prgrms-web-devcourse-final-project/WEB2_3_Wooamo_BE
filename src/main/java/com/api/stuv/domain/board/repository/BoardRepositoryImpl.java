@@ -45,7 +45,7 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 
         List<BoardResponse> query = jpaQueryFactory
                 .select(
-                        b.id.as("boardId"),
+                        b.id,
                         b.title,
                         b.boardType,
                         b.context,
@@ -60,7 +60,7 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
                 .fetch()
                 .stream()
                 .map(tuple -> new BoardResponse(
-                        tuple.get(b.id.as("boardId")),
+                        tuple.get(b.id),
                         tuple.get(b.title),
                         tuple.get(b.boardType),
                         tuple.get(b.context),
