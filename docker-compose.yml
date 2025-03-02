@@ -5,6 +5,8 @@ services:
     restart: always
     env_file:
       - /home/ubuntu/env/.env
+    environment:
+      - TZ=Asia/Seoul
 
     build:
       context: .
