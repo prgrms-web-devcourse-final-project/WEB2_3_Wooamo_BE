@@ -26,10 +26,8 @@ public class ChatController {
     @Operation(summary = "채팅방 목록 리스트 API", description = "user가 포함된 채팅방 목록을 가져옵니다.")
     @GetMapping("/list/{senderId}")
     public ResponseEntity<ApiResponse<List<ChatRoomResponse>>> getRoomListBySenderId(
-            @PathVariable Long senderId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        List<ChatRoomResponse> roomList = chatRoomDetailService.getSortedRoomListBySenderId(senderId, PageRequest.of(page, size));
+            @PathVariable Long senderId) {
+        List<ChatRoomResponse> roomList = chatRoomDetailService.getSortedRoomListBySenderId(senderId);
 
         return ResponseEntity.ok(ApiResponse.success(roomList));
     }

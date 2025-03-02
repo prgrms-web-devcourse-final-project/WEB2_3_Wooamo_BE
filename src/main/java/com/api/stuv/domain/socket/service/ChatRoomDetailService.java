@@ -29,23 +29,22 @@ public class ChatRoomDetailService {
     private final PartyGroupRepository partyGroupRepository;
 
 
-    public List<ChatRoomResponse> getSortedRoomListBySenderId(Long senderId, Pageable pageable) {
-        Page<ChatRoom> chatRooms = chatRoomRepository.findByMembersContaining(senderId, pageable);
+    public List<ChatRoomResponse> getSortedRoomListBySenderId(Long senderId) {
+        List<ChatRoom> chatRooms = chatRoomRepository.findByMembersContaining(senderId);
 
         if (chatRooms.isEmpty()) {
             throw new NotFoundException(ErrorCode.CHAT_ROOM_NOT_FOUND);
         }
 
-        return chatRooms.getContent()
-                .stream()
+        return chatRooms.stream()
                 .map(room -> {
                     ChatMessage latestMessage = chatMessageRepository.findTopByRoomIdOrderByCreatedAtDesc(room.getRoomId());
 
                     int unreadCount = chatMessageRepository.countUnreadMessages(room.getRoomId(), senderId);
 
                     if ("PRIVATE".equals(room.getRoomType())) {
-                        String profileImageUrl = (latestMessage != null) ? userRepository.getCostumeInfoByUserId(latestMessage.getSenderId()) : null;
-                        return ChatRoomResponse.from(room, latestMessage, profileImageUrl, null, unreadCount);
+                        String profile = (latestMessage != null) ? userRepository.getCostumeInfoByUserId(latestMessage.getSenderId()) : null;
+                        return ChatRoomResponse.from(room, latestMessage, profile, null, unreadCount);
                     } else if ("GROUP".equals(room.getRoomType())) {
                         String groupName = partyGroupRepository.findPartyGroupNameByUserId(senderId);
                         return ChatRoomResponse.from(room, latestMessage, null, groupName, unreadCount);

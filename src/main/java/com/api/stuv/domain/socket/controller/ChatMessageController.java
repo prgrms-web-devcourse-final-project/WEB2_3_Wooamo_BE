@@ -95,8 +95,7 @@ public class ChatMessageController {
         logger.info("현재 목록 페이지 구독자: {}", listPageSubscribers);
 
         List<ChatRoomResponse> roomList = chatRoomDetailService.getSortedRoomListBySenderId(
-                readMessageRequest.userId(),
-                PageRequest.of(0, 10)
+                readMessageRequest.userId()
         );
         messagingTemplate.convertAndSend("/topic/rooms/" + userId, ApiResponse.success(roomList));
     }
@@ -135,8 +134,7 @@ public class ChatMessageController {
             // 채팅 목록 페이지에 있는 모든 사용자에게 업데이트 전송
             for (Long subscriberId : listPageSubscribers) {
                 List<ChatRoomResponse> roomList = chatRoomDetailService.getSortedRoomListBySenderId(
-                        subscriberId,
-                        PageRequest.of(0, 10)
+                        subscriberId
                 );
                 messagingTemplate.convertAndSend("/topic/rooms/" + subscriberId, ApiResponse.success(roomList));
             }
