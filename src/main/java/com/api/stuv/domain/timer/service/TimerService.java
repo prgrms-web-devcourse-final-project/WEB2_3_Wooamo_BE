@@ -206,6 +206,7 @@ public class TimerService {
                     if (dto == null) return null;
 
                     return new RankInfoResponse(
+                            userId,
                             s3ImageService.generateImageFile(
                                     EntityType.COSTUME, dto.entityId(), dto.filename()
                             ),
