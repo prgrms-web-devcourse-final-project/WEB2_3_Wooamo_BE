@@ -14,6 +14,7 @@ import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
@@ -142,7 +143,24 @@ public class TimerService {
         Long userId = tokenUtil.getUserId();
         if (!userRepository.existsById(userId)) throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
 
-        return studyTimeRepository.sumTotalStudyTimeByDaily(userId, today);
+        HashOperations<String, String, String> hashOps = redisTemplate.opsForHash();
+        Set<String> keys = redisTemplate.keys(STUDY_KEY + ":" + userId + ":*");
+        System.out.println(userId);
+
+        if (keys == null || keys.isEmpty()) {
+            return studyTimeRepository.sumTotalStudyTimeByDaily(userId, today);
+        }
+
+        long totalStudyTime = 0L;
+        for (String key : keys) {
+            String studyTime = hashOps.get(key, today.toString());
+            if (studyTime != null) {
+                System.out.println(Long.parseLong(studyTime));
+                totalStudyTime += Long.parseLong(studyTime);
+            }
+        }
+
+        return new StudyDateTimeResponse(today, formatSecondsToTime(totalStudyTime));
     }
 
     public RankResponse getUserRank() {
@@ -188,6 +206,7 @@ public class TimerService {
                     if (dto == null) return null;
 
                     return new RankInfoResponse(
+                            userId,
                             s3ImageService.generateImageFile(
                                     EntityType.COSTUME, dto.entityId(), dto.filename()
                             ),
