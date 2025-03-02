@@ -206,7 +206,7 @@ public class TimerService {
         LocalDate endOfWeek = startOfWeek.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
 
         String rankUpdateKey = "weekly_study_rank";
-        List<UserRankDTO> rankings = studyTimeRepository.findWeeklyUserRank(startOfWeek, endOfWeek);
+        List<UserRankDTO> rankings = studyTimeRepository.findWeeklyUserRank(startOfWeek, endOfWeek, null);
 
         redisTemplate.delete(rankUpdateKey);
         if (rankings.isEmpty()) {

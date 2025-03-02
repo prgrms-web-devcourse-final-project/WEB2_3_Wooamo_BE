@@ -12,5 +12,5 @@ public interface StudyTimeRepositoryCustom {
     Map<LocalDate, Long> sumTotalStudyTimeByDate(Long userId, LocalDate startDate, LocalDate endDate);
     Long sumTotalStudyTimeByWeekly(Long userId, LocalDate startOfWeek, LocalDate endOfWeek);
     StudyDateTimeResponse sumTotalStudyTimeByDaily(Long userId, LocalDate today);
-    List<UserRankDTO> findWeeklyUserRank(LocalDate startOfWeek, LocalDate endOfWeek);
+    List<UserRankDTO> findWeeklyUserRank(LocalDate startOfWeek, LocalDate endOfWeek, Integer limit);
 }

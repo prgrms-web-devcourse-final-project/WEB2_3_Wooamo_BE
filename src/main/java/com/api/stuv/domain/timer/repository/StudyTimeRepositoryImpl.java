@@ -5,13 +5,14 @@ import com.api.stuv.domain.timer.dto.response.StudyDateTimeResponse;
 import com.api.stuv.domain.timer.entity.QStudyTime;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.api.stuv.domain.timer.util.TimerUtil.formatSecondsToTime;
@@ -23,14 +24,14 @@ public class StudyTimeRepositoryImpl implements StudyTimeRepositoryCustom {
 
     @Override
     public Long findStudyTimeById(Long userId, Long categoryId, LocalDate date) {
-        return factory.select(st.studyTime.coalesce(0L))
+        return Optional.ofNullable(factory.select(st.studyTime.coalesce(0L))
                 .from(st)
                 .where(
                         st.userId.eq(userId),
                         st.categoryId.eq(categoryId),
                         st.studyDate.eq(date)
                 )
-                .fetchOne();
+                .fetchOne()).orElse(0L);
     }
 
     @Override
@@ -85,8 +86,8 @@ public class StudyTimeRepositoryImpl implements StudyTimeRepositoryCustom {
     }
 
     @Override
-    public List<UserRankDTO> findWeeklyUserRank(LocalDate startOfWeek, LocalDate endOfWeek) {
-        return factory.select(Projections.constructor(
+    public List<UserRankDTO> findWeeklyUserRank(LocalDate startOfWeek, LocalDate endOfWeek, Integer limit) {
+        JPAQuery<UserRankDTO> query = factory.select(Projections.constructor(
                         UserRankDTO.class,
                         st.userId,
                         st.studyTime.sum().coalesce(0L)
@@ -94,7 +95,9 @@ public class StudyTimeRepositoryImpl implements StudyTimeRepositoryCustom {
                 .from(st)
                 .where(st.studyDate.between(startOfWeek, endOfWeek))
                 .groupBy(st.userId)
-                .orderBy(st.studyTime.sum().desc())
-                .fetch();
+                .orderBy(st.studyTime.sum().desc());
+        if (limit != null && limit > 0) query.limit(limit);
+
+        return query.fetch();
     }
 }

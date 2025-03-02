@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 
 @Repository
-public interface PointHistoryRepository extends JpaRepository<PointHistory, Long> {
+public interface PointHistoryRepository extends JpaRepository<PointHistory, Long>, PointHistoryRepositoryCustom {
 
     @Query("SELECT p FROM PointHistory p WHERE p.userId = :userId AND p.updatedAt >= :startOfDay AND p.updatedAt < :endOfDay AND p.transactionType = 'PERSONAL'")
     PointHistory findByUserIdAndTransactionType(@Param("userId") Long userId,
