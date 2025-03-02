@@ -145,21 +145,24 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
 
     @Override
     public String getCostumeInfoByUserId(Long userId) {
-        String filename = jpaQueryFactory
-                .select(i.newFilename)
+        Tuple costumeDetails = jpaQueryFactory
+                .select(i.entityId, i.newFilename)
                 .from(u)
                 .leftJoin(uc).on(u.costumeId.eq(uc.id))
                 .leftJoin(i).on(uc.costumeId.eq(i.entityId).and(i.entityType.eq(EntityType.COSTUME)))
                 .where(u.id.eq(userId))
                 .fetchFirst();
 
-        if (filename == null) {
+        if (costumeDetails == null || costumeDetails.get(i.newFilename) == null) {
             return null;
         }
 
+        Long entityId = costumeDetails.get(i.entityId);
+        String filename = costumeDetails.get(i.newFilename);
+
         return s3ImageService.generateImageFile(
                 EntityType.COSTUME,
-                null,
+                entityId,
                 filename
         );
     }
