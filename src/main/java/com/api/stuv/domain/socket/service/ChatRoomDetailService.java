@@ -123,5 +123,7 @@ public class ChatRoomDetailService {
             throw new NotFoundException(ErrorCode.CHAT_ROOM_NOT_FOUND);
         }
         chatRoomRepository.deleteByRoomId(roomId);
+
+        chatMessageRepository.deleteByRoomId(roomId);
     }
 }
