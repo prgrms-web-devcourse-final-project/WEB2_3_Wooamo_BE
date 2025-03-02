@@ -32,6 +32,6 @@ public class TodoList extends BaseTimeEntity {
 
     public void updateTodoList(ModifyTodoRequest modifyTodoRequest){
         this.todo = modifyTodoRequest.todo();
-        this.isChecked = modifyTodoRequest.isChecked();
+        this.isChecked = modifyTodoRequest.isChecked() == null ? false : modifyTodoRequest.isChecked();
     }
 }
