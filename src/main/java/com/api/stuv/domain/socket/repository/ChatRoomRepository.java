@@ -1,6 +1,7 @@
 package com.api.stuv.domain.socket.repository;
 
 import com.api.stuv.domain.socket.entity.ChatRoom;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -13,4 +14,8 @@ import java.util.Optional;
 public interface ChatRoomRepository extends MongoRepository<ChatRoom, String>{
     Optional<ChatRoom> findByRoomId(String roomId);
     List<ChatRoom> findByMembersContaining(Long userId);
+    boolean existsByRoomId(String roomId);
+
+    @Transactional
+    void deleteByRoomId(String roomId);
 }
