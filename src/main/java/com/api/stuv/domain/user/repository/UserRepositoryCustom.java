@@ -5,7 +5,6 @@ import com.api.stuv.domain.user.dto.response.GetCostume;
 import com.api.stuv.domain.user.dto.response.UserBoardListResponse;
 import com.api.stuv.domain.user.dto.response.UserInformationResponse;
 import com.api.stuv.domain.user.dto.response.MyInformationResponse;
-import com.api.stuv.domain.user.dto.response.*;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
