@@ -5,10 +5,7 @@ import com.api.stuv.domain.friend.entity.QFriend;
 import com.api.stuv.domain.image.entity.EntityType;
 import com.api.stuv.domain.image.entity.QImageFile;
 import com.api.stuv.domain.image.service.S3ImageService;
-import com.api.stuv.domain.user.dto.response.GetCostume;
-import com.api.stuv.domain.user.dto.response.UserBoardListResponse;
-import com.api.stuv.domain.user.dto.response.UserInformationResponse;
-import com.api.stuv.domain.user.dto.response.MyInformationResponse;
+import com.api.stuv.domain.user.dto.response.*;
 import com.api.stuv.domain.user.entity.QUser;
 import com.api.stuv.domain.user.entity.QUserCostume;
 import com.api.stuv.global.exception.ErrorCode;
@@ -145,4 +142,29 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
 
         return query;
     }
+
+    @Override
+    public String getCostumeInfoByUserId(Long userId) {
+        Tuple costumeDetails = jpaQueryFactory
+                .select(i.entityId, i.newFilename)
+                .from(u)
+                .leftJoin(uc).on(u.costumeId.eq(uc.id))
+                .leftJoin(i).on(uc.costumeId.eq(i.entityId).and(i.entityType.eq(EntityType.COSTUME)))
+                .where(u.id.eq(userId))
+                .fetchFirst();
+
+        if (costumeDetails == null || costumeDetails.get(i.newFilename) == null) {
+            return null;
+        }
+
+        Long entityId = costumeDetails.get(i.entityId);
+        String filename = costumeDetails.get(i.newFilename);
+
+        return s3ImageService.generateImageFile(
+                EntityType.COSTUME,
+                entityId,
+                filename
+        );
+    }
+
 }

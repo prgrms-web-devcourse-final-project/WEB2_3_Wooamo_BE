@@ -1,7 +1,9 @@
 package com.api.stuv.domain.socket.controller;
 
 import com.api.stuv.domain.socket.dto.ChatMessageResponse;
+import com.api.stuv.domain.socket.dto.ChatRoomResponse;
 import com.api.stuv.domain.socket.service.ChatMessageService;
+import com.api.stuv.domain.socket.service.ChatRoomDetailService;
 import com.api.stuv.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,12 +21,15 @@ import java.util.List;
 @Tag(name = "ChatRoom", description = "채팅방 관련 API")
 public class ChatController {
     private final ChatMessageService chatMessageService;
+    private final ChatRoomDetailService chatRoomDetailService;
 
-    @Operation(summary = "채팅방 목록 API", description = "user가 포함된 채팅방 목록을 가져옵니다.")
-    @GetMapping("/{senderId}")
-    public ResponseEntity<ApiResponse<List<String>>> getRoomsBySenderId(@PathVariable Long senderId) {
-        return ResponseEntity.ok()
-                .body(ApiResponse.success((chatMessageService.getRoomIdsBySenderId(senderId))));
+    @Operation(summary = "채팅방 목록 리스트 API", description = "user가 포함된 채팅방 목록을 가져옵니다.")
+    @GetMapping("/list/{senderId}")
+    public ResponseEntity<ApiResponse<List<ChatRoomResponse>>> getRoomListBySenderId(
+            @PathVariable Long senderId) {
+        List<ChatRoomResponse> roomList = chatRoomDetailService.getSortedRoomListBySenderId(senderId);
+
+        return ResponseEntity.ok(ApiResponse.success(roomList));
     }
 
     @Operation(summary = "메세지 요청 API", description = "채팅방 메세지를 요청을 합니다.")
@@ -38,4 +43,6 @@ public class ChatController {
                 .body(ApiResponse.success(chatMessageService.getMessagesByRoomIdPagination(
                 roomId, PageRequest.of(page, size))));
     }
+
+
 }

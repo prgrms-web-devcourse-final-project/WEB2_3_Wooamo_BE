@@ -15,4 +15,5 @@ public interface PartyGroupRepositoryCustom {
     PageResponse<AdminPartyGroupResponse> findAllPartyGroupsWithApproved(Pageable pageable);
     AdminPartyAuthDetailResponse findPartyGroupById(Long partyId);
     void updatePartyStatusForPartyGroup(Long partyId, PartyStatus partyStatus);
+    String findPartyGroupNameByUserId(Long userId);
 }
