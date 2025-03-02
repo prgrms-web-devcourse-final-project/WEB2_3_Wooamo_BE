@@ -15,6 +15,6 @@ public class TodoListScheduler {
     @Scheduled(cron = "0 0 0 * * *")
     public void deleteAllTodoLists(){
         todoListRepository.deleteAll();
-        log.info("모든 TodoList가 삭제되었습니다.");
+        log.info("== 전날 TODO-LIST 삭제 완료 (MariaDB: delete) ==");
     }
 }

@@ -1,5 +1,8 @@
 package com.api.stuv.domain.user.controller;
 
+import com.api.stuv.domain.timer.dto.response.RankInfoResponse;
+import com.api.stuv.domain.timer.dto.response.RankResponse;
+import com.api.stuv.domain.timer.service.TimerService;
 import com.api.stuv.domain.user.dto.request.*;
 import com.api.stuv.domain.user.dto.response.*;
 import com.api.stuv.domain.user.service.KakaoService;
@@ -27,6 +30,7 @@ public class UserController {
     private final UserService userService;
     private final KakaoService kakaoService;
     private final TodoService todoService;
+    private final TimerService timerService;
 
     @Value("${frontend.server}")
     private String url;
@@ -174,5 +178,19 @@ public class UserController {
     public ResponseEntity<ApiResponse<ChangeUserCostume>> changeUserCostume(@PathVariable("costumeId") Long costumeId) {
         return ResponseEntity.ok()
                 .body(ApiResponse.success(userService.changeUserCostume(costumeId)));
+    }
+
+    @Operation(summary = "회원 공부 시간 랭킹 조회 API", description = "회원의 주간 공부시간 랭킹을 조회합니다.")
+    @GetMapping("/ranking")
+    public ResponseEntity<ApiResponse<RankResponse>> userRankingNumber() {
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(timerService.getUserRank()));
+    }
+
+    @Operation(summary = "공부 시간 랭킹 상위 3명 조회 API", description = "주간 랭킹의 상위 3명의 정보를 조회합니다.")
+    @GetMapping("/topranking")
+    public ResponseEntity<ApiResponse<List<RankInfoResponse>>> topUserRanking() {
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(timerService.getTopRankUser()));
     }
 }
