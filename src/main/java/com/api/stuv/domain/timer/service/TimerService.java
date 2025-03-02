@@ -1,6 +1,7 @@
 package com.api.stuv.domain.timer.service;
 
 import com.api.stuv.domain.auth.util.TokenUtil;
+import com.api.stuv.domain.timer.dto.UserRankDTO;
 import com.api.stuv.domain.timer.dto.response.StudyDateTimeResponse;
 import com.api.stuv.domain.timer.dto.request.AddTimerCategoryRequest;
 import com.api.stuv.domain.timer.dto.response.AddTimerCategoryResponse;
@@ -8,6 +9,7 @@ import com.api.stuv.domain.timer.dto.response.TimerListResponse;
 import com.api.stuv.domain.timer.entity.Timer;
 import com.api.stuv.domain.timer.repository.StudyTimeRepository;
 import com.api.stuv.domain.timer.repository.TimerRepository;
+import com.api.stuv.domain.timer.dto.response.RankResponse;
 import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
@@ -121,9 +123,8 @@ public class TimerService {
     }
 
     public StudyDateTimeResponse getWeeklyStudyRecord() {
-        LocalDate today = LocalDate.now();
-        LocalDate startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-        LocalDate endOfWeek = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+        LocalDate startOfWeek = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate endOfWeek = startOfWeek.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
         Long userId = tokenUtil.getUserId();
         if (!userRepository.existsById(userId)) throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
 
@@ -140,5 +141,32 @@ public class TimerService {
         if (!userRepository.existsById(userId)) throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
 
         return studyTimeRepository.sumTotalStudyTimeByDaily(userId, today);
+    }
+
+    public RankResponse getUserRank() {
+        Long userId = tokenUtil.getUserId();
+        if (!userRepository.existsById(userId)) throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
+
+        Long rank = redisTemplate.opsForZSet().reverseRank("weekly_study_rank", userId.toString());
+
+        if (rank == null) {
+            return new RankResponse("-");
+        }
+
+        return new RankResponse(String.valueOf(rank + 1));
+    }
+
+    /* Initialize And Scheduler */
+    public void updateWeeklyRanking() {
+        LocalDate startOfWeek = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate endOfWeek = startOfWeek.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+
+        List<UserRankDTO> rankings = studyTimeRepository.findWeeklyUserRank(startOfWeek, endOfWeek);
+        if (rankings.isEmpty()) return;
+
+        String rankUpdateKey = "weekly_study_rank";
+        redisTemplate.delete(rankUpdateKey);
+
+        rankings.forEach(rank -> redisTemplate.opsForZSet().add(rankUpdateKey, rank.userId().toString(), rank.studyTime()));
     }
 }
