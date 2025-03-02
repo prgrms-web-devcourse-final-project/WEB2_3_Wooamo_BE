@@ -1,13 +1,16 @@
 package com.api.stuv.domain.timer.repository;
 
+import com.api.stuv.domain.timer.dto.UserRankDTO;
 import com.api.stuv.domain.timer.dto.response.StudyDateTimeResponse;
 import com.api.stuv.domain.timer.entity.QStudyTime;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -79,5 +82,19 @@ public class StudyTimeRepositoryImpl implements StudyTimeRepositoryCustom {
         Long studyTime = result.get(st.studyTime.sum().coalesce(0L));
 
         return new StudyDateTimeResponse(studyDate, formatSecondsToTime(studyTime));
+    }
+
+    @Override
+    public List<UserRankDTO> findWeeklyUserRank(LocalDate startOfWeek, LocalDate endOfWeek) {
+        return factory.select(Projections.constructor(
+                        UserRankDTO.class,
+                        st.userId,
+                        st.studyTime.sum().coalesce(0L)
+                ))
+                .from(st)
+                .where(st.studyDate.between(startOfWeek, endOfWeek))
+                .groupBy(st.userId)
+                .orderBy(st.studyTime.sum().desc())
+                .fetch();
     }
 }
