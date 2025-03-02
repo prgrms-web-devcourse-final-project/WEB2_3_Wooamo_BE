@@ -28,20 +28,6 @@ public class ChatRoomDetailService {
     private final UserRepository userRepository;
     private final PartyGroupRepository partyGroupRepository;
 
-    // 특정 senderId가 포함된 채팅방의 roomId 목록 조회
-    public List<String> getRoomIdsBySenderId(Long senderId, Pageable pageable) {
-        Page<ChatRoom> chatRooms = chatRoomRepository.findByMembersContaining(senderId, pageable);
-
-        if (chatRooms.isEmpty()) {
-            throw new NotFoundException(ErrorCode.CHAT_ROOM_NOT_FOUND);
-        }
-
-        return chatRooms.getContent()
-                .stream()
-                .map(ChatRoom::getRoomId)
-                .distinct()
-                .collect(Collectors.toList());
-    }
 
     public List<ChatRoomResponse> getSortedRoomListBySenderId(Long senderId, Pageable pageable) {
         Page<ChatRoom> chatRooms = chatRoomRepository.findByMembersContaining(senderId, pageable);
@@ -55,14 +41,17 @@ public class ChatRoomDetailService {
                 .map(room -> {
                     ChatMessage latestMessage = chatMessageRepository.findTopByRoomIdOrderByCreatedAtDesc(room.getRoomId());
 
+                    int unreadCount = chatMessageRepository.countUnreadMessages(room.getRoomId(), senderId);
+
                     if ("PRIVATE".equals(room.getRoomType())) {
                         String profileImageUrl = (latestMessage != null) ? userRepository.getCostumeInfoByUserId(latestMessage.getSenderId()) : null;
-                        return ChatRoomResponse.from(room, latestMessage, profileImageUrl, null);
+                        return ChatRoomResponse.from(room, latestMessage, profileImageUrl, null, unreadCount);
                     } else if ("GROUP".equals(room.getRoomType())) {
                         String groupName = partyGroupRepository.findPartyGroupNameByUserId(senderId);
-                        return ChatRoomResponse.from(room, latestMessage, null, groupName);
+                        return ChatRoomResponse.from(room, latestMessage, null, groupName, unreadCount);
                     }
-                    return ChatRoomResponse.from(room, latestMessage, null, null);
+
+                    return ChatRoomResponse.from(room, latestMessage, null, null, unreadCount);
                 })
                 .sorted(Comparator.comparing(ChatRoomResponse::createdAt, Comparator.reverseOrder()))
                 .collect(Collectors.toList());

@@ -13,9 +13,10 @@ public record ChatRoomResponse(
         String lastMessage,
         LocalDateTime createdAt,
         String profileImageUrl,
-        String groupName
+        String groupName,
+        int unreadCount
 ) {
-    public static ChatRoomResponse from(ChatRoom room, ChatMessage latestMessage, String profileImageUrl, String groupName) {
+    public static ChatRoomResponse from(ChatRoom room, ChatMessage latestMessage, String profileImageUrl, String groupName, int unreadCount) {
         boolean isPrivate = "PRIVATE".equals(room.getRoomType());
 
         return new ChatRoomResponse(
@@ -26,7 +27,8 @@ public record ChatRoomResponse(
                 latestMessage != null ? latestMessage.getMessage() : "대화 내역 없음",
                 latestMessage != null ? latestMessage.getCreatedAt() : LocalDateTime.MIN,
                 isPrivate ? profileImageUrl : null,
-                isPrivate ? null : groupName
+                isPrivate ? null : groupName,
+                unreadCount
         );
     }
 }
