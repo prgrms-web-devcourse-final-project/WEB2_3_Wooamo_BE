@@ -248,6 +248,7 @@ public class UserService {
         }
 
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        Long id = userCostumeRepository.findIdByCostumeId(costumeId);
         user.changeUserCostume(costumeId);
         userRepository.save(user);
 
