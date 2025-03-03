@@ -1,6 +1,7 @@
 package com.api.stuv.domain.party.controller;
 
 import com.api.stuv.domain.auth.util.TokenUtil;
+import com.api.stuv.domain.party.dto.response.PartyDetailResponse;
 import com.api.stuv.domain.party.dto.response.PartyGroupResponse;
 import com.api.stuv.domain.party.dto.response.PartyRewardStatusResponse;
 import com.api.stuv.domain.party.service.PartyService;
@@ -11,10 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -55,6 +53,15 @@ public class PartyController {
         return ResponseEntity.ok()
                 .body(ApiResponse.success(
                         partyService.getCompletePartyStatus(tokenUtil.getUserId())
+                ));
+    }
+
+    @GetMapping("/{partyId}")
+    @Operation(summary = "팟 상세 조회 API", description = "팟의 상세한 내용과 현재 회원의 참가 여부를 조회합니다.")
+    public ResponseEntity<ApiResponse<PartyDetailResponse>> getPartyDetail(@PathVariable Long partyId) {
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(
+                        partyService.getPartyDetailInfo(partyId, tokenUtil.getUserId())
                 ));
     }
 }
