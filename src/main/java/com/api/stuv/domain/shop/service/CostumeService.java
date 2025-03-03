@@ -13,8 +13,11 @@ import com.api.stuv.domain.shop.entity.Costume;
 import com.api.stuv.domain.shop.exception.CostumeAlreadyException;
 import com.api.stuv.domain.shop.exception.CostumeNotPurchaseException;
 import com.api.stuv.domain.shop.repository.CostumeRepository;
+import com.api.stuv.domain.user.entity.HistoryType;
+import com.api.stuv.domain.user.entity.PointHistory;
 import com.api.stuv.domain.user.entity.User;
 import com.api.stuv.domain.user.entity.UserCostume;
+import com.api.stuv.domain.user.repository.PointHistoryRepository;
 import com.api.stuv.domain.user.repository.UserCostumeRepository;
 import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.ErrorCode;
@@ -39,6 +42,7 @@ public class CostumeService {
     private final TokenUtil tokenUtil;
     private final S3ImageService s3ImageService;
     private final ImageFileRepository imageFileRepository;
+    private final PointHistoryRepository pointHistoryRepository;
 
     @Transactional(readOnly = true)
     public PageResponse<CostumeResponse> getCostumeList(Pageable pageable) {
@@ -57,6 +61,7 @@ public class CostumeService {
         userCostumeRepository.findCostumeIdByUserId(user.getId(), request.costumeId()).ifPresent( userCostume -> { throw new CostumeAlreadyException(); });
         user.subtractPoint(request.point());
         userCostumeRepository.save(new UserCostume(user.getId(), request.costumeId()));
+        pointHistoryRepository.save(new PointHistory(user.getId(), HistoryType.CONSUME, request.point(), HistoryType.CONSUME.getText()));
     }
 
     @Transactional
@@ -70,6 +75,7 @@ public class CostumeService {
         Long randomCostumeId = availableCostume.get(new Random().nextInt(availableCostume.size()));
         user.subtractPoint(point);
         userCostumeRepository.save(new UserCostume(user.getId(), randomCostumeId));
+        pointHistoryRepository.save(new PointHistory(user.getId(), HistoryType.CONSUME, point, HistoryType.CONSUME.getText()));
         ImageFile imageFile = imageFileRepository.findByEntityIdAndEntityType(randomCostumeId, EntityType.COSTUME).orElseThrow(ImageFileNotFound::new);
         return new CostumeRandomResponse(s3ImageService.generateImageFile(EntityType.COSTUME, randomCostumeId, imageFile.getNewFilename()), imageFile.getOriginFilename());
     }
