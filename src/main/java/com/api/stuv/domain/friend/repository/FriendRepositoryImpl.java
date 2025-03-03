@@ -11,6 +11,8 @@ import com.api.stuv.domain.user.entity.QUser;
 import com.api.stuv.domain.user.entity.QUserCostume;
 import com.api.stuv.global.response.PageResponse;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageImpl;
@@ -65,26 +67,49 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
                         tuple.get(u.id),
                         tuple.get(u.nickname),
                         tuple.get(u.context),
-                        s3ImageService.generateImageFile(EntityType.COSTUME, tuple.get(uc.costumeId), tuple.get(i.newFilename)))).toList();
+                        s3ImageService.generateImageFile(EntityType.COSTUME, tuple.get(uc.costumeId), tuple.get(i.newFilename)),
+                        null)).toList();
         return PageResponse.of(new PageImpl<>(response, pageable, getTotalFriendListPage(userId)));
     }
 
     @Override
     public PageResponse<FriendResponse> searchUser(Long userId, String target, Pageable pageable) {
-        List<Long> friendIds = getFriendAndMyIdList(userId);
+        JPQLQuery<Long> subQuery = JPAExpressions
+                .select(f.userId.when(userId).then(f.friendId).otherwise(f.userId))
+                .from(f).where(f.userId.eq(userId).or(f.friendId.eq(userId)).and(f.status.eq(FriendStatus.ACCEPTED)));
+
         List<FriendResponse> response = jpaQueryFactory
-                .select(u.id, u.nickname, uc.costumeId, i.newFilename, u.context)
-                .from(u).leftJoin(uc).on(u.costumeId.eq(uc.id))
-                .leftJoin(i).on(uc.costumeId.eq(i.entityId).and(i.entityType.eq(EntityType.COSTUME)))
-                .where((u.nickname.contains(target).or(u.context.contains(target))).and(u.id.notIn(friendIds)))
-                .offset(pageable.getOffset()).limit(pageable.getPageSize()).fetch()
-                .stream().map(tuple -> new FriendResponse(
+                .select(u.id,
+                        u.nickname,
+                        u.context,
+                        uc.id,
+                        i.newFilename,
+                        Expressions.cases()
+                                .when(f.userId.eq(userId)).then("ME")
+                                .when(f.friendId.eq(userId)).then("OTHER")
+                                .otherwise("NONE"))
+                .from(u)
+                .leftJoin(f).on(u.id.eq(
+                        Expressions.cases()
+                                .when(f.userId.eq(userId)).then(f.friendId)
+                                .when(f.friendId.eq(userId)).then(f.userId)
+                                .otherwise(-100_000_000L)
+                ).and(f.status.eq(FriendStatus.PENDING)))
+                .leftJoin(uc).on(u.costumeId.eq(uc.id))
+                .leftJoin(i).on(uc.costumeId.eq(i.entityId))
+                .where(u.id.ne(userId)
+                        .and(u.nickname.contains(target).or(u.context.contains(target))))
+                .where(u.id.notIn(subQuery))
+                .offset(pageable.getOffset()).limit(pageable.getPageSize())
+                .fetch().stream().map(tuple -> new FriendResponse(
                         null,
                         tuple.get(u.id),
                         tuple.get(u.nickname),
                         tuple.get(u.context),
-                        s3ImageService.generateImageFile(EntityType.COSTUME, tuple.get(uc.costumeId), tuple.get(i.newFilename)))).toList();
-        return PageResponse.of(new PageImpl<>(response, pageable, getTotalSearchUserPage(userId, target, friendIds)));
+                        s3ImageService.generateImageFile(EntityType.COSTUME, tuple.get(uc.id), tuple.get(i.newFilename)),
+                        tuple.get(5, String.class))).toList();
+
+        return PageResponse.of(new PageImpl<>(response, pageable, getTotalSearchUserPage(userId, target, subQuery)));
     }
 
     @Override
@@ -102,7 +127,8 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
                         tuple.get(u.id),
                         tuple.get(u.nickname),
                         tuple.get(u.context),
-                        s3ImageService.generateImageFile(EntityType.COSTUME, tuple.get(uc.costumeId), tuple.get(i.newFilename)))).toList();
+                        s3ImageService.generateImageFile(EntityType.COSTUME, tuple.get(uc.costumeId), tuple.get(i.newFilename)),
+                        null)).toList();
     }
 
     public List<Long> getFriendAndMyIdList(Long userId) {
@@ -123,7 +149,10 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
         return jpaQueryFactory.select(f.count()).from(f).where((f.userId.eq(userId).or(f.friendId.eq(userId))).and(f.status.eq(FriendStatus.ACCEPTED))).fetchOne();
     }
 
-    private Long getTotalSearchUserPage(Long userId, String target, List<Long> friendIds) {
-        return jpaQueryFactory.select(u.count()).from(u).where(u.nickname.contains(target).or(u.context.contains(target)).and(u.id.ne(userId)).and(u.id.notIn(friendIds))).fetchOne();
+    private Long getTotalSearchUserPage(Long userId, String target, JPQLQuery<Long> subQuery) {
+        return jpaQueryFactory.select(u.count()).from(u)
+                .where(u.id.ne(userId).and(u.nickname.contains(target).or(u.context.contains(target))))
+                .where(u.id.notIn(subQuery))
+                .fetchOne();
     }
 }
