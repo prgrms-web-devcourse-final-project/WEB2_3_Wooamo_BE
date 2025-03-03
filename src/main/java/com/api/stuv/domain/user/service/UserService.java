@@ -164,8 +164,7 @@ public class UserService {
         return modifyProfileResponse;
     }
 
-    public List<UserBoardListResponse> getUserBoardList(){
-        Long userId = tokenUtil.getUserId();
+    public List<UserBoardListResponse> getUserBoardList(Long userId){
 
         List<UserBoardListResponse> userBoardList = userRepository.getUserBoardList(userId);
 
@@ -248,8 +247,9 @@ public class UserService {
         }
 
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
-        Long id = userCostumeRepository.findIdByCostumeId(costumeId);
-        user.changeUserCostume(costumeId);
+        Long id = userCostumeRepository.findIdByCostumeId(costumeId, userId);
+        System.out.println(id);
+        user.changeUserCostume(id);
         userRepository.save(user);
 
         ImageFile newFilename = imageFileRepository.findByEntityIdAndEntityType(costumeId, EntityType.COSTUME).orElseThrow(() ->  new NotFoundException(ErrorCode.COSTUME_NOT_FOUND));
