@@ -82,7 +82,7 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
                 .select(u.id,
                         u.nickname,
                         u.context,
-                        uc.id,
+                        uc.costumeId,
                         i.newFilename,
                         Expressions.cases()
                                 .when(f.userId.eq(userId)).then("ME")
@@ -106,7 +106,7 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
                         tuple.get(u.id),
                         tuple.get(u.nickname),
                         tuple.get(u.context),
-                        s3ImageService.generateImageFile(EntityType.COSTUME, tuple.get(uc.id), tuple.get(i.newFilename)),
+                        s3ImageService.generateImageFile(EntityType.COSTUME, tuple.get(uc.costumeId), tuple.get(i.newFilename)),
                         tuple.get(5, String.class))).toList();
 
         return PageResponse.of(new PageImpl<>(response, pageable, getTotalSearchUserPage(userId, target, subQuery)));
