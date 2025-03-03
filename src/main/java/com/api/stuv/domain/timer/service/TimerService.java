@@ -1,27 +1,31 @@
 package com.api.stuv.domain.timer.service;
 
 import com.api.stuv.domain.auth.util.TokenUtil;
-import com.api.stuv.domain.timer.dto.response.StudyDateTimeResponse;
+import com.api.stuv.domain.image.entity.EntityType;
+import com.api.stuv.domain.image.service.S3ImageService;
+import com.api.stuv.domain.timer.dto.UserRankDTO;
+import com.api.stuv.domain.timer.dto.response.*;
 import com.api.stuv.domain.timer.dto.request.AddTimerCategoryRequest;
-import com.api.stuv.domain.timer.dto.response.AddTimerCategoryResponse;
-import com.api.stuv.domain.timer.dto.response.TimerListResponse;
 import com.api.stuv.domain.timer.entity.Timer;
 import com.api.stuv.domain.timer.repository.StudyTimeRepository;
 import com.api.stuv.domain.timer.repository.TimerRepository;
+import com.api.stuv.domain.user.dto.UserProfileInfoDTO;
 import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.temporal.TemporalAdjusters;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.api.stuv.domain.timer.util.TimerUtil.formatSecondsToTime;
 
@@ -35,6 +39,7 @@ public class TimerService {
 
     private static final String STUDY_KEY = "study:total";
     private final UserRepository userRepository;
+    private final S3ImageService s3ImageService;
 
     public List<TimerListResponse> getTimerList() {
         Long userId = tokenUtil.getUserId();
@@ -121,9 +126,8 @@ public class TimerService {
     }
 
     public StudyDateTimeResponse getWeeklyStudyRecord() {
-        LocalDate today = LocalDate.now();
-        LocalDate startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-        LocalDate endOfWeek = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+        LocalDate startOfWeek = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate endOfWeek = startOfWeek.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
         Long userId = tokenUtil.getUserId();
         if (!userRepository.existsById(userId)) throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
 
@@ -139,6 +143,95 @@ public class TimerService {
         Long userId = tokenUtil.getUserId();
         if (!userRepository.existsById(userId)) throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
 
-        return studyTimeRepository.sumTotalStudyTimeByDaily(userId, today);
+        HashOperations<String, String, String> hashOps = redisTemplate.opsForHash();
+        Set<String> keys = redisTemplate.keys(STUDY_KEY + ":" + userId + ":*");
+        System.out.println(userId);
+
+        if (keys == null || keys.isEmpty()) {
+            return studyTimeRepository.sumTotalStudyTimeByDaily(userId, today);
+        }
+
+        long totalStudyTime = 0L;
+        for (String key : keys) {
+            String studyTime = hashOps.get(key, today.toString());
+            if (studyTime != null) {
+                System.out.println(Long.parseLong(studyTime));
+                totalStudyTime += Long.parseLong(studyTime);
+            }
+        }
+
+        return new StudyDateTimeResponse(today, formatSecondsToTime(totalStudyTime));
+    }
+
+    public RankResponse getUserRank() {
+        Long userId = tokenUtil.getUserId();
+        if (!userRepository.existsById(userId)) throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
+
+        Long rank = redisTemplate.opsForZSet().reverseRank("weekly_study_rank", userId.toString());
+
+        if (rank == null) {
+            return new RankResponse("-");
+        }
+
+        return new RankResponse(String.valueOf(rank + 1));
+    }
+
+    public List<RankInfoResponse> getTopRankUser() {
+        Set<ZSetOperations.TypedTuple<String>> topUsers = redisTemplate.opsForZSet().reverseRangeWithScores("weekly_study_rank", 0, 2);
+
+        if (topUsers == null || topUsers.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        LinkedHashMap<Long, Long> studyTimeMap = new LinkedHashMap<>();
+        List<Long> userIds = new ArrayList<>();
+
+        for (ZSetOperations.TypedTuple<String> tuple : topUsers) {
+            if (tuple.getValue() != null && tuple.getScore() != null) {
+                Long userId = Long.parseLong(tuple.getValue());
+                Long studyTime = tuple.getScore().longValue();
+                studyTimeMap.put(userId, studyTime);
+                userIds.add(userId);
+            }
+        }
+
+        List<UserProfileInfoDTO> userInfoList = userRepository.findUserInfoByIds(userIds);
+
+        Map<Long, UserProfileInfoDTO> userInfoMap = userInfoList.stream()
+                .collect(Collectors.toMap(UserProfileInfoDTO::userId, Function.identity()));
+
+        return userIds.stream()
+                .map(userId -> {
+                    UserProfileInfoDTO dto = userInfoMap.get(userId);
+                    if (dto == null) return null;
+
+                    return new RankInfoResponse(
+                            userId,
+                            s3ImageService.generateImageFile(
+                                    EntityType.COSTUME, dto.entityId(), dto.filename()
+                            ),
+                            dto.nickname(),
+                            formatSecondsToTime(studyTimeMap.get(userId))
+                    );
+                })
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+
+    /* Initialize And Scheduler */
+    public void updateWeeklyRanking() {
+        LocalDate startOfWeek = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate endOfWeek = startOfWeek.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+
+        String rankUpdateKey = "weekly_study_rank";
+        List<UserRankDTO> rankings = studyTimeRepository.findWeeklyUserRank(startOfWeek, endOfWeek, null);
+
+        redisTemplate.delete(rankUpdateKey);
+        if (rankings.isEmpty()) {
+            return;
+        }
+
+        rankings.forEach(rank -> redisTemplate.opsForZSet().add(rankUpdateKey, rank.userId().toString(), rank.studyTime()));
     }
 }

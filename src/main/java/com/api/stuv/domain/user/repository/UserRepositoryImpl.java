@@ -5,6 +5,11 @@ import com.api.stuv.domain.friend.entity.QFriend;
 import com.api.stuv.domain.image.entity.EntityType;
 import com.api.stuv.domain.image.entity.QImageFile;
 import com.api.stuv.domain.image.service.S3ImageService;
+import com.api.stuv.domain.user.dto.UserProfileInfoDTO;
+import com.api.stuv.domain.user.dto.response.GetCostume;
+import com.api.stuv.domain.user.dto.response.UserBoardListResponse;
+import com.api.stuv.domain.user.dto.response.UserInformationResponse;
+import com.api.stuv.domain.user.dto.response.MyInformationResponse;
 import com.api.stuv.domain.user.dto.response.*;
 import com.api.stuv.domain.user.entity.QUser;
 import com.api.stuv.domain.user.entity.QUserCostume;
@@ -12,6 +17,7 @@ import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
 import com.api.stuv.global.util.common.TemplateUtils;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
@@ -141,6 +147,24 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
                 .toList();
 
         return query;
+    }
+
+    @Override
+    public List<UserProfileInfoDTO> findUserInfoByIds(List<Long> userIds) {
+        return jpaQueryFactory
+                .select(Projections.constructor(
+                        UserProfileInfoDTO.class,
+                        u.id,
+                        u.nickname,
+                        i.newFilename,
+                        i.entityId
+                ))
+                .from(u)
+                .leftJoin(uc).on(u.costumeId.eq(uc.id))
+                .leftJoin(i).on(uc.costumeId.eq(i.entityId)
+                        .and(i.entityType.eq(EntityType.COSTUME)))
+                .where(u.id.in(userIds))
+                .fetch();
     }
 
     @Override
