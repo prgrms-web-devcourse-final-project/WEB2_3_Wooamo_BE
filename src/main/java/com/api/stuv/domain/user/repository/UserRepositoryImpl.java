@@ -10,7 +10,6 @@ import com.api.stuv.domain.user.dto.response.GetCostume;
 import com.api.stuv.domain.user.dto.response.UserBoardListResponse;
 import com.api.stuv.domain.user.dto.response.UserInformationResponse;
 import com.api.stuv.domain.user.dto.response.MyInformationResponse;
-import com.api.stuv.domain.user.dto.response.*;
 import com.api.stuv.domain.user.entity.QUser;
 import com.api.stuv.domain.user.entity.QUserCostume;
 import com.api.stuv.global.exception.ErrorCode;
@@ -51,7 +50,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
                 informationDetails.get(u.nickname),
                 informationDetails.get(u.point),
                 informationDetails.get(u.role),
-                s3ImageService.generateImageFile(
+                informationDetails.get(i.newFilename) == null ? null : s3ImageService.generateImageFile(
                         EntityType.COSTUME,
                         informationDetails.get(uc.costumeId),
                         informationDetails.get(i.newFilename))
@@ -86,7 +85,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
                informationDetails.get(u.context),
                informationDetails.get(u.blogLink),
                informationDetails.get(u.nickname),
-               s3ImageService.generateImageFile(
+               informationDetails.get(i.newFilename) == null ? null : s3ImageService.generateImageFile(
                        EntityType.COSTUME,
                        informationDetails.get(uc.costumeId),
                        informationDetails.get(i.newFilename)
