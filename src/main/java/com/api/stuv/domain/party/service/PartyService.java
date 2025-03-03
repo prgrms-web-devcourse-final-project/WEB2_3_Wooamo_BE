@@ -92,6 +92,8 @@ public class PartyService {
     }
 
     public PageResponse<MemberResponse> getPartyMemberList(Long partyId, Long userId, Pageable pageable) {
+        if (!userRepository.existsById(userId)) throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
+        if (!partyRepository.existsById(partyId)) throw new NotFoundException(ErrorCode.PARTY_NOT_FOUND);
         return PageResponse.of(new PageImpl<>(
                 memberRepository.findMemberList(partyId, userId, pageable)
                         .stream()
