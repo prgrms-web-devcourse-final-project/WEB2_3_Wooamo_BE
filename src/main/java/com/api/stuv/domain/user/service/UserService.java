@@ -1,6 +1,7 @@
 package com.api.stuv.domain.user.service;
 
 import com.api.stuv.domain.auth.util.TokenUtil;
+import com.api.stuv.domain.friend.repository.FriendRepository;
 import com.api.stuv.domain.image.entity.EntityType;
 import com.api.stuv.domain.image.entity.ImageFile;
 import com.api.stuv.domain.image.repository.ImageFileRepository;
@@ -47,6 +48,7 @@ public class UserService {
     private final RandomName randomName;
     private final TokenUtil tokenUtil;
     private final ImageFileRepository imageFileRepository;
+    private final FriendRepository friendRepository;
 
     public void registerUser(UserRequest userRequest) {
         String email = userRequest.email();
@@ -136,7 +138,8 @@ public class UserService {
 
     public MyInformationResponse getMyInformation(){
         Long myId = tokenUtil.getUserId();
-        MyInformationResponse information = userRepository.getUserByMyId(myId);
+        Long friends = friendRepository.getTotalFriendListPage(myId);
+        MyInformationResponse information = userRepository.getUserByMyId(myId, friends);
 
         return information;
     }

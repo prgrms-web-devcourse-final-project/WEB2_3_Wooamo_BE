@@ -119,7 +119,7 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
         return jpaQueryFactory.select(f.count()).from(f).where(f.friendId.eq(receiverId).and(f.status.eq(FriendStatus.PENDING))).fetchOne();
     }
 
-    private Long getTotalFriendListPage(Long userId) {
+    public Long getTotalFriendListPage(Long userId) {
         return jpaQueryFactory.select(f.count()).from(f).where((f.userId.eq(userId).or(f.friendId.eq(userId))).and(f.status.eq(FriendStatus.ACCEPTED))).fetchOne();
     }
 

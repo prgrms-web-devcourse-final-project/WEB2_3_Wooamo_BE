@@ -12,4 +12,5 @@ public interface FriendRepositoryCustom {
     PageResponse<FriendResponse> getFriendList(Long receiverId, Pageable pageable, String imageUrl);
     PageResponse<FriendResponse> searchUser(Long userId, String target, Pageable pageable);
     List<FriendResponse> recommendFriend(Long userId);
+    Long getTotalFriendListPage(Long userId);
 }

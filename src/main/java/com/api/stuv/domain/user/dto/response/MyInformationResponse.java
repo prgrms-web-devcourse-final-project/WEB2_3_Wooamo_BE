@@ -11,6 +11,7 @@ public record MyInformationResponse(
         String nickname,
         BigDecimal point,
         RoleType role,
-        String profile
+        String profile,
+        Long friends
 ) {
 }

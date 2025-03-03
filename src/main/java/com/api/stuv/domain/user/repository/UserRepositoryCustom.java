@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface UserRepositoryCustom {
     UserInformationResponse getUserInformation(Long userId, Long myId);
-    MyInformationResponse getUserByMyId(@Param("myId") Long myId);
+    MyInformationResponse getUserByMyId(@Param("myId") Long myId, @Param("friends") Long friends);
     List<UserBoardListResponse> getUserBoardList(@Param("userId") Long userId);
     List<GetCostume> getUserCostume(@Param("userId") Long userId);
     String getCostumeInfoByUserId(Long userId);
