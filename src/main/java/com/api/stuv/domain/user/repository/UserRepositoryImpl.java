@@ -65,7 +65,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
     @Override
    public UserInformationResponse getUserInformation(Long userId, Long myId, Long friends) {
        Tuple informationDetails = jpaQueryFactory
-               .select(u.id, u.context, u.blogLink, u.nickname, f.status, u.costumeId, i.newFilename, uc.costumeId)
+               .select(u.id, u.context, u.blogLink, u.nickname, f.status, f.id, u.costumeId, i.newFilename, uc.costumeId)
                .from(u)
                .leftJoin(f).on
                        (f.userId.eq(userId).and(f.friendId.eq(myId))
@@ -95,14 +95,15 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
                        informationDetails.get(i.newFilename)
                ),
                status,
-               friends
+               friends,
+               informationDetails.get(f.id)
        );
     }
 
     @Override
     public List<UserBoardListResponse> getUserBoardList(Long userId) {
         List<Tuple> results = jpaQueryFactory
-                .select(b.id, b.title, b.context, b.boardType, b.createdAt, i.newFilename)
+                .select(b.id, b.title, b.context, b.boardType, TemplateUtils.timeFormater(b.createdAt), i.newFilename)
                 .from(b)
                 .leftJoin(i).on(b.id.eq(i.entityId).and(i.entityType.eq(EntityType.BOARD)))
                 .where(b.userId.eq(userId))

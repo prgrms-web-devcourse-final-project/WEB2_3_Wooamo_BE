@@ -143,11 +143,11 @@ public class UserController {
     }
 
     @Operation(summary = "본인 작성 게시글 조회 API", description = "본인이 작성했던 글 목록을 조회하는 API 입니다.")
-    @GetMapping("/board")
-    private ResponseEntity<ApiResponse<List<UserBoardListResponse>>> getUserBoardList() {
+    @GetMapping("/board/{userId}")
+    private ResponseEntity<ApiResponse<List<UserBoardListResponse>>> getUserBoardList(@PathVariable("userId") Long userId) {
 
         return ResponseEntity.ok()
-                .body(ApiResponse.success(userService.getUserBoardList()));
+                .body(ApiResponse.success(userService.getUserBoardList(userId)));
     }
 
     @Operation(summary = "개인 퀘스트 진행여부 조회 API", description = "개인의 일일 퀘스트 진행 상황을 조회합니다")

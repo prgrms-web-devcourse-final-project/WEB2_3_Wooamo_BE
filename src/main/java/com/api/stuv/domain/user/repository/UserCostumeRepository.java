@@ -16,5 +16,6 @@ public interface UserCostumeRepository extends JpaRepository<UserCostume, Long> 
     @Query("SELECT uc.costumeId FROM UserCostume uc WHERE uc.userId = :userId")
     List<Long> findCostumeIdListByUserId(Long userId);
 
-    Long findIdByCostumeId(Long costumeId);
+    @Query("SELECT id FROM UserCostume WHERE costumeId = :costumeId AND userId = :userId")
+    Long findIdByCostumeId(Long costumeId, Long userId);
 }
