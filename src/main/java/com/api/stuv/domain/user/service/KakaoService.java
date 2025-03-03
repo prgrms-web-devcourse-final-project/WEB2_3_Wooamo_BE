@@ -17,6 +17,9 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -27,6 +30,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class KakaoService {
@@ -101,7 +105,7 @@ public class KakaoService {
                     String.class
             );
         } catch (HttpClientErrorException e) {
-            System.out.println("[kakao Login HTTP API 오류] " + e.getMessage());
+            log.error("[kakao Login HTTP API 오류] {}", e.getMessage());
             throw new NotFoundException(ErrorCode.INVALID_ACCESS_TOKEN);
         }
 
@@ -112,7 +116,7 @@ public class KakaoService {
         try {
             jsonNode = objectMapper.readTree(resBody);
         } catch (JsonProcessingException e) {
-            System.out.println("[json 파싱 오류] " + e.getMessage());
+            log.error("[json 파싱 오류] {}", e.getMessage());
         }
 
         // Access Token 반환
@@ -137,7 +141,7 @@ public class KakaoService {
                     String.class
             );
         } catch (HttpClientErrorException e){
-            System.out.println("[kakao Data Access API 오류] " + e.getMessage());
+            log.error("[kakao Data Access API 오류] {}", e.getMessage());
             throw new NotFoundException(ErrorCode.DATA_ACCESS_API);
         }
 
@@ -147,7 +151,7 @@ public class KakaoService {
         try {
             jsonNode = objectMapper.readTree(resBody);
         } catch (JsonProcessingException e) {
-            System.out.println("[json 파싱 오류] " + e.getMessage());
+            log.error("[json 파싱 오류] {}", e.getMessage());
             throw new NotFoundException(ErrorCode.JSON_PARSING_ERROR);
         }
 
