@@ -1,11 +1,14 @@
 package com.api.stuv.domain.friend.service;
 
+import com.api.stuv.domain.alert.entity.AlertType;
+import com.api.stuv.domain.alert.service.AlertService;
 import com.api.stuv.domain.friend.dto.FriendFollowListResponse;
 import com.api.stuv.domain.friend.dto.FriendFollowResponse;
 import com.api.stuv.domain.friend.dto.FriendResponse;
 import com.api.stuv.domain.friend.entity.Friend;
 import com.api.stuv.domain.friend.entity.FriendStatus;
 import com.api.stuv.domain.friend.repository.FriendRepository;
+import com.api.stuv.domain.user.entity.User;
 import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.*;
 import com.api.stuv.global.response.PageResponse;
@@ -23,10 +26,12 @@ public class FriendService {
 
     private final UserRepository userRepository;
     private final FriendRepository friendRepository;
+    private final AlertService alertService;
 
     // TODO: 알림 기능 추가시 알림 생성 로직 추가
     @Transactional
     public FriendFollowResponse requestFriend(Long userId, Long receiverId) {
+        User sender = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
         if ( userId.equals(receiverId) ) throw new BadRequestException(ErrorCode.FRIEND_REQUEST_SELF);
         if ( userRepository.isDuplicateIds(Arrays.asList(userId, receiverId)) != 2 ) throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
 
@@ -35,6 +40,7 @@ public class FriendService {
             if (status.equals(FriendStatus.PENDING)) throw new DuplicateException(ErrorCode.FRIEND_REQUEST_ALREADY_EXIST);
             else if (status.equals(FriendStatus.ACCEPTED)) throw new DuplicateException(ErrorCode.FRIEND_REQUEST_ALREADY_ACCEPTED);
 
+        alertService.createAlert(receiverId, null, AlertType.FOLLOW, sender.getNickname());
         return FriendFollowResponse.from(friendRepository.save(Friend.init(userId, receiverId)));
     }
 
