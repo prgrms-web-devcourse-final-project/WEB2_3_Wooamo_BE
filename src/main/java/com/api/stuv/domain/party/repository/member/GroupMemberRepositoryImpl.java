@@ -4,7 +4,6 @@ import com.api.stuv.domain.admin.dto.MemberDetailDTO;
 import com.api.stuv.domain.image.entity.EntityType;
 import com.api.stuv.domain.image.entity.QImageFile;
 import com.api.stuv.domain.image.service.S3ImageService;
-import com.api.stuv.domain.party.entity.GroupMember;
 import com.api.stuv.domain.party.entity.QGroupMember;
 import com.api.stuv.domain.party.entity.QQuestConfirm;
 import com.api.stuv.domain.party.entity.QuestStatus;
@@ -13,6 +12,7 @@ import com.api.stuv.domain.user.entity.QUserCostume;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -73,5 +73,34 @@ public class GroupMemberRepositoryImpl implements GroupMemberRepositoryCustom {
                                 .and(gm.questStatus.eq(QuestStatus.PROGRESS)))
                         .fetchOne()
         ).orElse(0L) == 0;
+    }
+
+    @Override
+    public Long countAllGroupMembers(Long partyId) {
+        return factory
+                .select(gm.id.count())
+                .from(gm)
+                .where(gm.groupId.eq(partyId))
+                .fetchOne();
+    }
+
+    @Override
+    public BigDecimal sumFailedGroupMemberBettingPoint(Long partyId) {
+        return factory
+                .select(gm.bettingPoint.sum().coalesce(BigDecimal.ZERO))
+                .from(gm)
+                .where(gm.groupId.eq(partyId)
+                        .and(gm.questStatus.eq(QuestStatus.FAILED)))
+                .fetchOne();
+    }
+
+    @Override
+    public Long countSuccessGroupMembers(Long partyId) {
+        return factory
+                .select(gm.id.count().coalesce(0L))
+                .from(gm)
+                .where(gm.groupId.eq(partyId)
+                        .and(gm.questStatus.in(QuestStatus.SUCCESS, QuestStatus.COMPLETED)))
+                .fetchOne();
     }
 }
