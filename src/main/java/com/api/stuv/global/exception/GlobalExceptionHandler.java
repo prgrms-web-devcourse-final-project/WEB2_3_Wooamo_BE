@@ -102,6 +102,13 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(ErrorCode.REDIS_NOT_CONNECTED.getMessage()));
     }
 
+    @ExceptionHandler(SseErrorException.class)
+    protected ResponseEntity<ApiResponse<Void>> handleSseErrorException(SseErrorException e) {
+        log.error("[ERROR] handleSseErrorException - {}", e.getMessage());
+        return ResponseEntity.internalServerError()
+                .body(ApiResponse.error(e.getMessage()));
+    }
+
     // 그 외 예외
     @ExceptionHandler(BusinessException.class)
     protected ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException e) {
