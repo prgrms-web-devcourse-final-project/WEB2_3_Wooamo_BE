@@ -1,10 +1,8 @@
 package com.api.stuv.domain.party.service;
 
-import com.api.stuv.domain.party.dto.MemberRewardStatusDTO;
 import com.api.stuv.domain.party.dto.response.PartyGroupResponse;
 import com.api.stuv.domain.party.dto.response.PartyRewardStatusResponse;
 import com.api.stuv.domain.party.entity.QuestStatus;
-import com.api.stuv.domain.party.repository.member.GroupMemberRepository;
 import com.api.stuv.domain.party.repository.party.PartyGroupRepository;
 import com.api.stuv.domain.user.entity.RewardType;
 import com.api.stuv.domain.user.repository.UserRepository;
@@ -12,8 +10,6 @@ import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
 import com.api.stuv.global.response.PageResponse;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +22,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class PartyService {
 
-    private static final Logger log = LoggerFactory.getLogger(PartyService.class);
     private final PartyGroupRepository partyRepository;
     private final UserRepository userRepository;
 
