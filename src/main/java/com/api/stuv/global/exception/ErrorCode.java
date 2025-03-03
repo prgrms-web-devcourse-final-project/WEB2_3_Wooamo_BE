@@ -82,9 +82,9 @@ public enum ErrorCode {
 
     // CHAT SOCKET
     CHAT_ROOM_NOT_FOUND(404, -10000, "채팅방을 찾을 수 없습니다."),
-    USER_ALREADY_IN_CHAT_ROOM(400, -10001, "이미 참여 중인 사용자입니다."),
+    USER_ALREADY_IN_CHAT_ROOM(409, -10001, "이미 참여 중인 사용자입니다."),
     CHAT_ROOM_ALREADY_EXISTS(409, -10002, "이미 존재하는 채팅방입니다."),
-    CHAT_ROOM_MAX_MEMBERS_EXCEEDED(400, -10003, "채팅방 최대 인원 초과"),
+    CHAT_ROOM_MAX_MEMBERS_EXCEEDED(403, -10003, "채팅방 최대 인원 초과"),
 
     // PARTY
     PARTY_NOT_FOUND(404, -11000, "해당 팟을 팢을 수 없습니다."),
