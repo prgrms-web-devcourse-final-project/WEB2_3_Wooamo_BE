@@ -1,5 +1,6 @@
 package com.api.stuv.domain.shop.service;
 
+import com.api.stuv.domain.admin.exception.CostumeNotFound;
 import com.api.stuv.domain.auth.util.TokenUtil;
 import com.api.stuv.domain.image.entity.EntityType;
 import com.api.stuv.domain.image.entity.ImageFile;
@@ -77,6 +78,7 @@ public class CostumeService {
         userCostumeRepository.save(new UserCostume(user.getId(), randomCostumeId));
         pointHistoryRepository.save(new PointHistory(user.getId(), HistoryType.CONSUME, point, HistoryType.CONSUME.getText()));
         ImageFile imageFile = imageFileRepository.findByEntityIdAndEntityType(randomCostumeId, EntityType.COSTUME).orElseThrow(ImageFileNotFound::new);
-        return new CostumeRandomResponse(s3ImageService.generateImageFile(EntityType.COSTUME, randomCostumeId, imageFile.getNewFilename()), imageFile.getOriginFilename());
+        Costume costume = costumeRepository.findById(randomCostumeId).orElseThrow(CostumeNotFound::new);
+        return new CostumeRandomResponse(s3ImageService.generateImageFile(EntityType.COSTUME, randomCostumeId, imageFile.getNewFilename()), costume.getCostumeName());
     }
 }
