@@ -28,10 +28,19 @@ public class GroupMember {
     @Column(precision = 10)
     private BigDecimal bettingPoint;
 
-    @PrePersist
-    public void prePersist() {
-        if (questStatus == null) {
-            this.questStatus = QuestStatus.PROGRESS;
-        }
+    public GroupMember(Long groupId, Long userId, QuestStatus questStatus, BigDecimal bettingPoint) {
+        this.groupId = groupId;
+        this.userId = userId;
+        this.questStatus = questStatus;
+        this.bettingPoint = bettingPoint;
+    }
+
+    public static GroupMember join(Long groupId, Long userId, BigDecimal bettingPoint) {
+        return new GroupMember(
+                groupId,
+                userId,
+                QuestStatus.PROGRESS,
+                bettingPoint
+        );
     }
 }

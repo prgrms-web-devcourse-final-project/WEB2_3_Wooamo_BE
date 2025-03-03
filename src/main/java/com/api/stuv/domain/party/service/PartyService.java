@@ -1,16 +1,22 @@
 package com.api.stuv.domain.party.service;
 
+import com.api.stuv.domain.party.dto.request.PartyCreateRequest;
 import com.api.stuv.domain.party.dto.response.PartyDetailResponse;
 import com.api.stuv.domain.party.dto.response.PartyGroupResponse;
+import com.api.stuv.domain.party.dto.response.PartyIdResponse;
 import com.api.stuv.domain.party.dto.response.PartyRewardStatusResponse;
+import com.api.stuv.domain.party.entity.GroupMember;
+import com.api.stuv.domain.party.entity.PartyGroup;
 import com.api.stuv.domain.party.entity.QuestStatus;
 import com.api.stuv.domain.party.repository.member.GroupMemberRepository;
 import com.api.stuv.domain.party.repository.party.PartyGroupRepository;
 import com.api.stuv.domain.user.entity.RewardType;
 import com.api.stuv.domain.user.repository.UserRepository;
+import com.api.stuv.global.exception.BusinessException;
 import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
 import com.api.stuv.global.response.PageResponse;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -71,5 +77,38 @@ public class PartyService {
     public PartyDetailResponse getPartyDetailInfo(Long partyId, Long userId) {
         return partyRepository.findDetailByUserId(partyId, userId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PARTY_NOT_FOUND));
+    }
+
+    @Transactional
+    public PartyIdResponse createParty(PartyCreateRequest dto, Long userId) {
+        if (isBettingPointInvalid(dto.bettingPointCap(), dto.userBettingPoint())) throw new BusinessException(ErrorCode.BETTING_AMOUNT_TOO_LOW);
+
+        PartyGroup party = PartyGroup.create(dto);
+        partyRepository.save(party);
+
+        GroupMember member = GroupMember.join(party.getId(), userId, dto.userBettingPoint());
+        memberRepository.save(member);
+
+        return new PartyIdResponse(party.getId());
+    }
+
+    @Transactional
+    public void joinParty(BigDecimal bettingPoint, Long partyId, Long userId) {
+        PartyDetailResponse party = partyRepository.findDetailByUserId(partyId, userId).orElseThrow(() -> new NotFoundException(ErrorCode.PARTY_NOT_FOUND));
+        if (party.isJoined()) throw new BusinessException(ErrorCode.ALREADY_JOINED_PARTY);
+        if (isFullParty(party.recruitCap(), party.recruitCnt())) throw new BusinessException(ErrorCode.CANNOT_JOIN_FULL_PARTY);
+        if (isBettingPointInvalid(party.bettingPointCap(), bettingPoint)) throw new BusinessException(ErrorCode.BETTING_AMOUNT_TOO_LOW);
+
+        GroupMember member = GroupMember.join(partyId, userId, bettingPoint);
+
+        memberRepository.save(member);
+    }
+
+    private boolean isBettingPointInvalid(BigDecimal bettingPoint, BigDecimal userPoint) {
+        return userPoint.compareTo(bettingPoint) < 0;
+    }
+
+    private boolean isFullParty(Long cap, Long count) {
+        return count >= cap;
     }
 }

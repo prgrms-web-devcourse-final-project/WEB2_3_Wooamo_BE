@@ -1,5 +1,6 @@
 package com.api.stuv.domain.party.entity;
 
+import com.api.stuv.domain.party.dto.request.PartyCreateRequest;
 import com.api.stuv.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -50,5 +51,17 @@ public class PartyGroup extends BaseTimeEntity {
         this.startDate = startDate;
         this.endDate = endDate;
         this.status = status != null ? status : PartyStatus.PENDING;
+    }
+
+    public static PartyGroup create(PartyCreateRequest request) {
+        return new PartyGroup(
+                request.name(),
+                request.context(),
+                request.bettingPointCap(),
+                request.recruitCap(),
+                request.startDate(),
+                request.endDate(),
+                PartyStatus.PENDING
+        );
     }
 }
