@@ -63,7 +63,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
 
 
     @Override
-   public UserInformationResponse getUserInformation(Long userId, Long myId) {
+   public UserInformationResponse getUserInformation(Long userId, Long myId, Long friends) {
        Tuple informationDetails = jpaQueryFactory
                .select(u.id, u.context, u.blogLink, u.nickname, f.status, u.costumeId, i.newFilename, uc.costumeId)
                .from(u)
@@ -94,7 +94,8 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
                        informationDetails.get(uc.costumeId),
                        informationDetails.get(i.newFilename)
                ),
-               status
+               status,
+               friends
        );
     }
 

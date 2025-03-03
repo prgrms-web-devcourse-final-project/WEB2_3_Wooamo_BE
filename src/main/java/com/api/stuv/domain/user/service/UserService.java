@@ -131,7 +131,10 @@ public class UserService {
 
     public UserInformationResponse getUserInformation(Long userId){
         Long myId = tokenUtil.getUserId();
-        UserInformationResponse information = userRepository.getUserInformation(userId, myId);
+        Long friends = friendRepository.getTotalFriendListPage(userId);
+        if (friends == null) friends = 0L;
+
+        UserInformationResponse information = userRepository.getUserInformation(userId, myId, friends);
 
         return information;
     }
@@ -139,6 +142,8 @@ public class UserService {
     public MyInformationResponse getMyInformation(){
         Long myId = tokenUtil.getUserId();
         Long friends = friendRepository.getTotalFriendListPage(myId);
+        if (friends == null) friends = 0L;
+
         MyInformationResponse information = userRepository.getUserByMyId(myId, friends);
 
         return information;

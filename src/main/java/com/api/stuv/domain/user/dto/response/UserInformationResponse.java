@@ -6,6 +6,7 @@ public record UserInformationResponse(
         String link,
         String nickname,
         String profile,
-        String status
+        String status,
+        Long friends
 ) {
 }
