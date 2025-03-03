@@ -90,6 +90,9 @@ public enum ErrorCode {
     PARTY_NOT_FOUND(404, -11000, "해당 팟을 팢을 수 없습니다."),
     PARTY_INVALID_DATE(400, -11001, "해당 날짜는 팟의 인증 기간이 아닙니다."),
     CONFIRM_NOT_FOUND(404, -11002, "해당 회원의 인증을 찾을 수 없습니다."),
+    BETTING_AMOUNT_TOO_LOW(400, -11003, "베팅 포인트가 최소 포인트보다 낮습니다."),
+    ALREADY_JOINED_PARTY(400, -11004, "이미 참가한 팟입니다."),
+    CANNOT_JOIN_FULL_PARTY(400, -11005, "팟의 최대 인원이 초과되어 참가할 수 없습니다."),
 
     //TIMER
     TIMER_NOT_EXIST(404, -12000, "저장된 타이머가 없습니다."),
