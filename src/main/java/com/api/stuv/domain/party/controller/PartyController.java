@@ -1,8 +1,11 @@
 package com.api.stuv.domain.party.controller;
 
 import com.api.stuv.domain.auth.util.TokenUtil;
+import com.api.stuv.domain.party.dto.request.PartyCreateRequest;
+import com.api.stuv.domain.party.dto.request.PartyJoinRequest;
 import com.api.stuv.domain.party.dto.response.PartyDetailResponse;
 import com.api.stuv.domain.party.dto.response.PartyGroupResponse;
+import com.api.stuv.domain.party.dto.response.PartyIdResponse;
 import com.api.stuv.domain.party.dto.response.PartyRewardStatusResponse;
 import com.api.stuv.domain.party.service.PartyService;
 import com.api.stuv.global.response.ApiResponse;
@@ -63,6 +66,23 @@ public class PartyController {
                 .body(ApiResponse.success(
                         partyService.getPartyDetailInfo(partyId, tokenUtil.getUserId())
                 ));
+    }
+
+    @PostMapping
+    @Operation(summary = "팟 생성 API", description = "팟을 생성하면서 방장이 팟에 참가합니다.")
+    public ResponseEntity<ApiResponse<PartyIdResponse>> createParty(@RequestBody PartyCreateRequest request) {
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(
+                        partyService.createParty(request, tokenUtil.getUserId())
+                ));
+    }
+
+    @PostMapping("/{partyId}")
+    @Operation(summary = "팟 참가 API", description = "회원이 팟에 참가합니다.")
+    public ResponseEntity<ApiResponse<Void>> joinParty(@PathVariable Long partyId, @RequestBody PartyJoinRequest request) {
+        partyService.joinParty(request.bettingPoint(), partyId, tokenUtil.getUserId());
+        return ResponseEntity.ok()
+                .body(ApiResponse.success());
     }
 }
 
