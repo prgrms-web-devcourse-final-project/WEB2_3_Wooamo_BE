@@ -3,10 +3,7 @@ package com.api.stuv.domain.party.controller;
 import com.api.stuv.domain.auth.util.TokenUtil;
 import com.api.stuv.domain.party.dto.request.PartyCreateRequest;
 import com.api.stuv.domain.party.dto.request.PartyJoinRequest;
-import com.api.stuv.domain.party.dto.response.PartyDetailResponse;
-import com.api.stuv.domain.party.dto.response.PartyGroupResponse;
-import com.api.stuv.domain.party.dto.response.PartyIdResponse;
-import com.api.stuv.domain.party.dto.response.PartyRewardStatusResponse;
+import com.api.stuv.domain.party.dto.response.*;
 import com.api.stuv.domain.party.service.PartyService;
 import com.api.stuv.global.response.ApiResponse;
 import com.api.stuv.global.response.PageResponse;
@@ -83,6 +80,15 @@ public class PartyController {
         partyService.joinParty(request.bettingPoint(), partyId, tokenUtil.getUserId());
         return ResponseEntity.ok()
                 .body(ApiResponse.success());
+    }
+
+    @GetMapping("/event")
+    @Operation(summary = "이벤트 배너 조회 API", description = "이벤트 팟의 배너를 조회할 수 있습니다.")
+    public ResponseEntity<ApiResponse<List<EventBannerResponse>>> getEventBanner() {
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(
+                        partyService.getEventList()
+                ));
     }
 }
 

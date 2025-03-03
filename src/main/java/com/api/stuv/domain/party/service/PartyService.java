@@ -1,10 +1,9 @@
 package com.api.stuv.domain.party.service;
 
+import com.api.stuv.domain.image.entity.EntityType;
+import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.domain.party.dto.request.PartyCreateRequest;
-import com.api.stuv.domain.party.dto.response.PartyDetailResponse;
-import com.api.stuv.domain.party.dto.response.PartyGroupResponse;
-import com.api.stuv.domain.party.dto.response.PartyIdResponse;
-import com.api.stuv.domain.party.dto.response.PartyRewardStatusResponse;
+import com.api.stuv.domain.party.dto.response.*;
 import com.api.stuv.domain.party.entity.GroupMember;
 import com.api.stuv.domain.party.entity.PartyGroup;
 import com.api.stuv.domain.party.entity.QuestStatus;
@@ -33,6 +32,7 @@ public class PartyService {
     private final PartyGroupRepository partyRepository;
     private final UserRepository userRepository;
     private final GroupMemberRepository memberRepository;
+    private final S3ImageService s3ImageService;
 
     public PageResponse<PartyGroupResponse> getPendingPartyGroups(String name, Pageable pageable) {
         return partyRepository.findPendingGroupsByName(name, pageable);
@@ -77,6 +77,16 @@ public class PartyService {
     public PartyDetailResponse getPartyDetailInfo(Long partyId, Long userId) {
         return partyRepository.findDetailByUserId(partyId, userId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.PARTY_NOT_FOUND));
+    }
+
+    public List<EventBannerResponse> getEventList() {
+        return partyRepository.findEventPartyList()
+                .stream()
+                .map(dto -> new EventBannerResponse(
+                        s3ImageService.generateImageFile(EntityType.EVENT, dto.partyId(), dto.image()),
+                        dto.partyId()
+                ))
+                .toList();
     }
 
     @Transactional
