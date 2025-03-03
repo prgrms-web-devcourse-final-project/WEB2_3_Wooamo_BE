@@ -1,7 +1,9 @@
 package com.api.stuv.domain.party.entity;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+@Getter
 @RequiredArgsConstructor
 public enum QuestStatus {
     COMPLETED("보상완료"),
