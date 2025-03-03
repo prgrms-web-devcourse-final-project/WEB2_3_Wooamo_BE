@@ -247,17 +247,19 @@ public class UserService {
         }
 
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
-        Long id = userCostumeRepository.findIdByCostumeId(costumeId);
-        user.changeUserCostume(costumeId);
+        Long id = userCostumeRepository.findIdByCostumeId(costumeId, userId);
+        System.out.println(id);
+        user.changeUserCostume(id);
         userRepository.save(user);
 
-        ImageFile newFilename = imageFileRepository.findByEntityIdAndEntityType(costumeId, EntityType.COSTUME).orElseThrow(() ->  new NotFoundException(ErrorCode.COSTUME_NOT_FOUND));
-        String url = s3ImageService.generateImageFile(
-                        EntityType.COSTUME,
-                        costumeId,
-                        newFilename.getNewFilename());
-
-        ChangeUserCostume changeUserCostume = new ChangeUserCostume(url);
+//        ImageFile newFilename = imageFileRepository.findByEntityIdAndEntityType(costumeId, EntityType.COSTUME).orElseThrow(() ->  new NotFoundException(ErrorCode.COSTUME_NOT_FOUND));
+//        String url = s3ImageService.generateImageFile(
+//                        EntityType.COSTUME,
+//                        costumeId,
+//                        newFilename.getNewFilename());
+//
+//        ChangeUserCostume changeUserCostume = new ChangeUserCostume(url);
+        ChangeUserCostume changeUserCostume = new ChangeUserCostume("hello");
 
         return changeUserCostume;
     }
