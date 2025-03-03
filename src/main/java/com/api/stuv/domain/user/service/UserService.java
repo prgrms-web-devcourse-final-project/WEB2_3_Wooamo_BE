@@ -8,10 +8,7 @@ import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.domain.timer.repository.StudyTimeRepository;
 import com.api.stuv.domain.user.dto.request.*;
 import com.api.stuv.domain.user.dto.response.*;
-import com.api.stuv.domain.user.entity.HistoryType;
-import com.api.stuv.domain.user.entity.PointHistory;
-import com.api.stuv.domain.user.entity.User;
-import com.api.stuv.domain.user.entity.UserCostume;
+import com.api.stuv.domain.user.entity.*;
 import com.api.stuv.domain.user.repository.PointHistoryRepository;
 import com.api.stuv.domain.user.repository.UserCostumeRepository;
 import com.api.stuv.domain.user.repository.UserRepository;
@@ -212,7 +209,7 @@ public class UserService {
                 .sum()
                 : 0L;
 
-        BigDecimal point = new BigDecimal(5);
+        BigDecimal point = RewardType.DAILY.getValue();
         if(totalTime > 10800L){
             user.updatePoint(point);
             userRepository.save(user);
