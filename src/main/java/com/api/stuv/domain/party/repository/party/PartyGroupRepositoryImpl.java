@@ -128,15 +128,6 @@ public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
     }
 
     @Override
-    public String findPartyGroupNameByUserId(Long userId) {
-        return factory.select(pg.name)
-                .from(gm)
-                .join(pg).on(gm.groupId.eq(pg.id))
-                .where(gm.userId.eq(userId))
-                .fetchFirst();
-    }
-
-    @Override
     public List<MemberRewardStatusDTO> findCompletePartyStatusList(Long userId) {
         return factory
                 .select(Projections.constructor(
