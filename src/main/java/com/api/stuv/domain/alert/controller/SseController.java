@@ -13,8 +13,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @RestController
 @RequestMapping("/api/sse")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:63342")
-@Tag(name = "Sse", description = "Sse 관련 API")
+@Tag(name = "SSE", description = "SSE 관련 API")
 public class SseController {
     private final SseService sseService;
     private final TokenUtil tokenUtil;
