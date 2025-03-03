@@ -103,7 +103,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
     @Override
     public List<UserBoardListResponse> getUserBoardList(Long userId) {
         List<Tuple> results = jpaQueryFactory
-                .select(b.id, b.title, b.context, b.boardType, b.createdAt, i.newFilename)
+                .select(b.id, b.title, b.context, b.boardType, TemplateUtils.timeFormater(b.createdAt), i.newFilename)
                 .from(b)
                 .leftJoin(i).on(b.id.eq(i.entityId).and(i.entityType.eq(EntityType.BOARD)))
                 .where(b.userId.eq(userId))
