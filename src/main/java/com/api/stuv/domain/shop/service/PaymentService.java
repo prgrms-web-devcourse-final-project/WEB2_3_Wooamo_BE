@@ -8,7 +8,10 @@ import com.api.stuv.domain.shop.entity.Payment;
 import com.api.stuv.domain.shop.exception.PaymentsMismatchException;
 import com.api.stuv.domain.shop.exception.PaymentsNotFoundException;
 import com.api.stuv.domain.shop.repository.PaymentRepository;
+import com.api.stuv.domain.user.entity.HistoryType;
+import com.api.stuv.domain.user.entity.PointHistory;
 import com.api.stuv.domain.user.entity.User;
+import com.api.stuv.domain.user.repository.PointHistoryRepository;
 import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
@@ -39,14 +42,16 @@ public class PaymentService {
     private final UserRepository userRepository;
     private static final Logger log = LoggerFactory.getLogger(PaymentService.class);
     private static final HttpClient httpClient = HttpClient.newHttpClient();
+    private final PointHistoryRepository pointHistoryRepository;
 
     @Value("${payment.toss.test_secret_api_key}")
     private String secretKey;
 
-    public PaymentService(PaymentRepository paymentRepository, TokenUtil tokenUtil, UserRepository userRepository) {
+    public PaymentService(PaymentRepository paymentRepository, TokenUtil tokenUtil, UserRepository userRepository, PointHistoryRepository pointHistoryRepository) {
         this.paymentRepository = paymentRepository;
         this.tokenUtil = tokenUtil;
         this.userRepository = userRepository;
+        this.pointHistoryRepository = pointHistoryRepository;
     }
 
     @Transactional
@@ -75,6 +80,7 @@ public class PaymentService {
             payment.setPaymentSuccess();
             payment.setPaymentKey(request.paymentKey());
             user.updatePoint(request.point());
+            pointHistoryRepository.save(new PointHistory(user.getId(), HistoryType.CHARGE, request.point(), HistoryType.CHARGE.getText()));
         } else {
             log.error("Payment confirmation failed : {}", response.body());
             throw new PaymentsNotFoundException();
