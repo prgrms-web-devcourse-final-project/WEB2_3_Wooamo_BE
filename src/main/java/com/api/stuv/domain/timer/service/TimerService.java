@@ -145,7 +145,6 @@ public class TimerService {
 
         HashOperations<String, String, String> hashOps = redisTemplate.opsForHash();
         Set<String> keys = redisTemplate.keys(STUDY_KEY + ":" + userId + ":*");
-        System.out.println(userId);
 
         if (keys == null || keys.isEmpty()) {
             return studyTimeRepository.sumTotalStudyTimeByDaily(userId, today);
