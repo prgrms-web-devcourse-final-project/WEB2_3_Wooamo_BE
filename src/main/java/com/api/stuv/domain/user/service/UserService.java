@@ -164,8 +164,7 @@ public class UserService {
         return modifyProfileResponse;
     }
 
-    public List<UserBoardListResponse> getUserBoardList(){
-        Long userId = tokenUtil.getUserId();
+    public List<UserBoardListResponse> getUserBoardList(Long userId){
 
         List<UserBoardListResponse> userBoardList = userRepository.getUserBoardList(userId);
 
