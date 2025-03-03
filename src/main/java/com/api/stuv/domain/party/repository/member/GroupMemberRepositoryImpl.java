@@ -4,6 +4,7 @@ import com.api.stuv.domain.admin.dto.MemberDetailDTO;
 import com.api.stuv.domain.image.entity.EntityType;
 import com.api.stuv.domain.image.entity.QImageFile;
 import com.api.stuv.domain.image.service.S3ImageService;
+import com.api.stuv.domain.party.entity.GroupMember;
 import com.api.stuv.domain.party.entity.QGroupMember;
 import com.api.stuv.domain.party.entity.QQuestConfirm;
 import com.api.stuv.domain.party.entity.QuestStatus;
@@ -69,7 +70,7 @@ public class GroupMemberRepositoryImpl implements GroupMemberRepositoryCustom {
                 factory.select(gm.count())
                         .from(gm)
                         .where(gm.groupId.eq(partyId)
-                                .and(gm.questStatus.eq(QuestStatus.PROGRESS))) // PROGRESS 상태가 있는지 확인
+                                .and(gm.questStatus.eq(QuestStatus.PROGRESS)))
                         .fetchOne()
         ).orElse(0L) == 0;
     }

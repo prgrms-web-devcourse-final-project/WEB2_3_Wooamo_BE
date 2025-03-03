@@ -2,6 +2,7 @@ package com.api.stuv.domain.party.controller;
 
 import com.api.stuv.domain.auth.util.TokenUtil;
 import com.api.stuv.domain.party.dto.response.PartyGroupResponse;
+import com.api.stuv.domain.party.dto.response.PartyRewardStatusResponse;
 import com.api.stuv.domain.party.service.PartyService;
 import com.api.stuv.global.response.ApiResponse;
 import com.api.stuv.global.response.PageResponse;
@@ -45,6 +46,15 @@ public class PartyController {
         return ResponseEntity.ok()
                 .body(ApiResponse.success(
                         partyService.getActivePartyGroupsByUserId(tokenUtil.getUserId())
+                ));
+    }
+
+    @GetMapping("/complete")
+    @Operation(summary = "현재 사용자의 마감된 팟 보상 획득 여부 목록 조회 API", description = "마감된 팟에 대한 보상 획득 여부를 조회합니다.")
+    public ResponseEntity<ApiResponse<List<PartyRewardStatusResponse>>> getCompletePartyList() {
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(
+                        partyService.getCompletePartyStatus(tokenUtil.getUserId())
                 ));
     }
 }
