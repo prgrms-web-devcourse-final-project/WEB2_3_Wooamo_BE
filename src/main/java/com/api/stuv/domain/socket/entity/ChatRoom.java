@@ -36,6 +36,9 @@ public class ChatRoom {
     @Field("members")
     private List<Long> members;
 
+    @Field("max_members")
+    private Integer maxMembers;
+
     @Field("created_at")
     private LocalDateTime createdAt;
 
@@ -47,10 +50,11 @@ public class ChatRoom {
     }
 
     @PersistenceConstructor
-    public ChatRoom(String roomId, String roomType, List<Long> members, LocalDateTime createdAt) {
+    public ChatRoom(String roomId, String roomType, List<Long> members, Integer maxMembers, LocalDateTime createdAt) {
         this.roomId = roomId;
         this.roomType = roomType;
         this.members = members;
+        this.maxMembers = maxMembers;
         this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
     }
 }
