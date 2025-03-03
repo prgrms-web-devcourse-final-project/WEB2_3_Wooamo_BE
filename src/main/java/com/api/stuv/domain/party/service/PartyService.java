@@ -2,6 +2,7 @@ package com.api.stuv.domain.party.service;
 
 import com.api.stuv.domain.image.entity.EntityType;
 import com.api.stuv.domain.image.service.S3ImageService;
+import com.api.stuv.domain.party.dto.response.MemberResponse;
 import com.api.stuv.domain.party.dto.request.PartyCreateRequest;
 import com.api.stuv.domain.party.dto.response.*;
 import com.api.stuv.domain.party.entity.GroupMember;
@@ -17,6 +18,7 @@ import com.api.stuv.global.exception.NotFoundException;
 import com.api.stuv.global.response.PageResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -87,6 +89,23 @@ public class PartyService {
                         dto.partyId()
                 ))
                 .toList();
+    }
+
+    public PageResponse<MemberResponse> getPartyMemberList(Long partyId, Long userId, Pageable pageable) {
+        return PageResponse.of(new PageImpl<>(
+                memberRepository.findMemberList(partyId, userId, pageable)
+                        .stream()
+                        .map(dto -> new MemberResponse(
+                                dto.friendId(),
+                                dto.userId(),
+                                dto.nickname(),
+                                s3ImageService.generateImageFile(EntityType.COSTUME, dto.imageId(), dto.image()),
+                                dto.context(),
+                                dto.status()
+                        )).toList(),
+                pageable,
+                memberRepository.countAllGroupMembers(partyId)
+        ));
     }
 
     @Transactional
