@@ -1,5 +1,7 @@
 package com.api.stuv.domain.board.service;
 
+import com.api.stuv.domain.alert.entity.AlertType;
+import com.api.stuv.domain.alert.service.AlertService;
 import com.api.stuv.domain.board.dto.BoardDetailResponse;
 import com.api.stuv.domain.board.dto.BoardRequest;
 import com.api.stuv.domain.board.dto.BoardResponse;
@@ -44,6 +46,7 @@ public class BoardService {
     private final UserRepository userRepository;
     private final ImageFileRepository imageFileRepository;
     private final ImageService imageService;
+    private final AlertService alertService;
     private final S3ImageService s3ImageService;
 
     @Transactional(readOnly = true)
@@ -112,25 +115,26 @@ public class BoardService {
     // TODO: 이후 알림 기능 추가
     @Transactional
     public void createComment(Long userId, Long boardId, String content) {
-        if (!boardRepository.existsById(boardId)) throw new NotFoundException(ErrorCode.BOARD_NOT_FOUND);
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        Board board = boardRepository.findById(boardId).orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
+        if (!userId.equals(board.getUserId())) alertService.createAlert(board.getUserId(), boardId, AlertType.COMMENT, user.getNickname());
         commentRepository.save(Comment.create(boardId, userId, content));
     }
 
     // TODO: 이후 알림 기능 추가
     @Transactional
     public void confirmComment(Long userId, Long commentId) {
-
-        final int CONFIRM_COMMENT_POINT = 50;
-
+        final int CONFIRM_COMMENT_POINT = 5;
         Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NotFoundException(ErrorCode.COMMENT_NOT_FOUND));
         Board board = boardRepository.findById(comment.getBoardId()).orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
         User user = userRepository.findById(comment.getUserId()).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        User boardWitter = userRepository.findById(board.getUserId()).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
         if (!board.getBoardType().equals(BoardType.QUESTION)) throw new AccessDeniedException(ErrorCode.BOARD_NOT_QUESTION);
         if (comment.getUserId().equals(userId)) throw new AccessDeniedException(ErrorCode.COMMENT_BY_WRITER);
         if (board.getConfirmedCommentId() != null) throw new AccessDeniedException(ErrorCode.COMMENT_ALREADY_CONFIRM);
         if (!board.getUserId().equals(userId)) throw new AccessDeniedException(ErrorCode.COMMENT_NOT_AUTHORIZED);
+        alertService.createAlert(comment.getUserId(), board.getId(), AlertType.CONFIRM, boardWitter.getNickname());
         board.confirmComment(commentId);
         user.updatePoint(BigDecimal.valueOf(CONFIRM_COMMENT_POINT));
-
     }
 }

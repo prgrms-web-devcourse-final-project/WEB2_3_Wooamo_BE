@@ -1,5 +1,6 @@
 package com.api.stuv.domain.board.service;
 
+import com.api.stuv.domain.alert.service.AlertService;
 import com.api.stuv.domain.board.entity.Board;
 import com.api.stuv.domain.board.entity.BoardType;
 import com.api.stuv.domain.board.entity.Comment;
@@ -42,6 +43,9 @@ public class ConfirmCommentTest {
     @InjectMocks
     private BoardService boardService;
 
+    @Mock
+    private AlertService alertService;
+
     List<User> users = List.of(
             new User(1L, "user1", "user1", null, null, "user1", BigDecimal.valueOf(0), null, RoleType.USER, null),
             new User(2L, "user2", "user2", null, null, "user2", BigDecimal.valueOf(0), null, RoleType.USER, null)
@@ -72,6 +76,7 @@ public class ConfirmCommentTest {
 
         when(commentRepository.findById(2L)).thenReturn(Optional.of(comment));
         when(boardRepository.findById(comment.getBoardId())).thenReturn(Optional.of(board));
+        when(userRepository.findById(board.getUserId())).thenReturn(Optional.of(writer));
         when(userRepository.findById(comment.getUserId())).thenReturn(Optional.of(commentWriter));
 
         // when
@@ -79,7 +84,7 @@ public class ConfirmCommentTest {
 
         // then
         assertThat(board.getConfirmedCommentId()).isEqualTo(comment.getId());
-        assertThat(commentWriter.getPoint()).isEqualTo(BigDecimal.valueOf(50));
+        assertThat(commentWriter.getPoint()).isEqualTo(BigDecimal.valueOf(5));
     }
 
     @Test
@@ -92,6 +97,7 @@ public class ConfirmCommentTest {
 
         when(commentRepository.findById(2L)).thenReturn(Optional.of(comment));
         when(boardRepository.findById(comment.getBoardId())).thenReturn(Optional.of(board));
+        when(userRepository.findById(board.getUserId())).thenReturn(Optional.of(writer));
         when(userRepository.findById(comment.getUserId())).thenReturn(Optional.of(commentWriter));
 
         // when
@@ -113,6 +119,7 @@ public class ConfirmCommentTest {
 
         when(commentRepository.findById(2L)).thenReturn(Optional.of(comment));
         when(boardRepository.findById(comment.getBoardId())).thenReturn(Optional.of(board));
+        when(userRepository.findById(board.getUserId())).thenReturn(Optional.of(writer));
         when(userRepository.findById(comment.getUserId())).thenReturn(Optional.of(commentWriter));
 
         // when
@@ -134,6 +141,7 @@ public class ConfirmCommentTest {
 
         when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
         when(boardRepository.findById(comment.getBoardId())).thenReturn(Optional.of(board));
+        when(userRepository.findById(board.getUserId())).thenReturn(Optional.of(writer));
         when(userRepository.findById(comment.getUserId())).thenReturn(Optional.of(commentWriter));
         // when
         try {
@@ -154,6 +162,7 @@ public class ConfirmCommentTest {
 
         when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
         when(boardRepository.findById(comment.getBoardId())).thenReturn(Optional.of(board));
+        when(userRepository.findById(board.getUserId())).thenReturn(Optional.of(writer));
         when(userRepository.findById(comment.getUserId())).thenReturn(Optional.of(commentWriter));
 
         // when
@@ -177,6 +186,7 @@ public class ConfirmCommentTest {
 
         when(commentRepository.findById(2L)).thenReturn(Optional.of(comment));
         when(boardRepository.findById(comment.getBoardId())).thenReturn(Optional.of(board));
+        when(userRepository.findById(board.getUserId())).thenReturn(Optional.of(writer));
         when(userRepository.findById(comment.getUserId())).thenReturn(Optional.of(commentWriter));
 
         // when
@@ -198,6 +208,7 @@ public class ConfirmCommentTest {
 
         when(commentRepository.findById(1L)).thenReturn(Optional.of(comment));
         when(boardRepository.findById(comment.getBoardId())).thenReturn(Optional.of(board));
+        when(userRepository.findById(board.getUserId())).thenReturn(Optional.of(writer));
         when(userRepository.findById(comment.getUserId())).thenReturn(Optional.of(commentWriter));
 
         // when

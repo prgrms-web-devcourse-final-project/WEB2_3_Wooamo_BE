@@ -98,7 +98,18 @@ public enum ErrorCode {
     // PAYMENTS
     PAYMENTS_MISMATCH(404, -13000, "결제 금액이 일치하지 않습니다."),
     PAYMENTS_NOT_FOUND(400, -13001, "승인에 실패했습니다. 다시 시도해주세요"),
-    POINT_NOT_ENOUGH(400, -13002, "포인트가 부족합니다.")
+    POINT_NOT_ENOUGH(400, -13002, "포인트가 부족합니다."),
+
+    // SSE
+    SSE_ERROR(500, -14000, "SSE 서버 오류가 발생했습니다."),
+    SSE_NOT_FOUND(404, -14000, "해당 SSE를 찾을 수 없습니다."),
+    SSE_CONNECTION_FAILED(500, -14001, "SSE 연결에 실패했습니다."),
+    SSE_CONNECTION_CLOSED(500, -14002, "SSE 연결이 끊어졌습니다."),
+
+    // ALERT
+    ALERT_NOT_FOUND(404, -15000, "해당 알림을 찾을 수 없습니다."),
+    ALERT_ALREADY_READ(400, -15001, "해당 알림이 이미 읽음 상태입니다."),
+    ALL_ALERT_ALREADY_READ(400, -15002, "모든 알림이 이미 읽음 상태입니다."),
     ;
 
     private final int status;
