@@ -1,7 +1,6 @@
 package com.api.stuv.domain.socket.controller;
 
-import com.api.stuv.domain.socket.dto.ChatMessageResponse;
-import com.api.stuv.domain.socket.dto.ChatRoomResponse;
+import com.api.stuv.domain.socket.dto.*;
 import com.api.stuv.domain.socket.service.ChatMessageService;
 import com.api.stuv.domain.socket.service.ChatRoomDetailService;
 import com.api.stuv.global.response.ApiResponse;
@@ -47,28 +46,24 @@ public class ChatController {
     @Operation(summary = "1:1 채팅방 생성", description = "두 사용자 간의 1:1 채팅방을 생성합니다.")
     @PostMapping("/private")
     public ResponseEntity<ApiResponse<String>> createPrivateRoom(
-            @RequestParam Long userId1,
-            @RequestParam Long userId2) {
-        String roomId = chatRoomDetailService.createPrivateChatRoom(userId1, userId2);
+            @RequestBody CreatePrivateRoomRequest request) {
+        String roomId = chatRoomDetailService.createPrivateChatRoom(request.userId1(), request.userId2());
         return ResponseEntity.ok(ApiResponse.success(roomId));
     }
 
     @Operation(summary = "그룹 채팅방 생성", description = "여러 사용자가 참여하는 그룹 채팅방을 생성합니다.")
     @PostMapping("/group")
     public ResponseEntity<ApiResponse<String>> createGroupRoom(
-            @RequestParam String groupName,
-            @RequestParam Long userId,
-            @RequestParam(defaultValue = "100") int maxMembers) {
-        String roomId = chatRoomDetailService.createGroupChatRoom(groupName, userId, maxMembers);
-        return ResponseEntity.ok(ApiResponse.success(roomId));
+            @RequestBody CreateGroupRoomRequest request) {
+        String roomId = chatRoomDetailService.createGroupChatRoom(request.groupName(), request.userId(), request.maxMembers());        return ResponseEntity.ok(ApiResponse.success(roomId));
     }
 
     @Operation(summary = "그룹 채팅방에 사용자 추가", description = "기존 그룹 채팅방에 새로운 사용자를 추가합니다.")
     @PostMapping("/group/{roomId}/addUser")
     public ResponseEntity<ApiResponse<Void>> addUserToGroupChat(
             @PathVariable String roomId,
-            @RequestParam Long newUserId) {
-        chatRoomDetailService.addUserToGroupChat(roomId, newUserId);
+            @RequestBody AddUserToGroupChatRequest request) {
+        chatRoomDetailService.addUserToGroupChat(roomId, request.newUserId());
         return ResponseEntity.ok(ApiResponse.success());
     }
 

@@ -37,18 +37,13 @@ public class ChatRoomDetailService {
         return chatRooms.stream()
                 .map(room -> {
                     ChatMessage latestMessage = chatMessageRepository.findTopByRoomIdOrderByCreatedAtDesc(room.getRoomId());
-
                     int unreadCount = chatMessageRepository.countUnreadMessages(room.getRoomId(), senderId);
 
-                    if ("PRIVATE".equals(room.getRoomType())) {
-                        String profile = (latestMessage != null) ? userRepository.getCostumeInfoByUserId(latestMessage.getSenderId()) : null;
-                        return ChatRoomResponse.from(room, latestMessage, profile, null, unreadCount);
-                    } else if ("GROUP".equals(room.getRoomType())) {
-                        String groupName = partyGroupRepository.findPartyGroupNameByUserId(senderId);
-                        return ChatRoomResponse.from(room, latestMessage, null, groupName, unreadCount);
-                    }
+                    String profile = ("PRIVATE".equals(room.getRoomType()) && latestMessage != null)
+                            ? userRepository.getCostumeInfoByUserId(latestMessage.getSenderId())
+                            : null;
 
-                    return ChatRoomResponse.from(room, latestMessage, null, null, unreadCount);
+                    return ChatRoomResponse.from(room, latestMessage, profile, unreadCount);
                 })
                 .sorted(Comparator.comparing(ChatRoomResponse::createdAt, Comparator.reverseOrder()))
                 .collect(Collectors.toList());
