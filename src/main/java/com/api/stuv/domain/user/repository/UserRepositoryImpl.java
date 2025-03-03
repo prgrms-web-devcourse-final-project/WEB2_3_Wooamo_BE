@@ -2,6 +2,7 @@ package com.api.stuv.domain.user.repository;
 
 import com.api.stuv.domain.board.entity.QBoard;
 import com.api.stuv.domain.friend.entity.QFriend;
+import com.api.stuv.domain.friend.repository.FriendRepository;
 import com.api.stuv.domain.image.entity.EntityType;
 import com.api.stuv.domain.image.entity.QImageFile;
 import com.api.stuv.domain.image.service.S3ImageService;
@@ -26,6 +27,7 @@ import java.util.List;
 public class UserRepositoryImpl implements UserRepositoryCustom{
     private final JPAQueryFactory jpaQueryFactory;
     private final S3ImageService s3ImageService;
+    private final FriendRepository friendRepository;
     private final QUser u = QUser.user;
     private final QImageFile i = QImageFile.imageFile;
     private final QFriend f = QFriend.friend;
@@ -34,7 +36,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
 
 
     @Override
-    public MyInformationResponse getUserByMyId(Long myId) {
+    public MyInformationResponse getUserByMyId(Long myId, Long friends) {
         Tuple informationDetails = jpaQueryFactory
                 .select(u.id, u.context, u.blogLink, u.nickname, u.point, u.role, i.newFilename, uc.costumeId)
                 .from(u)
@@ -42,6 +44,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
                 .leftJoin(i).on(uc.costumeId.eq(i.entityId).and(i.entityType.eq(EntityType.COSTUME)))
                 .where(u.id.eq(myId))
                 .fetchOne();
+
 
         return new MyInformationResponse(
                 informationDetails.get(u.id),
@@ -53,13 +56,14 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
                 informationDetails.get(i.newFilename) == null ? null : s3ImageService.generateImageFile(
                         EntityType.COSTUME,
                         informationDetails.get(uc.costumeId),
-                        informationDetails.get(i.newFilename))
+                        informationDetails.get(i.newFilename)),
+                friends
         );
     }
 
 
     @Override
-   public UserInformationResponse getUserInformation(Long userId, Long myId) {
+   public UserInformationResponse getUserInformation(Long userId, Long myId, Long friends) {
        Tuple informationDetails = jpaQueryFactory
                .select(u.id, u.context, u.blogLink, u.nickname, f.status, u.costumeId, i.newFilename, uc.costumeId)
                .from(u)
@@ -90,7 +94,8 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
                        informationDetails.get(uc.costumeId),
                        informationDetails.get(i.newFilename)
                ),
-               status
+               status,
+               friends
        );
     }
 

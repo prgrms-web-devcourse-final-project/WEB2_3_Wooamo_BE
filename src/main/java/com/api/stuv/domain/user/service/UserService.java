@@ -1,6 +1,7 @@
 package com.api.stuv.domain.user.service;
 
 import com.api.stuv.domain.auth.util.TokenUtil;
+import com.api.stuv.domain.friend.repository.FriendRepository;
 import com.api.stuv.domain.image.entity.EntityType;
 import com.api.stuv.domain.image.entity.ImageFile;
 import com.api.stuv.domain.image.repository.ImageFileRepository;
@@ -8,10 +9,7 @@ import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.domain.timer.repository.StudyTimeRepository;
 import com.api.stuv.domain.user.dto.request.*;
 import com.api.stuv.domain.user.dto.response.*;
-import com.api.stuv.domain.user.entity.HistoryType;
-import com.api.stuv.domain.user.entity.PointHistory;
-import com.api.stuv.domain.user.entity.User;
-import com.api.stuv.domain.user.entity.UserCostume;
+import com.api.stuv.domain.user.entity.*;
 import com.api.stuv.domain.user.repository.PointHistoryRepository;
 import com.api.stuv.domain.user.repository.UserCostumeRepository;
 import com.api.stuv.domain.user.repository.UserRepository;
@@ -50,6 +48,7 @@ public class UserService {
     private final RandomName randomName;
     private final TokenUtil tokenUtil;
     private final ImageFileRepository imageFileRepository;
+    private final FriendRepository friendRepository;
 
     public void registerUser(UserRequest userRequest) {
         String email = userRequest.email();
@@ -132,14 +131,20 @@ public class UserService {
 
     public UserInformationResponse getUserInformation(Long userId){
         Long myId = tokenUtil.getUserId();
-        UserInformationResponse information = userRepository.getUserInformation(userId, myId);
+        Long friends = friendRepository.getTotalFriendListPage(userId);
+        if (friends == null) friends = 0L;
+
+        UserInformationResponse information = userRepository.getUserInformation(userId, myId, friends);
 
         return information;
     }
 
     public MyInformationResponse getMyInformation(){
         Long myId = tokenUtil.getUserId();
-        MyInformationResponse information = userRepository.getUserByMyId(myId);
+        Long friends = friendRepository.getTotalFriendListPage(myId);
+        if (friends == null) friends = 0L;
+
+        MyInformationResponse information = userRepository.getUserByMyId(myId, friends);
 
         return information;
     }
@@ -212,7 +217,7 @@ public class UserService {
                 .sum()
                 : 0L;
 
-        BigDecimal point = new BigDecimal(5);
+        BigDecimal point = RewardType.DAILY.getValue();
         if(totalTime > 10800L){
             user.updatePoint(point);
             userRepository.save(user);
@@ -243,6 +248,7 @@ public class UserService {
         }
 
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        Long id = userCostumeRepository.findIdByCostumeId(costumeId);
         user.changeUserCostume(costumeId);
         userRepository.save(user);
 
