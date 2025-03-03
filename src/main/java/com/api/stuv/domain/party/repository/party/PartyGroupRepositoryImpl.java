@@ -3,8 +3,11 @@ package com.api.stuv.domain.party.repository.party;
 import com.api.stuv.domain.admin.dto.response.AdminPartyAuthDetailResponse;
 import com.api.stuv.domain.admin.dto.response.AdminPartyGroupResponse;
 import com.api.stuv.domain.party.dto.MemberRewardStatusDTO;
+import com.api.stuv.domain.party.dto.response.PartyDetailResponse;
 import com.api.stuv.domain.party.dto.response.PartyGroupResponse;
 import com.api.stuv.domain.party.entity.*;
+import com.api.stuv.global.exception.ErrorCode;
+import com.api.stuv.global.exception.NotFoundException;
 import com.api.stuv.global.response.PageResponse;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
@@ -17,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
@@ -124,7 +128,7 @@ public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
     }
 
     @Override
-    public List<MemberRewardStatusDTO> findCompletePartuStatusList(Long userId) {
+    public List<MemberRewardStatusDTO> findCompletePartyStatusList(Long userId) {
         return factory
                 .select(Projections.constructor(
                         MemberRewardStatusDTO.class,
@@ -141,32 +145,30 @@ public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
     }
 
     @Override
-    public Long countAllGroupMembers(Long partyId) {
-        return factory
-                .select(pg.id.count())
-                .from(pg)
-                .leftJoin(gm).on(pg.id.eq(gm.groupId))
-                .where(pg.id.eq(partyId))
-                .fetchOne();
-    }
-
-    @Override
-    public BigDecimal sumFailedGroupMemberBettingPoint(Long partyId) {
-        return factory
-                .select(gm.bettingPoint.sum().coalesce(BigDecimal.ZERO))
-                .from(gm)
-                .where(gm.groupId.eq(partyId)
-                        .and(gm.questStatus.eq(QuestStatus.FAILED)))
-                .fetchOne();
-    }
-
-    @Override
-    public Long countSuccessGroupMembers(Long partyId) {
-        return factory
-                .select(gm.id.count().coalesce(0L))
-                .from(gm)
-                .where(gm.groupId.eq(partyId)
-                        .and(gm.questStatus.in(QuestStatus.SUCCESS, QuestStatus.COMPLETED)))
-                .fetchOne();
+    public Optional<PartyDetailResponse> findDetailByUserId(Long partyId, Long userId) {
+        return Optional.ofNullable(
+                factory
+                        .select(Projections.constructor(
+                                PartyDetailResponse.class,
+                                pg.id,
+                                pg.name,
+                                pg.recruitCap,
+                                gm.id.count(),
+                                pg.startDate,
+                                pg.endDate,
+                                pg.bettingPoint,
+                                factory
+                                        .selectOne()
+                                        .from(gm)
+                                        .where(gm.groupId.eq(partyId)
+                                                .and(gm.userId.eq(userId)))
+                                        .exists()
+                        ))
+                        .from(pg)
+                        .leftJoin(gm).on(pg.id.eq(gm.groupId))
+                        .where(pg.id.eq(partyId))
+                        .groupBy(pg.id, pg.name, pg.recruitCap, pg.startDate, pg.endDate, pg.bettingPoint)
+                        .fetchOne()
+        );
     }
 }
