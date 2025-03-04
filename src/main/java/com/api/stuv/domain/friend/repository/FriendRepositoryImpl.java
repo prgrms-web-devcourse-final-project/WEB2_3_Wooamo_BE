@@ -1,7 +1,7 @@
 package com.api.stuv.domain.friend.repository;
 
-import com.api.stuv.domain.friend.dto.FriendFollowListResponse;
-import com.api.stuv.domain.friend.dto.FriendResponse;
+import com.api.stuv.domain.friend.dto.dto.FriendListDTO;
+import com.api.stuv.domain.friend.dto.response.FriendResponse;
 import com.api.stuv.domain.friend.entity.FriendFollowStatus;
 import com.api.stuv.domain.friend.entity.FriendStatus;
 import com.api.stuv.domain.friend.entity.QFriend;
@@ -11,6 +11,7 @@ import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.domain.user.entity.QUser;
 import com.api.stuv.domain.user.entity.QUserCostume;
 import com.api.stuv.global.response.PageResponse;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
@@ -31,26 +32,29 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
     private final QImageFile i = QImageFile.imageFile;
 
     @Override
-    public PageResponse<FriendFollowListResponse> getFriendFollowList(Long receiverId, Pageable pageable, String imageUrl) {
-        List<FriendFollowListResponse> response = jpaQueryFactory
-                .select(f.id,
+    public List<FriendListDTO> getFriendFollowList(Long receiverId, Pageable pageable) {
+        return jpaQueryFactory
+                .select(Projections.constructor(FriendListDTO.class,
+                        f.id,
                         u.id,
-                        uc.costumeId,
-                        i.newFilename,
                         u.nickname,
-                        u.context)
+                        u.context,
+                        uc.costumeId,
+                        i.newFilename))
                 .from(f).join(u).on(f.userId.eq(u.id))
                 .leftJoin(uc).on(u.costumeId.eq(uc.id))
                 .leftJoin(i).on(uc.costumeId.eq(i.entityId).and(i.entityType.eq(EntityType.COSTUME)))
                 .where(f.friendId.eq(receiverId).and(f.status.eq(FriendStatus.PENDING)))
-                .offset(pageable.getOffset()).limit(pageable.getPageSize()).fetch()
-                .stream().map( tuple -> new FriendFollowListResponse(
-                        tuple.get(f.id),
-                        tuple.get(u.id),
-                        s3ImageService.generateImageFile(EntityType.COSTUME, tuple.get(uc.costumeId), tuple.get(i.newFilename)),
-                        tuple.get(u.nickname),
-                        tuple.get(u.context))).toList();
-        return PageResponse.of(new PageImpl<>(response, pageable, getTotalFriendFollowListPage(receiverId)));
+                .offset(pageable.getOffset()).limit(pageable.getPageSize()).fetch();
+    }
+
+    @Override
+    public Long getTotalFriendFollowListPage(Long receiverId) {
+        return jpaQueryFactory
+                .select(f.count())
+                .from(f).join(u).on(f.userId.eq(u.id))
+                .where(f.friendId.eq(receiverId).and(f.status.eq(FriendStatus.PENDING)))
+                .fetchOne();
     }
 
     @Override
@@ -86,16 +90,11 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
                         uc.costumeId,
                         i.newFilename,
                         Expressions.cases()
-                                .when(f.userId.eq(userId)).then(FriendFollowStatus.ME.toString())
-                                .when(f.friendId.eq(userId)).then(FriendFollowStatus.OTHER.toString())
+                                .when(f.userId.eq(userId).and(f.status.eq(FriendStatus.PENDING))).then(FriendFollowStatus.ME.toString())
+                                .when(f.friendId.eq(userId).and(f.status.eq(FriendStatus.PENDING))).then(FriendFollowStatus.OTHER.toString())
                                 .otherwise(FriendFollowStatus.NONE.toString()))
                 .from(u)
-                .leftJoin(f).on(u.id.eq(
-                        Expressions.cases()
-                                .when(f.userId.eq(userId)).then(f.friendId)
-                                .when(f.friendId.eq(userId)).then(f.userId)
-                                .otherwise(-100_000_000L)
-                ).and(f.status.eq(FriendStatus.PENDING)))
+                .leftJoin(f).on((f.userId.eq(userId).and(f.friendId.eq(u.id))).or(f.friendId.eq(userId).and(f.userId.eq(u.id))))
                 .leftJoin(uc).on(u.costumeId.eq(uc.id))
                 .leftJoin(i).on(uc.costumeId.eq(i.entityId))
                 .where(u.id.ne(userId)
@@ -140,10 +139,6 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
                 .fetch();
         friendIds.add(userId);
         return friendIds;
-    }
-
-    private Long getTotalFriendFollowListPage(Long receiverId) {
-        return jpaQueryFactory.select(f.count()).from(f).where(f.friendId.eq(receiverId).and(f.status.eq(FriendStatus.PENDING))).fetchOne();
     }
 
     public Long getTotalFriendListPage(Long userId) {

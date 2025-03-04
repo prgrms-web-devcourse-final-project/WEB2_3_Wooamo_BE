@@ -2,12 +2,14 @@ package com.api.stuv.domain.friend.service;
 
 import com.api.stuv.domain.alert.entity.AlertType;
 import com.api.stuv.domain.alert.service.AlertService;
-import com.api.stuv.domain.friend.dto.FriendFollowListResponse;
-import com.api.stuv.domain.friend.dto.FriendFollowResponse;
-import com.api.stuv.domain.friend.dto.FriendResponse;
+import com.api.stuv.domain.friend.dto.response.FriendFollowListResponse;
+import com.api.stuv.domain.friend.dto.response.FriendFollowResponse;
+import com.api.stuv.domain.friend.dto.response.FriendResponse;
 import com.api.stuv.domain.friend.entity.Friend;
 import com.api.stuv.domain.friend.entity.FriendStatus;
 import com.api.stuv.domain.friend.repository.FriendRepository;
+import com.api.stuv.domain.image.entity.EntityType;
+import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.domain.user.entity.User;
 import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.*;
@@ -27,8 +29,8 @@ public class FriendService {
     private final UserRepository userRepository;
     private final FriendRepository friendRepository;
     private final AlertService alertService;
+    private final S3ImageService s3ImageService;
 
-    // TODO: 알림 기능 추가시 알림 생성 로직 추가
     @Transactional
     public FriendFollowResponse requestFriend(Long userId, Long receiverId) {
         User sender = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
@@ -56,10 +58,16 @@ public class FriendService {
         return FriendFollowResponse.from(friend);
     }
 
-    // TODO: profile image 경로 맞는지 확인
     @Transactional(readOnly = true)
     public PageResponse<FriendFollowListResponse> getFriendFollowList(Long userId, Pageable pageable) {
-        return friendRepository.getFriendFollowList(userId, pageable, "http://localhost:8080/api/v1/costume/");
+        List<FriendFollowListResponse> frinedList = friendRepository.getFriendFollowList(userId, pageable).stream().map( dto -> new FriendFollowListResponse(
+                dto.friendId(),
+                dto.userId(),
+                s3ImageService.generateImageFile(EntityType.COSTUME, dto.costumeId(), dto.newFilename()),
+                dto.nickname(),
+                dto.context())).toList();
+        Long totalPage = friendRepository.getTotalFriendFollowListPage(userId);
+        return PageResponse.applyPage(frinedList, pageable, totalPage);
     }
 
     @Transactional(readOnly = true)

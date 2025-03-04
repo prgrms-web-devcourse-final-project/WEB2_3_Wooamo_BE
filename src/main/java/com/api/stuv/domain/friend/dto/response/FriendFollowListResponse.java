@@ -1,4 +1,4 @@
-package com.api.stuv.domain.friend.dto;
+package com.api.stuv.domain.friend.dto.response;
 
 public record FriendFollowListResponse(
         Long friendId,

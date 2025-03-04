@@ -1,7 +1,9 @@
 package com.api.stuv.domain.friend.controller;
 
 import com.api.stuv.domain.auth.util.TokenUtil;
-import com.api.stuv.domain.friend.dto.*;
+import com.api.stuv.domain.friend.dto.response.FriendFollowListResponse;
+import com.api.stuv.domain.friend.dto.response.FriendFollowResponse;
+import com.api.stuv.domain.friend.dto.response.FriendResponse;
 import com.api.stuv.domain.friend.service.FriendService;
 import com.api.stuv.global.response.ApiResponse;
 import com.api.stuv.global.response.PageResponse;

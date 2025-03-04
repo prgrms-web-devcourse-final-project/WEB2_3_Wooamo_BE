@@ -35,8 +35,12 @@ public class PageResponse<T> {
         return new PageResponse<>(page);
     }
 
-    public static <K> PageResponse<K> applyPage(JPAQuery<K> query, Pageable pageable, Long count) {
-        List<K> content = query.offset(pageable.getOffset()).limit(pageable.getPageSize()).fetch();
+    public static <T> PageResponse<T> applyPage(JPAQuery<T> query, Pageable pageable, Long count) {
+        List<T> content = query.offset(pageable.getOffset()).limit(pageable.getPageSize()).fetch();
+        return PageResponse.of(new PageImpl<>(content, pageable, count));
+    }
+
+    public static <T> PageResponse<T> applyPage(List<T> content, Pageable pageable, Long count) {
         return PageResponse.of(new PageImpl<>(content, pageable, count));
     }
 }
