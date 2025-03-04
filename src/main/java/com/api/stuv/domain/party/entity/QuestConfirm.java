@@ -1,6 +1,5 @@
 package com.api.stuv.domain.party.entity;
 
-
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
