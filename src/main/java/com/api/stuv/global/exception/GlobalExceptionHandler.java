@@ -10,6 +10,7 @@ import org.springframework.messaging.handler.annotation.support.MethodArgumentTy
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.time.DateTimeException;
 import java.time.format.DateTimeParseException;
 
 @Slf4j
@@ -42,11 +43,19 @@ public class GlobalExceptionHandler {
     // 날짜 변환 관련 예외
     @ExceptionHandler(DateTimeParseException.class)
     public ResponseEntity<ApiResponse<Void>> handleDateTimeParseException(DateTimeParseException e) {
-        ErrorCode errorCode = ErrorCode.DATE_FORMAT_MISMATCH;
+        ErrorCode errorCode = ErrorCode.INVALID_DATE_FORMAT;
         log.error("[ERROR] handleDateTimeParseException - {}", e.getMessage());
         return ResponseEntity
                 .status(errorCode.getStatus())
                 .body(ApiResponse.error(errorCode.getMessage()));
+    }
+
+    @ExceptionHandler(DateTimeException.class)
+    protected ResponseEntity<ApiResponse<Void>> handleDateTimeException(DateTimeException e) {
+        log.error("[ERROR] handleDateTimeException - {}", e.getMessage());
+        return ResponseEntity
+                .status(ErrorCode.INVALID_DATE_FORMAT.getStatus())
+                .body(ApiResponse.error(ErrorCode.INVALID_DATE_FORMAT.getMessage()));
     }
 
     @ExceptionHandler(ExpressionException.class)

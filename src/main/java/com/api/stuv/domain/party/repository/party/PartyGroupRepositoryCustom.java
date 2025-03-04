@@ -3,6 +3,7 @@ package com.api.stuv.domain.party.repository.party;
 import com.api.stuv.domain.admin.dto.response.AdminPartyAuthDetailResponse;
 import com.api.stuv.domain.admin.dto.response.AdminPartyGroupResponse;
 import com.api.stuv.domain.party.dto.MemberRewardStatusDTO;
+import com.api.stuv.domain.party.dto.response.EventBannerResponse;
 import com.api.stuv.domain.party.dto.response.PartyDetailResponse;
 import com.api.stuv.domain.party.dto.response.PartyGroupResponse;
 import com.api.stuv.domain.party.entity.PartyStatus;
@@ -21,4 +22,5 @@ public interface PartyGroupRepositoryCustom {
     void updatePartyStatusForPartyGroup(Long partyId, PartyStatus partyStatus);
     List<MemberRewardStatusDTO> findCompletePartyStatusList(Long userId);
     Optional<PartyDetailResponse> findDetailByUserId(Long partyId, Long userId);
+    List<EventBannerResponse> findEventPartyList();
 }
