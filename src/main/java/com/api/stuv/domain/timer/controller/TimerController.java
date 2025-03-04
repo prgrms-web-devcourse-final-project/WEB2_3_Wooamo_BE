@@ -60,13 +60,14 @@ public class TimerController {
     }
 
     @Operation(summary = "회원 월간 공부 시간 조회 API", description = "회원이 월간 동안 공부한 시간을 조회합니다.")
-    @GetMapping("/time/monthly")
+    @GetMapping("/time/monthly/{userId}")
     public ResponseEntity<ApiResponse<List<StudyDateTimeResponse>>> monthlyStudyTime(
+            @PathVariable Long userId,
             @RequestParam int year,
             @RequestParam int month
     ) {
         return ResponseEntity.ok().body(ApiResponse.success(
-                timerService.getMonthlyStudyRecord(year, month)
+                timerService.getMonthlyStudyRecord(year, month, userId)
         ));
     }
 

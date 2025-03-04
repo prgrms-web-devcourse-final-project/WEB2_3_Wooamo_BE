@@ -14,16 +14,18 @@ public class Alert {
     private final String alertId;
     private final Long typeId;
     private final AlertType type;
+    private final String title;
     private final String nickname;
     private Boolean isRead;
     private LocalDateTime createdAt;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private LocalDateTime expiredAt;
 
-    public Alert(String alertId, Long typeId, AlertType type, String nickname, Boolean isRead, LocalDateTime createdAt) {
+    public Alert(String alertId, Long typeId, AlertType type, String title, String nickname, Boolean isRead, LocalDateTime createdAt) {
         this.alertId = alertId;
         this.typeId = typeId;
         this.type = type;
+        this.title = title;
         this.nickname = nickname;
         this.isRead = isRead;
         this.createdAt = createdAt;
@@ -34,6 +36,7 @@ public class Alert {
             @JsonProperty("alertId") String alertId,
             @JsonProperty("typeId") Long typeId,
             @JsonProperty("type") AlertType type,
+            @JsonProperty("title") String title,
             @JsonProperty("nickname") String nickname,
             @JsonProperty("isRead") Boolean isRead,
             @JsonProperty("createdAt") LocalDateTime createdAt,
@@ -42,6 +45,7 @@ public class Alert {
         this.alertId = alertId;
         this.typeId = typeId;
         this.type = type;
+        this.title = title;
         this.nickname = nickname;
         this.isRead = isRead;
         this.createdAt = createdAt;

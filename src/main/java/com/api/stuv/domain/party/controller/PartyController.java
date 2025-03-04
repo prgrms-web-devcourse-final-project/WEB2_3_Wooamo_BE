@@ -1,12 +1,10 @@
 package com.api.stuv.domain.party.controller;
 
 import com.api.stuv.domain.auth.util.TokenUtil;
+import com.api.stuv.domain.party.dto.response.MemberResponse;
 import com.api.stuv.domain.party.dto.request.PartyCreateRequest;
 import com.api.stuv.domain.party.dto.request.PartyJoinRequest;
-import com.api.stuv.domain.party.dto.response.PartyDetailResponse;
-import com.api.stuv.domain.party.dto.response.PartyGroupResponse;
-import com.api.stuv.domain.party.dto.response.PartyIdResponse;
-import com.api.stuv.domain.party.dto.response.PartyRewardStatusResponse;
+import com.api.stuv.domain.party.dto.response.*;
 import com.api.stuv.domain.party.service.PartyService;
 import com.api.stuv.global.response.ApiResponse;
 import com.api.stuv.global.response.PageResponse;
@@ -14,8 +12,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -83,6 +83,48 @@ public class PartyController {
         partyService.joinParty(request.bettingPoint(), partyId, tokenUtil.getUserId());
         return ResponseEntity.ok()
                 .body(ApiResponse.success());
+    }
+
+    @GetMapping("/event")
+    @Operation(summary = "이벤트 배너 조회 API", description = "이벤트 팟의 배너를 조회할 수 있습니다.")
+    public ResponseEntity<ApiResponse<List<EventBannerResponse>>> getEventBanner() {
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(
+                        partyService.getEventList()
+                ));
+    }
+
+    @GetMapping("/{partyId}/users")
+    @Operation(summary = "팟 참가자 목록 조회 API", description = "팟의 참가자 목록을 조회할 수 있습니다.")
+    public ResponseEntity<ApiResponse<PageResponse<MemberResponse>>> getMemberList(
+            @PathVariable Long partyId,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(
+                        partyService.getPartyMemberList(partyId, tokenUtil.getUserId(), PageRequest.of(page, size))
+                ));
+    }
+
+    @PostMapping(value = "/{partyId}/verify", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "팟 일일 인증 API", description = "회원이 팟의 목표에 대한 일일 인증을 등록할 수 있습니다.")
+    public ResponseEntity<ApiResponse<Void>> verifyParty(
+            @PathVariable Long partyId,
+            @RequestPart MultipartFile image
+    ) {
+        partyService.dailyVerifyParty(tokenUtil.getUserId(), partyId, image);
+        return ResponseEntity.ok()
+                .body(ApiResponse.success());
+    }
+
+    @PostMapping("/{partyId}/reward")
+    @Operation(summary = "성공한 팟 보상 받기 API", description = "회원이 성공한 팟에 대한 보상을 획득할 수 있습니다.")
+    public ResponseEntity<ApiResponse<PointResponse>> rewardParty(@PathVariable Long partyId) {
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(
+                        partyService.getReward(partyId, tokenUtil.getUserId())
+                ));
     }
 }
 

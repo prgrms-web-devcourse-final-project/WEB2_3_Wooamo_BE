@@ -41,7 +41,7 @@ public enum ErrorCode {
     HTTP_API_ERROR(400, -3010, "HTTP API에서 오류가 발생했습니다."),
     JSON_PARSING_ERROR(400, -3011, "JSON 파싱이 잘못되었습니다."),
     ARGUMENT_TYPE_MISMATCH(400, -3012, "올바르지 않은 파라미터입니다."),
-    DATE_FORMAT_MISMATCH(400, -3013, "날짜 형식이 올바르지 않습니다. (yyyy-MM-dd)"),
+    INVALID_DATE_FORMAT(400, -3013, "날짜 형식이 올바르지 않습니다."),
     INVALID_ARGUMENT_METHOD(400, -3014, "데이터 유효성 검증에 실패했습니다."),
     REDIS_NOT_CONNECTED(500, -3015, "Redis 서버에 연결할 수 없습니다."),
     DATABASE_ERROR(500, -3100, "데이터베이스 처리 중 오류가 발생했습니다."),
@@ -75,7 +75,7 @@ public enum ErrorCode {
     // IMAGE
     IMAGE_NAME_NOT_FOUND(404, -8000, "해당 이미지를 찾을 수 없습니다."),
 
-    // TODO
+    // TODOLIST
     TODOLIST_NOT_FOUND(409, -9000, "TODOLIST가 없습니다."),
     TODO_NOT_FOUND(404, -900, "해당 TODO를 찾을 수 없습니다."),
     TODO_SAVE_FAILED(400, -9002, "TODO 저장에 실패했습니다."),
@@ -93,6 +93,10 @@ public enum ErrorCode {
     BETTING_AMOUNT_TOO_LOW(400, -11003, "베팅 포인트가 최소 포인트보다 낮습니다."),
     ALREADY_JOINED_PARTY(400, -11004, "이미 참가한 팟입니다."),
     CANNOT_JOIN_FULL_PARTY(400, -11005, "팟의 최대 인원이 초과되어 참가할 수 없습니다."),
+    ALREADY_AUTH_TODAY(400, -11006, "이미 오늘의 인증을 완료했습니다."),
+    MEMBER_NOT_FOUND(400, -11007, "해당 팟에 참가하지 않은 회원입니다."),
+    ALREADY_RECEIVED_REWARD(400, -11008, "이미 보상을 획득한 상태입니다."),
+    MISSION_FAILED(400, -11009, "미션에 실패하여 보상을 받을 수 없습니다."),
 
     //TIMER
     TIMER_NOT_EXIST(404, -12000, "저장된 타이머가 없습니다."),

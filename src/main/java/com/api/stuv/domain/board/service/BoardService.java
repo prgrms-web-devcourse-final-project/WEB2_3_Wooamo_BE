@@ -117,7 +117,7 @@ public class BoardService {
     public void createComment(Long userId, Long boardId, String content) {
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
         Board board = boardRepository.findById(boardId).orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
-        if (!userId.equals(board.getUserId())) alertService.createAlert(board.getUserId(), boardId, AlertType.COMMENT, user.getNickname());
+        if (!userId.equals(board.getUserId())) alertService.createAlert(board.getUserId(), boardId, AlertType.COMMENT, board.getTitle(), user.getNickname());
         commentRepository.save(Comment.create(boardId, userId, content));
     }
 
@@ -133,7 +133,7 @@ public class BoardService {
         if (comment.getUserId().equals(userId)) throw new AccessDeniedException(ErrorCode.COMMENT_BY_WRITER);
         if (board.getConfirmedCommentId() != null) throw new AccessDeniedException(ErrorCode.COMMENT_ALREADY_CONFIRM);
         if (!board.getUserId().equals(userId)) throw new AccessDeniedException(ErrorCode.COMMENT_NOT_AUTHORIZED);
-        alertService.createAlert(comment.getUserId(), board.getId(), AlertType.CONFIRM, boardWitter.getNickname());
+        alertService.createAlert(comment.getUserId(), board.getId(), AlertType.CONFIRM, board.getTitle(), boardWitter.getNickname());
         board.confirmComment(commentId);
         user.updatePoint(BigDecimal.valueOf(CONFIRM_COMMENT_POINT));
     }

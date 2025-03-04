@@ -108,11 +108,9 @@ public class TimerService {
         timerRepository.delete(timer);
     }
 
-    public List<StudyDateTimeResponse> getMonthlyStudyRecord(int year, int month) {
+    public List<StudyDateTimeResponse> getMonthlyStudyRecord(int year, int month, Long userId) {
         LocalDate firstDay = LocalDate.of(year, month, 1);
         LocalDate lastDay = YearMonth.of(year, month).atEndOfMonth();
-
-        Long userId = tokenUtil.getUserId();
         if (!userRepository.existsById(userId)) throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
 
         Map<LocalDate, Long> studyMap = studyTimeRepository.sumTotalStudyTimeByDate(userId, firstDay, lastDay);
