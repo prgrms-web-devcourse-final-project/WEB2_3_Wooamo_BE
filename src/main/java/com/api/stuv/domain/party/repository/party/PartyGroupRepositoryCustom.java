@@ -23,4 +23,5 @@ public interface PartyGroupRepositoryCustom {
     List<MemberRewardStatusDTO> findCompletePartyStatusList(Long userId);
     Optional<PartyDetailResponse> findDetailByUserId(Long partyId, Long userId);
     List<EventBannerResponse> findEventPartyList();
+    Optional<MemberRewardStatusDTO> findCompleteParty(Long partyId, Long userId);
 }

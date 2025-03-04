@@ -64,13 +64,8 @@ public class User extends BaseTimeEntity {
         this.blogLink = link;
     }
 
-    // TODO : 추후 리팩토링을 할 때 변경하면 좋을 듯 (정해진 리워드 타입에 따라 받을 수 있도록)
     public void updatePoint(BigDecimal point) {
         this.point = this.point.add(point);
-    }
-
-    public void earnReward(RewardType rewardType) {
-        this.point = this.point.add(rewardType.getValue());
     }
 
     public void subtractPoint(BigDecimal point) {

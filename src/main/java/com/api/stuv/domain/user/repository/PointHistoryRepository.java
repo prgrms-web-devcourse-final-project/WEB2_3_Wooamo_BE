@@ -15,4 +15,6 @@ public interface PointHistoryRepository extends JpaRepository<PointHistory, Long
     PointHistory findByUserIdAndTransactionType(@Param("userId") Long userId,
                                                 @Param("startOfDay") LocalDateTime startOfDay,
                                                 @Param("endOfDay") LocalDateTime endOfDay);
+
+    boolean existsByReason(String reason);
 }

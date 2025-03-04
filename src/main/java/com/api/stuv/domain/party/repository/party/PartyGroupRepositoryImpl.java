@@ -145,6 +145,26 @@ public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
     }
 
     @Override
+    public Optional<MemberRewardStatusDTO> findCompleteParty(Long partyId, Long userId) {
+        return Optional.ofNullable(
+                factory
+                        .select(Projections.constructor(
+                                MemberRewardStatusDTO.class,
+                                pg.id,
+                                pg.name,
+                                gm.bettingPoint,
+                                gm.questStatus
+                        ))
+                        .from(pg)
+                        .join(gm).on(pg.id.eq(gm.groupId))
+                        .where(gm.questStatus.ne(QuestStatus.PROGRESS)
+                                .and(gm.userId.eq(userId))
+                                .and(pg.id.eq(partyId)))
+                        .fetchOne()
+        );
+    }
+
+    @Override
     public Optional<PartyDetailResponse> findDetailByUserId(Long partyId, Long userId) {
         return Optional.ofNullable(
                 factory
@@ -152,6 +172,7 @@ public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
                                 PartyDetailResponse.class,
                                 pg.id,
                                 pg.name,
+                                pg.context,
                                 pg.recruitCap,
                                 gm.id.count(),
                                 pg.startDate,
