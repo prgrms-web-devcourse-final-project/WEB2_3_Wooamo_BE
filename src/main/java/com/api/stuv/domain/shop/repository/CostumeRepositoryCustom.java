@@ -1,10 +1,12 @@
 package com.api.stuv.domain.shop.repository;
 
-import com.api.stuv.domain.shop.dto.CostumeResponse;
+import com.api.stuv.domain.shop.dto.costume.CostumeDTO;
 import com.api.stuv.global.response.PageResponse;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Optional;
+
 public interface CostumeRepositoryCustom {
-    PageResponse<CostumeResponse> getCostumeList(Pageable pageable);
-    CostumeResponse getCostume(Long id);
+    PageResponse<CostumeDTO> getCostumeList(Pageable pageable);
+    Optional<CostumeDTO> getCostume(Long id);
 }
