@@ -2,6 +2,7 @@ package com.api.stuv.domain.board.service;
 
 import com.api.stuv.domain.alert.entity.AlertType;
 import com.api.stuv.domain.alert.service.AlertService;
+import com.api.stuv.domain.board.dto.dto.BoardDetailDTO;
 import com.api.stuv.domain.board.dto.response.BoardDetailResponse;
 import com.api.stuv.domain.board.dto.request.BoardRequest;
 import com.api.stuv.domain.board.dto.response.BoardResponse;
@@ -63,10 +64,23 @@ public class BoardService {
         return Map.of("boardId", boardId);
     }
 
-    // TODO: Repository 에서 Service 단으로 데이터 처리 이동
     @Transactional(readOnly = true)
     public BoardDetailResponse getBoardDetail(Long boardId) {
-        return boardRepository.getBoardDetail(boardId);
+        if (!boardRepository.existsById(boardId)) throw new NotFoundException(ErrorCode.BOARD_NOT_FOUND);
+        BoardDetailDTO boardDetail = boardRepository.getBoardDetail(boardId);
+        List<String> images = boardRepository.getBoardDetailImage(boardId).stream().map(
+                filename -> s3ImageService.generateImageFile(EntityType.BOARD, boardId, filename)).toList();
+        return new BoardDetailResponse(
+                boardDetail.title(),
+                boardDetail.userId(),
+                boardDetail.nickname(),
+                boardDetail.boardType().toString(),
+                boardDetail.createdAt().format(TemplateUtils.dateTimeFormatter),
+                boardDetail.isConfirm(),
+                boardDetail.context(),
+                s3ImageService.generateImageFile(EntityType.COSTUME, boardDetail.costumeId(), boardDetail.newFilename()),
+                images
+        );
     }
 
     @Transactional
@@ -110,7 +124,7 @@ public class BoardService {
 
     @Transactional(readOnly = true)
     public PageResponse<CommentResponse> getCommentList(Long boardId, Pageable pageable) {
-        if ( !boardRepository.existsById(boardId) ) throw new NotFoundException(ErrorCode.BOARD_NOT_FOUND);
+        if (!boardRepository.existsById(boardId)) throw new NotFoundException(ErrorCode.BOARD_NOT_FOUND);
         List<CommentResponse> commentList = commentRepository.getCommentList(boardId, pageable).stream().map(dto -> new CommentResponse(
                 dto.commentId(),
                 dto.userId(),
@@ -118,7 +132,7 @@ public class BoardService {
                 dto.context(),
                 dto.createdAt().format(TemplateUtils.dateTimeFormatter),
                 dto.isConfirm() != null && dto.isConfirm().equals(dto.commentId()),
-                getCostume(dto.costumeId(), dto.newFilename()))).toList();
+                s3ImageService.generateImageFile(EntityType.COSTUME, dto.costumeId(), dto.newFilename()))).toList();
         return PageResponse.applyPage(commentList, pageable, commentRepository.getCommentCount(boardId));
     }
 
@@ -144,9 +158,5 @@ public class BoardService {
         alertService.createAlert(comment.getUserId(), board.getId(), AlertType.CONFIRM, board.getTitle(), boardWitter.getNickname());
         board.confirmComment(commentId);
         user.updatePoint(BigDecimal.valueOf(CONFIRM_COMMENT_POINT));
-    }
-
-    private String getCostume(Long costumeId, String newFilename) {
-        return s3ImageService.generateImageFile(EntityType.COSTUME, costumeId, newFilename);
     }
 }
