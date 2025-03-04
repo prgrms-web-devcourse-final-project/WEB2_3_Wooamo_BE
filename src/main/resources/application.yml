@@ -54,14 +54,6 @@ spring:
     url: ${MARIA_URL}
     username: ${MARIA_USER}
     password: ${MARIA_PASSWORD}
-  kafka:
-    bootstrap-servers: ${KAFKA_URL}
-    consumer:
-      group-id: ${KAFKA_GROUP}
-      auto-offset-reset: earliest
-    producer:
-      retries: 3
-      acks: all
   jpa:
     hibernate:
       ddl-auto: update
@@ -110,14 +102,6 @@ spring:
     url: jdbc:h2:mem:stuv;MODE=MySQL
     username: sa
     password:
-  kafka:
-    bootstrap-servers: localhost:9092
-    consumer:
-      group-id: test-group
-      auto-offset-reset: earliest
-    producer:
-      retries: 3
-      acks: all
   jpa:
     hibernate:
       ddl-auto: create-drop
