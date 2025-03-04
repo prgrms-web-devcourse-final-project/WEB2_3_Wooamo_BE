@@ -5,6 +5,7 @@ import com.api.stuv.domain.alert.service.AlertService;
 import com.api.stuv.domain.board.dto.dto.BoardDetailDTO;
 import com.api.stuv.domain.board.dto.response.BoardDetailResponse;
 import com.api.stuv.domain.board.dto.request.BoardRequest;
+import com.api.stuv.domain.board.dto.response.BoardIdResponse;
 import com.api.stuv.domain.board.dto.response.BoardResponse;
 import com.api.stuv.domain.board.dto.request.BoardUpdateRequest;
 import com.api.stuv.domain.board.dto.response.CommentResponse;
@@ -35,7 +36,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 @Slf4j
@@ -51,25 +51,32 @@ public class BoardService {
     private final AlertService alertService;
     private final S3ImageService s3ImageService;
 
-    // TODO: Repository 에서 Service 단으로 데이터 처리 이동
     @Transactional(readOnly = true)
     public PageResponse<BoardResponse> getBoardList(String title, Pageable pageable) {
-        return boardRepository.getBoardList(title, pageable);
+        List<BoardResponse> boardList = boardRepository.getBoardList(title, pageable).stream().map(dto -> new BoardResponse(
+                dto.boardId(),
+                dto.title(),
+                dto.boardType().toString(),
+                dto.context(),
+                dto.isConfirm(),
+                dto.createdAt().format(TemplateUtils.dateTimeFormatter),
+                dto.newFilename() == null ? null : s3ImageService.generateImageFile(EntityType.BOARD, dto.boardId(), dto.newFilename()))).toList();
+        return PageResponse.applyPage(boardList, pageable, boardRepository.getTotalBoardListPage(title));
     }
 
     @Transactional
-    public Map<String, Long> createBoard(Long userId, BoardRequest boardRequest, List<MultipartFile> files) {
+    public BoardIdResponse createBoard(Long userId, BoardRequest boardRequest, List<MultipartFile> files) {
         Long boardId = boardRepository.save(BoardRequest.from(userId, boardRequest)).getId();
         if (files != null && !files.isEmpty()) {for (MultipartFile file : files) imageService.handleImage(boardId, file, EntityType.BOARD);}
-        return Map.of("boardId", boardId);
+        return new BoardIdResponse(boardId);
     }
 
     @Transactional(readOnly = true)
     public BoardDetailResponse getBoardDetail(Long boardId) {
         if (!boardRepository.existsById(boardId)) throw new NotFoundException(ErrorCode.BOARD_NOT_FOUND);
         BoardDetailDTO boardDetail = boardRepository.getBoardDetail(boardId);
-        List<String> images = boardRepository.getBoardDetailImage(boardId).stream().map(
-                filename -> s3ImageService.generateImageFile(EntityType.BOARD, boardId, filename)).toList();
+        List<String> images = boardRepository.getBoardDetailImage(boardId).stream()
+                .map(filename -> s3ImageService.generateImageFile(EntityType.BOARD, boardId, filename)).toList();
         return new BoardDetailResponse(
                 boardDetail.title(),
                 boardDetail.userId(),
@@ -84,7 +91,7 @@ public class BoardService {
     }
 
     @Transactional
-    public Map<String, Long> updateBoard(Long userId, Long boardId, BoardUpdateRequest request, List<MultipartFile> files) {
+    public BoardIdResponse updateBoard(Long userId, Long boardId, BoardUpdateRequest request, List<MultipartFile> files) {
         Board board = boardRepository.findById(boardId).orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
         if (!Objects.equals(board.getUserId(), userId)) throw new AccessDeniedException(ErrorCode.BOARD_NOT_AUTHORIZED);
         board.update(request);
@@ -94,7 +101,7 @@ public class BoardService {
             imageFileRepository.deleteByNewFilename(fileName);
         }
         if (files != null && !files.isEmpty()) for (MultipartFile file : files) imageService.handleImage(boardId, file, EntityType.BOARD);
-        return Map.of("boardId", boardId);
+        return new BoardIdResponse(boardId);
     }
 
     @Transactional

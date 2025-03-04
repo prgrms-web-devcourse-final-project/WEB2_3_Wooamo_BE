@@ -1,104 +1,78 @@
 package com.api.stuv.domain.board.repository;
 
 import com.api.stuv.domain.board.dto.dto.BoardDetailDTO;
-import com.api.stuv.domain.board.dto.response.BoardResponse;
-import com.api.stuv.domain.board.entity.QBoard;
+import com.api.stuv.domain.board.dto.dto.BoardListDTO;
 import com.api.stuv.domain.image.entity.EntityType;
-import com.api.stuv.domain.image.entity.QImageFile;
-import com.api.stuv.domain.image.service.S3ImageService;
-import com.api.stuv.domain.user.entity.QUser;
-import com.api.stuv.domain.user.entity.QUserCostume;
-import com.api.stuv.global.response.PageResponse;
-import com.api.stuv.global.util.common.TemplateUtils;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import static com.api.stuv.domain.board.entity.QBoard.board;
+import static com.api.stuv.domain.user.entity.QUser.user;
+import static com.api.stuv.domain.user.entity.QUserCostume.userCostume;
+import static com.api.stuv.domain.image.entity.QImageFile.imageFile;
 
 import java.util.List;
 
 @RequiredArgsConstructor
 public class BoardRepositoryImpl implements BoardRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
-    private final S3ImageService s3ImageService;
-    private final QBoard b = QBoard.board;
-    private final QUser u = QUser.user;
-    private final QUserCostume uc = QUserCostume.userCostume;
-    private final QImageFile i = QImageFile.imageFile;
 
     @Override
-    public PageResponse<BoardResponse> getBoardList(String title, Pageable pageable) {
+    public List<BoardListDTO> getBoardList(String title, Pageable pageable) {
         JPQLQuery<String> imageSubQuery = JPAExpressions
-                .select(i.newFilename)
-                .from(i)
-                .where(i.entityId.eq(b.id).and(i.entityType.eq(EntityType.BOARD)))
-                .groupBy(i.entityId)
-                .orderBy(i.createdAt.asc())
-                .limit(1);
-
-        List<BoardResponse> query = jpaQueryFactory
-                .select(
-                        b.id,
-                        b.title,
-                        b.boardType,
-                        b.context,
-                        b.confirmedCommentId.isNotNull(),
-                        TemplateUtils.timeFormater(b.createdAt),
+                .select(imageFile.newFilename)
+                .from(imageFile)
+                .where(imageFile.entityId.eq(board.id).and(imageFile.entityType.eq(EntityType.BOARD)))
+                .groupBy(imageFile.entityId);
+        return jpaQueryFactory
+                .select(Projections.constructor(BoardListDTO.class,
+                        board.id,
+                        board.title,
+                        board.boardType,
+                        board.context,
+                        board.confirmedCommentId.isNotNull(),
+                        board.createdAt,
                         imageSubQuery
-                )
-                .from(b)
-                .where(b.title.contains(title))
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch()
-                .stream()
-                .map(tuple -> new BoardResponse(
-                        tuple.get(b.id),
-                        tuple.get(b.title),
-                        tuple.get(b.boardType),
-                        tuple.get(b.context),
-                        tuple.get(b.confirmedCommentId.isNotNull()),
-                        tuple.get(TemplateUtils.timeFormater(b.createdAt)),
-                        tuple.get(imageSubQuery) == null ? null : s3ImageService.generateImageFile(
-                                EntityType.BOARD, tuple.get(b.id),tuple.get(imageSubQuery))
-                )).toList();
+                ))
+                .from(board)
+                .where(board.title.contains(title))
+                .offset(pageable.getOffset()).limit(pageable.getPageSize()).fetch();
+    }
 
-        return PageResponse.of(new PageImpl<>(query, pageable, getTotalBoardListPage(title)));
+    @Override
+    public Long getTotalBoardListPage(String title) {
+        return jpaQueryFactory.select(board.count()).from(board).where(board.title.contains(title)).fetchOne();
     }
 
     @Override
     public BoardDetailDTO getBoardDetail(Long boardId) {
         return jpaQueryFactory
                 .select(Projections.constructor(BoardDetailDTO.class,
-                        b.title,
-                        u.id,
-                        u.nickname,
-                        b.boardType,
-                        b.createdAt,
-                        b.confirmedCommentId.isNotNull(),
-                        b.context,
-                        uc.costumeId,
-                        i.newFilename))
-                .from(b).join(u).on(b.userId.eq(u.id))
-                .leftJoin(uc).on(u.costumeId.eq(uc.id))
-                .leftJoin(i).on(uc.costumeId.eq(i.entityId).and(i.entityType.eq(EntityType.COSTUME)))
-                .where(b.id.eq(boardId))
+                        board.title,
+                        user.id,
+                        user.nickname,
+                        board.boardType,
+                        board.createdAt,
+                        board.confirmedCommentId.isNotNull(),
+                        board.context,
+                        userCostume.costumeId,
+                        imageFile.newFilename))
+                .from(board).join(user).on(board.userId.eq(user.id))
+                .leftJoin(userCostume).on(user.costumeId.eq(userCostume.id))
+                .leftJoin(imageFile).on(userCostume.costumeId.eq(imageFile.entityId).and(imageFile.entityType.eq(EntityType.COSTUME)))
+                .where(board.id.eq(boardId))
                 .fetchOne();
     }
 
     @Override
     public List<String> getBoardDetailImage(Long boardId) {
         return jpaQueryFactory
-                .select(i.newFilename)
-                .from(i)
-                .where(i.entityId.eq(boardId).and(i.entityType.eq(EntityType.BOARD)))
+                .select(imageFile.newFilename)
+                .from(imageFile)
+                .where(imageFile.entityId.eq(boardId).and(imageFile.entityType.eq(EntityType.BOARD)))
                 .fetch();
-    }
-
-    private Long getTotalBoardListPage(String title) {
-        return jpaQueryFactory.select(b.count()).from(b).where(b.title.contains(title)).fetchOne();
     }
 }
