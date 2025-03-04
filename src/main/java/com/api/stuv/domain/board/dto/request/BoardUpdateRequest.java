@@ -1,4 +1,4 @@
-package com.api.stuv.domain.board.dto;
+package com.api.stuv.domain.board.dto.request;
 
 import java.util.List;
 

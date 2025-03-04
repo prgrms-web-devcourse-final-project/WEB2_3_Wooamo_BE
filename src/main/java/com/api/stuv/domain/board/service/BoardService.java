@@ -2,11 +2,13 @@ package com.api.stuv.domain.board.service;
 
 import com.api.stuv.domain.alert.entity.AlertType;
 import com.api.stuv.domain.alert.service.AlertService;
-import com.api.stuv.domain.board.dto.BoardDetailResponse;
-import com.api.stuv.domain.board.dto.BoardRequest;
-import com.api.stuv.domain.board.dto.BoardResponse;
-import com.api.stuv.domain.board.dto.BoardUpdateRequest;
-import com.api.stuv.domain.board.dto.CommentResponse;
+import com.api.stuv.domain.board.dto.dto.BoardDetailDTO;
+import com.api.stuv.domain.board.dto.response.BoardDetailResponse;
+import com.api.stuv.domain.board.dto.request.BoardRequest;
+import com.api.stuv.domain.board.dto.response.BoardIdResponse;
+import com.api.stuv.domain.board.dto.response.BoardResponse;
+import com.api.stuv.domain.board.dto.request.BoardUpdateRequest;
+import com.api.stuv.domain.board.dto.response.CommentResponse;
 import com.api.stuv.domain.board.entity.Board;
 import com.api.stuv.domain.board.entity.BoardType;
 import com.api.stuv.domain.board.entity.Comment;
@@ -24,6 +26,7 @@ import com.api.stuv.global.exception.BadRequestException;
 import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
 import com.api.stuv.global.response.PageResponse;
+import com.api.stuv.global.util.common.TemplateUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -33,7 +36,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 @Slf4j
@@ -51,23 +53,45 @@ public class BoardService {
 
     @Transactional(readOnly = true)
     public PageResponse<BoardResponse> getBoardList(String title, Pageable pageable) {
-        return boardRepository.getBoardList(title, pageable);
+        List<BoardResponse> boardList = boardRepository.getBoardList(title, pageable).stream().map(dto -> new BoardResponse(
+                dto.boardId(),
+                dto.title(),
+                dto.boardType().toString(),
+                dto.context(),
+                dto.isConfirm(),
+                dto.createdAt().format(TemplateUtils.dateTimeFormatter),
+                dto.newFilename() == null ? null : s3ImageService.generateImageFile(EntityType.BOARD, dto.boardId(), dto.newFilename()))).toList();
+        return PageResponse.applyPage(boardList, pageable, boardRepository.getTotalBoardListPage(title));
     }
 
     @Transactional
-    public Map<String, Long> createBoard(Long userId, BoardRequest boardRequest, List<MultipartFile> files) {
+    public BoardIdResponse createBoard(Long userId, BoardRequest boardRequest, List<MultipartFile> files) {
         Long boardId = boardRepository.save(BoardRequest.from(userId, boardRequest)).getId();
         if (files != null && !files.isEmpty()) {for (MultipartFile file : files) imageService.handleImage(boardId, file, EntityType.BOARD);}
-        return Map.of("boardId", boardId);
+        return new BoardIdResponse(boardId);
     }
 
     @Transactional(readOnly = true)
     public BoardDetailResponse getBoardDetail(Long boardId) {
-        return boardRepository.getBoardDetail(boardId);
+        if (!boardRepository.existsById(boardId)) throw new NotFoundException(ErrorCode.BOARD_NOT_FOUND);
+        BoardDetailDTO boardDetail = boardRepository.getBoardDetail(boardId);
+        List<String> images = boardRepository.getBoardDetailImage(boardId).stream()
+                .map(filename -> s3ImageService.generateImageFile(EntityType.BOARD, boardId, filename)).toList();
+        return new BoardDetailResponse(
+                boardDetail.title(),
+                boardDetail.userId(),
+                boardDetail.nickname(),
+                boardDetail.boardType().toString(),
+                boardDetail.createdAt().format(TemplateUtils.dateTimeFormatter),
+                boardDetail.isConfirm(),
+                boardDetail.context(),
+                s3ImageService.generateImageFile(EntityType.COSTUME, boardDetail.costumeId(), boardDetail.newFilename()),
+                images
+        );
     }
 
     @Transactional
-    public Map<String, Long> updateBoard(Long userId, Long boardId, BoardUpdateRequest request, List<MultipartFile> files) {
+    public BoardIdResponse updateBoard(Long userId, Long boardId, BoardUpdateRequest request, List<MultipartFile> files) {
         Board board = boardRepository.findById(boardId).orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
         if (!Objects.equals(board.getUserId(), userId)) throw new AccessDeniedException(ErrorCode.BOARD_NOT_AUTHORIZED);
         board.update(request);
@@ -77,7 +101,7 @@ public class BoardService {
             imageFileRepository.deleteByNewFilename(fileName);
         }
         if (files != null && !files.isEmpty()) for (MultipartFile file : files) imageService.handleImage(boardId, file, EntityType.BOARD);
-        return Map.of("boardId", boardId);
+        return new BoardIdResponse(boardId);
     }
 
     @Transactional
@@ -105,14 +129,20 @@ public class BoardService {
         commentRepository.delete(comment);
     }
 
-    // TODO : 이후 이미지 다운로드 기능 추가해 주세요!
     @Transactional(readOnly = true)
     public PageResponse<CommentResponse> getCommentList(Long boardId, Pageable pageable) {
-        if ( !boardRepository.existsById(boardId) ) throw new NotFoundException(ErrorCode.BOARD_NOT_FOUND);
-        return commentRepository.getCommentList(boardId, pageable);
+        if (!boardRepository.existsById(boardId)) throw new NotFoundException(ErrorCode.BOARD_NOT_FOUND);
+        List<CommentResponse> commentList = commentRepository.getCommentList(boardId, pageable).stream().map(dto -> new CommentResponse(
+                dto.commentId(),
+                dto.userId(),
+                dto.nickname(),
+                dto.context(),
+                dto.createdAt().format(TemplateUtils.dateTimeFormatter),
+                dto.isConfirm() != null && dto.isConfirm().equals(dto.commentId()),
+                s3ImageService.generateImageFile(EntityType.COSTUME, dto.costumeId(), dto.newFilename()))).toList();
+        return PageResponse.applyPage(commentList, pageable, commentRepository.getCommentCount(boardId));
     }
 
-    // TODO: 이후 알림 기능 추가
     @Transactional
     public void createComment(Long userId, Long boardId, String content) {
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
@@ -121,7 +151,6 @@ public class BoardService {
         commentRepository.save(Comment.create(boardId, userId, content));
     }
 
-    // TODO: 이후 알림 기능 추가
     @Transactional
     public void confirmComment(Long userId, Long commentId) {
         final int CONFIRM_COMMENT_POINT = 5;

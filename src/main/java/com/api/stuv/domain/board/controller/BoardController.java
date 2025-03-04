@@ -1,7 +1,13 @@
 package com.api.stuv.domain.board.controller;
 
 import com.api.stuv.domain.auth.util.TokenUtil;
-import com.api.stuv.domain.board.dto.*;
+import com.api.stuv.domain.board.dto.request.BoardRequest;
+import com.api.stuv.domain.board.dto.request.BoardUpdateRequest;
+import com.api.stuv.domain.board.dto.request.CommentRequest;
+import com.api.stuv.domain.board.dto.response.BoardDetailResponse;
+import com.api.stuv.domain.board.dto.response.BoardIdResponse;
+import com.api.stuv.domain.board.dto.response.BoardResponse;
+import com.api.stuv.domain.board.dto.response.CommentResponse;
 import com.api.stuv.domain.board.service.BoardService;
 import com.api.stuv.global.response.ApiResponse;
 import com.api.stuv.global.response.PageResponse;
@@ -16,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/board")
@@ -40,7 +45,7 @@ public class BoardController {
 
     @Operation(summary = "게시판 생성 API", description = "게시판을 생성합니다.")
     @PostMapping( value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponse<Map<String, Long>>> createBoard(
+    public ResponseEntity<ApiResponse<BoardIdResponse>> createBoard(
             @RequestPart(value = "contents") @Valid BoardRequest boardRequest,
             @RequestPart(value = "images", required = false) List<MultipartFile> files
     ) {
@@ -57,7 +62,7 @@ public class BoardController {
 
     @Operation(summary = "게시판 수정 API", description = "게시판을 수정합니다.")
     @PutMapping("/{boardId}")
-    public ResponseEntity<ApiResponse<Map<String, Long>>> updateBoard(
+    public ResponseEntity<ApiResponse<BoardIdResponse>> updateBoard(
             @PathVariable Long boardId,
             @RequestPart(value = "contents") @Valid BoardUpdateRequest boardUpdateRequest,
             @RequestPart(value = "images", required = false) List<MultipartFile> files

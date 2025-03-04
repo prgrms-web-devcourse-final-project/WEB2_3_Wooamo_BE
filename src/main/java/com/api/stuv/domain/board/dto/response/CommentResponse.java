@@ -1,11 +1,11 @@
-package com.api.stuv.domain.board.dto;
+package com.api.stuv.domain.board.dto.response;
 
 public record CommentResponse(
         Long commentId,
         Long userId,
         String nickname,
-        String profile,
         String context,
         String createdAt,
-        boolean isConfirm
+        boolean isConfirm,
+        String profile
 ) {}
