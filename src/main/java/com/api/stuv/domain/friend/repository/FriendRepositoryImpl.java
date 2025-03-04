@@ -2,6 +2,7 @@ package com.api.stuv.domain.friend.repository;
 
 import com.api.stuv.domain.friend.dto.FriendFollowListResponse;
 import com.api.stuv.domain.friend.dto.FriendResponse;
+import com.api.stuv.domain.friend.entity.FriendFollowStatus;
 import com.api.stuv.domain.friend.entity.FriendStatus;
 import com.api.stuv.domain.friend.entity.QFriend;
 import com.api.stuv.domain.image.entity.EntityType;
@@ -85,9 +86,9 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
                         uc.costumeId,
                         i.newFilename,
                         Expressions.cases()
-                                .when(f.userId.eq(userId)).then("ME")
-                                .when(f.friendId.eq(userId)).then("OTHER")
-                                .otherwise("NONE"))
+                                .when(f.userId.eq(userId)).then(FriendFollowStatus.ME.toString())
+                                .when(f.friendId.eq(userId)).then(FriendFollowStatus.OTHER.toString())
+                                .otherwise(FriendFollowStatus.NONE.toString()))
                 .from(u)
                 .leftJoin(f).on(u.id.eq(
                         Expressions.cases()
