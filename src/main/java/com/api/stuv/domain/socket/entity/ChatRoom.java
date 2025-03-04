@@ -1,6 +1,7 @@
 package com.api.stuv.domain.socket.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.PrePersist;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,6 +13,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -40,6 +42,7 @@ public class ChatRoom {
     private Integer maxMembers;
 
     @Field("created_at")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
 
     @PrePersist
@@ -53,7 +56,7 @@ public class ChatRoom {
     public ChatRoom(String roomId, String roomType, List<Long> members, Integer maxMembers, LocalDateTime createdAt) {
         this.roomId = roomId;
         this.roomType = roomType;
-        this.members = members;
+        this.members = members != null ? members : new ArrayList<>();
         this.maxMembers = maxMembers;
         this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
     }

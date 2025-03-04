@@ -1,8 +1,10 @@
 package com.api.stuv.domain.socket.controller;
 
+import com.api.stuv.domain.auth.util.TokenUtil;
 import com.api.stuv.domain.socket.dto.*;
 import com.api.stuv.domain.socket.service.ChatMessageService;
 import com.api.stuv.domain.socket.service.ChatRoomDetailService;
+import com.api.stuv.domain.socket.service.ChatRoomMemberService;
 import com.api.stuv.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,13 +23,13 @@ import java.util.List;
 public class ChatController {
     private final ChatMessageService chatMessageService;
     private final ChatRoomDetailService chatRoomDetailService;
+    private final ChatRoomMemberService chatRoomMemberService;
+    private final TokenUtil tokenUtil;
 
     @Operation(summary = "채팅방 목록 리스트 API", description = "user가 포함된 채팅방 목록을 가져옵니다.")
-    @GetMapping("/list/{senderId}")
-    public ResponseEntity<ApiResponse<List<ChatRoomResponse>>> getRoomListBySenderId(
-            @PathVariable Long senderId) {
-        List<ChatRoomResponse> roomList = chatRoomDetailService.getSortedRoomListBySenderId(senderId);
-
+    @GetMapping("/list")
+    public ResponseEntity<ApiResponse<List<ChatRoomResponse>>> getRoomListBySenderId() {
+        List<ChatRoomResponse> roomList = chatRoomDetailService.getSortedRoomListBySenderId(tokenUtil.getUserId());
         return ResponseEntity.ok(ApiResponse.success(roomList));
     }
 
@@ -39,7 +41,7 @@ public class ChatController {
             @RequestParam(defaultValue = "10") int size) {
 
         return ResponseEntity.ok()
-                .body(ApiResponse.success(chatMessageService.getMessagesByRoomIdPagination(
+                .body(ApiResponse.success(chatMessageService.getMessagesByRoomId(
                 roomId, PageRequest.of(page, size))));
     }
 
@@ -55,7 +57,8 @@ public class ChatController {
     @PostMapping("/group")
     public ResponseEntity<ApiResponse<String>> createGroupRoom(
             @RequestBody CreateGroupRoomRequest request) {
-        String roomId = chatRoomDetailService.createGroupChatRoom(request.groupName(), request.userId(), request.maxMembers());        return ResponseEntity.ok(ApiResponse.success(roomId));
+        String roomId = chatRoomDetailService.createGroupChatRoom(request.groupName(), request.userId(), request.maxMembers());
+        return ResponseEntity.ok(ApiResponse.success(roomId));
     }
 
     @Operation(summary = "그룹 채팅방에 사용자 추가", description = "기존 그룹 채팅방에 새로운 사용자를 추가합니다.")
@@ -64,6 +67,7 @@ public class ChatController {
             @PathVariable String roomId,
             @RequestBody AddUserToGroupChatRequest request) {
         chatRoomDetailService.addUserToGroupChat(roomId, request.newUserId());
+        chatRoomMemberService.updateRoomMembers(roomId);
         return ResponseEntity.ok(ApiResponse.success());
     }
 

@@ -27,10 +27,10 @@ public class ChatMessageRepositoryImpl implements ChatMessageRepositoryCustom {
 
     @Override
     public void updateManyReadBy(String roomId, Long userId) {
-        Query query = new Query(where("room_id").is(roomId).and("read_by").ne(userId)); // 읽지 않은 메시지만 선택
-        Update update = new Update().addToSet("read_by", userId); // read_by 배열에 userId 추가
+        Query query = new Query(where("room_id").is(roomId).and("read_by.userId").ne(userId));
+        Update update = new Update().addToSet("read_by", userId);
 
-        mongoTemplate.updateMulti(query, update, ChatMessage.class); // 여러 개의 메시지 업데이트
+        mongoTemplate.updateMulti(query, update, ChatMessage.class);
     }
 
     @Override

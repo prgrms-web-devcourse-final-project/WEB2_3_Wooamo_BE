@@ -3,7 +3,6 @@ package com.api.stuv.domain.socket.controller;
 
 import com.api.stuv.domain.socket.dto.*;
 
-import com.api.stuv.domain.socket.entity.ChatMessage;
 import com.api.stuv.domain.socket.service.ChatMessageService;
 import com.api.stuv.domain.socket.service.ChatRoomDetailService;
 import com.api.stuv.domain.socket.service.ChatRoomMemberService;
@@ -14,8 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -32,6 +29,7 @@ import java.util.concurrent.ConcurrentMap;
 public class ChatMessageController {
     private final ChatMessageService chatMessageService;
     private final ChatRoomDetailService chatRoomDetailService;
+    private final ChatRoomMemberService chatRoomMemberService;
     private final SimpMessagingTemplate messagingTemplate;
     private static final Logger logger = LoggerFactory.getLogger(ChatMessageController.class);
     private final ConcurrentMap<String, List<Long>> roomSessions = new ConcurrentHashMap<>();
@@ -42,6 +40,9 @@ public class ChatMessageController {
     public void addUserToRoom(@Payload ReadMessageRequest readMessageRequest) {
         String roomId = readMessageRequest.roomId();
         Long userId = readMessageRequest.userId();
+
+        chatRoomMemberService.userJoinRoom(userId, roomId);
+        List<UserInfo> userInfo = chatRoomMemberService.getRoomMemberInfos(roomId);
 
         roomSessions.forEach((rooms, users) -> {
             if (!rooms.equals(roomId) && users.contains(userId)) {
@@ -63,6 +64,7 @@ public class ChatMessageController {
         logger.info("현재 채팅방 사용자: {}", roomSessions);
 
         chatMessageService.markMessagesAsRead(roomId, userId);
+        messagingTemplate.convertAndSend("/topic/users/" + roomId, ApiResponse.success(userInfo));
     }
 
     @Operation(summary = "채팅방 퇴장", description = "사용자가 채팅방에서 나갈 때 삭제합니다.")
@@ -78,6 +80,8 @@ public class ChatMessageController {
                 roomSessions.remove(roomId);
             }
         }
+
+        chatRoomMemberService.userLeaveRoom(userId, roomId);
 
         logger.info("{} 사용자가 채팅방 {}에서 나감", userId, roomId);
         logger.info("현재 채팅방 사용자: {}", roomSessions);
@@ -113,7 +117,7 @@ public class ChatMessageController {
     @MessageMapping("/chat/send")
     public void sendMessage(@Payload ChatMessageRequest message) {
         if (message.roomId() != null) { // roomId를 기준으로 메시지를 전송
-            logger.info("메시지 전송 [{} -> {}]: {}", message.senderId(), message.roomId(), message.message());
+            logger.info("메시지 전송 [{} -> {}]: {}", message.userInfo().userId(), message.roomId(), message.message());
 
             // 현재 방에 있는 모든 사용자 가져오기
             List<Long> usersInRoom = roomSessions.getOrDefault(message.roomId(), Collections.emptyList());
@@ -122,7 +126,7 @@ public class ChatMessageController {
             ChatMessageResponse savedMessage = chatMessageService.saveMessage(
                     new ChatMessageRequest(
                             message.roomId(),
-                            message.senderId(),
+                            message.userInfo(),
                             message.message(),
                             readByList
                     )
@@ -156,6 +160,7 @@ public class ChatMessageController {
                 readMessageRequest.roomId(),
                 PageRequest.of(pageValue, sizeValue)
         );
+        System.out.println(updatedReadByList);
 
         messagingTemplate.convertAndSend("/topic/read/" + readMessageRequest.roomId(), ApiResponse.success((updatedReadByList)));
     }
