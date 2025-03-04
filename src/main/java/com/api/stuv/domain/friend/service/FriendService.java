@@ -107,6 +107,13 @@ public class FriendService {
     // TODO: 데이터 처리 서비스 단으로 분리
     @Transactional(readOnly = true)
     public List<FriendResponse> randomRecommendFriend(Long userId) {
-        return friendRepository.recommendFriend(userId);
+        return friendRepository.recommendFriend(userId).stream().map(dto -> new FriendResponse(
+                null,
+                dto.userId(),
+                null,
+                dto.nickname(),
+                dto.context(),
+                s3ImageService.generateImageFile(EntityType.COSTUME, dto.costumeId(), dto.newFilename()),
+                null)).toList();
     }
 }

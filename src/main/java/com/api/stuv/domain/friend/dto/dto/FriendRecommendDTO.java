@@ -1,11 +1,9 @@
 package com.api.stuv.domain.friend.dto.dto;
 
-public record FriendListDTO(
-        Long friendId,
+public record FriendRecommendDTO(
         Long userId,
         String nickname,
         String context,
         Long costumeId,
-        String newFilename,
-        String status
+        String newFilename
 ) {}
