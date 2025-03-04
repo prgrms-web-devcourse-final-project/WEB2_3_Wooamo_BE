@@ -140,4 +140,15 @@ public class GroupMemberRepositoryImpl implements GroupMemberRepositoryCustom {
                 .limit(pageable.getPageSize())
                 .fetch();
     }
+
+    @Override
+    public Optional<Long> findIdByGroupIdAndUserId(Long groupId, Long userId) {
+        return Optional.ofNullable(
+                factory
+                        .select(gm.id)
+                        .from(gm)
+                        .where(gm.groupId.eq(groupId).and(gm.userId.eq(userId)))
+                        .fetchOne()
+        );
+    }
 }

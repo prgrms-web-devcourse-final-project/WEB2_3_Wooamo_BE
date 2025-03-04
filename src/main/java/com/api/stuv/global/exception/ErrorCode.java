@@ -93,6 +93,10 @@ public enum ErrorCode {
     BETTING_AMOUNT_TOO_LOW(400, -11003, "베팅 포인트가 최소 포인트보다 낮습니다."),
     ALREADY_JOINED_PARTY(400, -11004, "이미 참가한 팟입니다."),
     CANNOT_JOIN_FULL_PARTY(400, -11005, "팟의 최대 인원이 초과되어 참가할 수 없습니다."),
+    ALREADY_AUTH_TODAY(400, -11006, "이미 오늘의 인증을 완료했습니다."),
+    MEMBER_NOT_FOUND(400, -11007, "해당 팟에 참가하지 않은 회원입니다."),
+    ALREADY_RECEIVED_REWARD(400, -11008, "이미 보상을 획득한 상태입니다."),
+    MISSION_FAILED(400, -11009, "미션에 실패하여 보상을 받을 수 없습니다."),
 
     //TIMER
     TIMER_NOT_EXIST(404, -12000, "저장된 타이머가 없습니다."),
