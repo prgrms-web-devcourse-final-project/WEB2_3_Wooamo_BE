@@ -8,5 +8,6 @@ public record FriendResponse(
         Long userId,
         String nickname,
         String context,
-        String profile
+        String profile,
+        String status
 ) {}
