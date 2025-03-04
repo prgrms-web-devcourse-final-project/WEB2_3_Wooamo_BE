@@ -3,9 +3,8 @@ package com.api.stuv.domain.admin.service;
 import com.api.stuv.domain.admin.dto.MemberDetailDTO;
 import com.api.stuv.domain.admin.dto.request.ConfirmRequest;
 import com.api.stuv.domain.admin.dto.request.CostumeRequest;
-import com.api.stuv.domain.admin.dto.response.AdminPartyAuthDetailResponse;
-import com.api.stuv.domain.admin.dto.response.PointSalesResponse;
-import com.api.stuv.domain.admin.dto.response.WeeklyInfoResponse;
+import com.api.stuv.domain.admin.dto.request.EventPartyRequest;
+import com.api.stuv.domain.admin.dto.response.*;
 import com.api.stuv.domain.admin.exception.CostumeNotFound;
 import com.api.stuv.domain.admin.exception.InvalidPointFormat;
 import com.api.stuv.domain.image.dto.ImageDTO;
@@ -16,7 +15,6 @@ import com.api.stuv.domain.image.exception.ImageFileNotFound;
 import com.api.stuv.domain.image.repository.ImageFileRepository;
 import com.api.stuv.domain.image.service.ImageService;
 import com.api.stuv.domain.image.service.S3ImageService;
-import com.api.stuv.domain.admin.dto.response.AdminPartyGroupResponse;
 import com.api.stuv.domain.party.entity.ConfirmStatus;
 import com.api.stuv.domain.party.entity.PartyGroup;
 import com.api.stuv.domain.party.entity.PartyStatus;
@@ -35,6 +33,7 @@ import com.api.stuv.global.exception.NotFoundException;
 import com.api.stuv.global.response.PageResponse;
 import com.querydsl.core.Tuple;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -151,5 +150,27 @@ public class AdminService {
 
     public List<PointSalesResponse> getPointSalesList() {
         return paymentRepository.findPointSalesList();
+    }
+
+    public PageResponse<EventPartyResponse> getEventList(Pageable pageable) {
+        return PageResponse.of(new PageImpl<>(
+                partyGroupRepository.findEventPartyList(pageable)
+                        .stream()
+                        .map(item -> new EventPartyResponse(
+                                item.partyId(),
+                                s3ImageService.generateImageFile(EntityType.EVENT, item.partyId(), item.image()),
+                                item.name(),
+                                item.bettingPointCap()
+                        )).toList(),
+                pageable,
+                partyGroupRepository.countEventParty()
+        ));
+    }
+
+    @Transactional
+    public void createEventParty(EventPartyRequest request, MultipartFile image) {
+        PartyGroup party = PartyGroup.createEvent(request);
+        partyGroupRepository.save(party);
+        imageService.handleImage(party.getId(), image, EntityType.EVENT);
     }
 }

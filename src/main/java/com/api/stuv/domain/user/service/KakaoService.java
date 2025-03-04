@@ -1,6 +1,7 @@
 package com.api.stuv.domain.user.service;
 
 import com.api.stuv.domain.auth.jwt.JWTUtil;
+import com.api.stuv.domain.user.dto.request.KakaoCodeRequest;
 import com.api.stuv.domain.user.dto.request.KakaoUserRequest;
 import com.api.stuv.domain.user.dto.request.UserRequest;
 import com.api.stuv.domain.user.entity.User;
@@ -92,7 +93,9 @@ public class KakaoService {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
         params.add("client_id", apiKey);                // 🔑 카카오 REST API 키
-        params.add("redirect_uri", redirectUri);        // 🔄 등록된 redirect_uri
+        //params.add("redirect_uri", redirectUri);        // 🔄 등록된 redirect_uri
+        //TODO: 배포 시 주소 변경
+        params.add("redirect_uri", "http://localhost:3000/api/kakaoLogin");
         params.add("code", code);                       // 📝 받은 인가 코드
 
         HttpEntity<MultiValueMap<String, String>> kakaoTokenReq = new HttpEntity<>(params, headers);
@@ -169,8 +172,8 @@ public class KakaoService {
 
     //카카오 로그인 구현
     //정보가 있으면 로그인, 없으면 회원가입
-    public String kakaoLogin(String code, HttpServletResponse response, HttpServletRequest request) {
-        String accessToken = getKakaoAccessToken(code);
+    public String kakaoLogin(KakaoCodeRequest kakaoCodeRequest, HttpServletResponse response, HttpServletRequest request) {
+        String accessToken = getKakaoAccessToken(kakaoCodeRequest.code());
         KakaoUserRequest kakaoUser = getKakaoUser(accessToken);
 
         User user = userRepository.findBySocialId(kakaoUser.socialId());
