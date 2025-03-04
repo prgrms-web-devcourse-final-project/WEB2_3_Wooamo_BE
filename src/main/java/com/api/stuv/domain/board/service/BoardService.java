@@ -2,11 +2,11 @@ package com.api.stuv.domain.board.service;
 
 import com.api.stuv.domain.alert.entity.AlertType;
 import com.api.stuv.domain.alert.service.AlertService;
-import com.api.stuv.domain.board.dto.BoardDetailResponse;
-import com.api.stuv.domain.board.dto.BoardRequest;
-import com.api.stuv.domain.board.dto.BoardResponse;
-import com.api.stuv.domain.board.dto.BoardUpdateRequest;
-import com.api.stuv.domain.board.dto.CommentResponse;
+import com.api.stuv.domain.board.dto.response.BoardDetailResponse;
+import com.api.stuv.domain.board.dto.request.BoardRequest;
+import com.api.stuv.domain.board.dto.response.BoardResponse;
+import com.api.stuv.domain.board.dto.request.BoardUpdateRequest;
+import com.api.stuv.domain.board.dto.response.CommentResponse;
 import com.api.stuv.domain.board.entity.Board;
 import com.api.stuv.domain.board.entity.BoardType;
 import com.api.stuv.domain.board.entity.Comment;
@@ -24,6 +24,7 @@ import com.api.stuv.global.exception.BadRequestException;
 import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
 import com.api.stuv.global.response.PageResponse;
+import com.api.stuv.global.util.common.TemplateUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -49,6 +50,7 @@ public class BoardService {
     private final AlertService alertService;
     private final S3ImageService s3ImageService;
 
+    // TODO: Repository 에서 Service 단으로 데이터 처리 이동
     @Transactional(readOnly = true)
     public PageResponse<BoardResponse> getBoardList(String title, Pageable pageable) {
         return boardRepository.getBoardList(title, pageable);
@@ -61,6 +63,7 @@ public class BoardService {
         return Map.of("boardId", boardId);
     }
 
+    // TODO: Repository 에서 Service 단으로 데이터 처리 이동
     @Transactional(readOnly = true)
     public BoardDetailResponse getBoardDetail(Long boardId) {
         return boardRepository.getBoardDetail(boardId);
@@ -108,7 +111,15 @@ public class BoardService {
     @Transactional(readOnly = true)
     public PageResponse<CommentResponse> getCommentList(Long boardId, Pageable pageable) {
         if ( !boardRepository.existsById(boardId) ) throw new NotFoundException(ErrorCode.BOARD_NOT_FOUND);
-        return commentRepository.getCommentList(boardId, pageable);
+        List<CommentResponse> commentList = commentRepository.getCommentList(boardId, pageable).stream().map(dto -> new CommentResponse(
+                dto.commentId(),
+                dto.userId(),
+                dto.nickname(),
+                dto.context(),
+                dto.createdAt().format(TemplateUtils.dateTimeFormatter),
+                dto.isConfirm() != null && dto.isConfirm().equals(dto.commentId()),
+                getCostume(dto.costumeId(), dto.newFilename()))).toList();
+        return PageResponse.applyPage(commentList, pageable, commentRepository.getCommentCount(boardId));
     }
 
     @Transactional
@@ -133,5 +144,9 @@ public class BoardService {
         alertService.createAlert(comment.getUserId(), board.getId(), AlertType.CONFIRM, board.getTitle(), boardWitter.getNickname());
         board.confirmComment(commentId);
         user.updatePoint(BigDecimal.valueOf(CONFIRM_COMMENT_POINT));
+    }
+
+    private String getCostume(Long costumeId, String newFilename) {
+        return s3ImageService.generateImageFile(EntityType.COSTUME, costumeId, newFilename);
     }
 }

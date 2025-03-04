@@ -1,7 +1,12 @@
 package com.api.stuv.domain.board.controller;
 
 import com.api.stuv.domain.auth.util.TokenUtil;
-import com.api.stuv.domain.board.dto.*;
+import com.api.stuv.domain.board.dto.request.BoardRequest;
+import com.api.stuv.domain.board.dto.request.BoardUpdateRequest;
+import com.api.stuv.domain.board.dto.request.CommentRequest;
+import com.api.stuv.domain.board.dto.response.BoardDetailResponse;
+import com.api.stuv.domain.board.dto.response.BoardResponse;
+import com.api.stuv.domain.board.dto.response.CommentResponse;
 import com.api.stuv.domain.board.service.BoardService;
 import com.api.stuv.global.response.ApiResponse;
 import com.api.stuv.global.response.PageResponse;
