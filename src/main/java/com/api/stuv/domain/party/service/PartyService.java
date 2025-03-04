@@ -3,6 +3,7 @@ package com.api.stuv.domain.party.service;
 import com.api.stuv.domain.image.entity.EntityType;
 import com.api.stuv.domain.image.service.ImageService;
 import com.api.stuv.domain.image.service.S3ImageService;
+import com.api.stuv.domain.party.dto.MemberRewardStatusDTO;
 import com.api.stuv.domain.party.dto.response.MemberResponse;
 import com.api.stuv.domain.party.dto.request.PartyCreateRequest;
 import com.api.stuv.domain.party.dto.response.*;
@@ -13,7 +14,11 @@ import com.api.stuv.domain.party.entity.QuestStatus;
 import com.api.stuv.domain.party.repository.confirm.QuestConfirmRepository;
 import com.api.stuv.domain.party.repository.member.GroupMemberRepository;
 import com.api.stuv.domain.party.repository.party.PartyGroupRepository;
+import com.api.stuv.domain.user.entity.HistoryType;
+import com.api.stuv.domain.user.entity.PointHistory;
 import com.api.stuv.domain.user.entity.RewardType;
+import com.api.stuv.domain.user.entity.User;
+import com.api.stuv.domain.user.repository.PointHistoryRepository;
 import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.BusinessException;
 import com.api.stuv.global.exception.ErrorCode;
@@ -42,6 +47,7 @@ public class PartyService {
     private final S3ImageService s3ImageService;
     private final QuestConfirmRepository confirmRepository;
     private final ImageService imageService;
+    private final PointHistoryRepository historyRepository;
 
     public PageResponse<PartyGroupResponse> getPendingPartyGroups(String name, Pageable pageable) {
         return partyRepository.findPendingGroupsByName(name, pageable);
@@ -140,6 +146,42 @@ public class PartyService {
         GroupMember member = GroupMember.join(partyId, userId, bettingPoint);
 
         memberRepository.save(member);
+    }
+
+    @Transactional
+    public PointResponse getReward(Long partyId, Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+        MemberRewardStatusDTO dto = partyRepository.findCompleteParty(partyId, userId).orElseThrow(() -> new NotFoundException(ErrorCode.PARTY_NOT_FOUND));
+        Long memberId = memberRepository.findIdByGroupIdAndUserId(partyId, userId).orElseThrow(() -> new NotFoundException(ErrorCode.MEMBER_NOT_FOUND));
+
+        String reason = dto.partyId() + ":팟보상:" + dto.partyName();
+
+        Long count = memberRepository.countAllGroupMembers(dto.partyId());
+        BigDecimal reward = Optional.ofNullable(dto.bettingPoint()).orElse(BigDecimal.ZERO);
+
+        if (dto.questStatus() == QuestStatus.FAILED) throw new BusinessException(ErrorCode.MISSION_FAILED);
+
+        long successCount = Optional.ofNullable(memberRepository.countSuccessGroupMembers(dto.partyId())).orElse(0L);
+
+        BigDecimal failedBettingSum = Optional.ofNullable(memberRepository.sumFailedGroupMemberBettingPoint(dto.partyId()))
+                .orElse(BigDecimal.ZERO);
+
+        BigDecimal serviceSupportPoint = RewardType.PARTY.getValue()
+                .multiply(BigDecimal.valueOf(count));
+
+        if (successCount > 0) {
+            BigDecimal bonus = (failedBettingSum.add(serviceSupportPoint))
+                    .divide(BigDecimal.valueOf(successCount), RoundingMode.FLOOR);
+            reward = reward.add(bonus);
+        }
+
+        if (historyRepository.existsByReason(reason)) throw new BusinessException(ErrorCode.ALREADY_RECEIVED_REWARD);
+        user.updatePoint(reward);
+        PointHistory pointHistory = new PointHistory(userId, HistoryType.PARTY, reward, reason);
+        historyRepository.save(pointHistory);
+        memberRepository.updateQuestStatusForMember(partyId, memberId, QuestStatus.COMPLETED);
+
+        return new PointResponse(reward);
     }
 
     @Transactional

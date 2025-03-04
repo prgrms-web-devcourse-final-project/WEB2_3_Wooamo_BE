@@ -118,6 +118,14 @@ public class PartyController {
                 .body(ApiResponse.success());
     }
 
+    @PostMapping("/{partyId}/reward")
+    @Operation(summary = "성공한 팟 보상 받기 API", description = "회원이 성공한 팟에 대한 보상을 획득할 수 있습니다.")
+    public ResponseEntity<ApiResponse<PointResponse>> rewardParty(@PathVariable Long partyId) {
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(
+                        partyService.getReward(partyId, tokenUtil.getUserId())
+                ));
+    }
 }
 
 
