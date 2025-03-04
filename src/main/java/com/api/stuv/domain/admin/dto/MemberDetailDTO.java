@@ -1,8 +1,12 @@
 package com.api.stuv.domain.admin.dto;
 
+import com.api.stuv.domain.party.entity.ConfirmStatus;
+
 public record MemberDetailDTO(
         Long memberId,
-        String profile,
         String nickname,
-        String isAuth
-) {}
+        ConfirmStatus status,
+        String filename,
+        Long costumeId
+) {
+}
