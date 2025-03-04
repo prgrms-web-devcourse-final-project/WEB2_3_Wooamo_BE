@@ -52,6 +52,6 @@ public class ReissueService {
 
         if(!redisService.exist(refreshToken)) {
             throw new IllegalArgumentException("Invalid refresh token");
-        };
+        }
     }
 }
