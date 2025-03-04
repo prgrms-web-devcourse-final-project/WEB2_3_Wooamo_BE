@@ -75,7 +75,7 @@ jwt:
 kakao:
   api-key: ${KAKAO_API_KEY}
   client-secret: ${KAKAO_CLIENT_SECRET}
-  redirect-uri: ${BE_BASE}/api/user/kakaoLogin
+  redirect-uri: ${FE_BASE}/api/kakaoLogin
   authentication:
     method: POST
     grant-type: authorization_code
