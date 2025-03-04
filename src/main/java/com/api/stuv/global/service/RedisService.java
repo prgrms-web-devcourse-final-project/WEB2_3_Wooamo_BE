@@ -55,8 +55,8 @@ public class RedisService {
         template.delete(key);
     }
 
-    public Boolean exist(String key) {
-        return true;
+    public Boolean exists(String key) {
+        return Boolean.TRUE.equals(template.hasKey(key));
     }
 
     public <T> void saveByAlertId(String key, String alertId, T value) {
