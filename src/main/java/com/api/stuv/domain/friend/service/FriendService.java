@@ -65,7 +65,7 @@ public class FriendService {
                 dto.userId(),
                 dto.nickname(),
                 dto.context(),
-                s3ImageService.generateImageFile(EntityType.COSTUME, dto.costumeId(), dto.newFilename()),
+                getCostume(dto.costumeId(), dto.newFilename()),
                 null)).toList();
         return PageResponse.applyPage(frinedList, pageable, friendRepository.getTotalFriendFollowListPage(userId));
     }
@@ -78,7 +78,7 @@ public class FriendService {
                 null,
                 dto.nickname(),
                 dto.context(),
-                s3ImageService.generateImageFile(EntityType.COSTUME, dto.costumeId(), dto.newFilename()),
+                getCostume(dto.costumeId(), dto.newFilename()),
                 null)).toList();
         return PageResponse.applyPage(frinedList, pageable, friendRepository.getTotalFriendListPage(userId));
     }
@@ -99,12 +99,11 @@ public class FriendService {
                 null,
                 dto.nickname(),
                 dto.context(),
-                s3ImageService.generateImageFile(EntityType.COSTUME, dto.costumeId(), dto.newFilename()),
+                getCostume(dto.costumeId(), dto.newFilename()),
                 dto.status())).toList();
         return PageResponse.applyPage(userList, pageable, friendRepository.getTotalSearchUserPage(userId, target));
     }
 
-    // TODO: 데이터 처리 서비스 단으로 분리
     @Transactional(readOnly = true)
     public List<FriendResponse> randomRecommendFriend(Long userId) {
         return friendRepository.recommendFriend(userId).stream().map(dto -> new FriendResponse(
@@ -113,7 +112,11 @@ public class FriendService {
                 null,
                 dto.nickname(),
                 dto.context(),
-                s3ImageService.generateImageFile(EntityType.COSTUME, dto.costumeId(), dto.newFilename()),
+                getCostume(dto.costumeId(), dto.newFilename()),
                 null)).toList();
+    }
+
+    private String getCostume(Long costumeId, String newFilename) {
+        return s3ImageService.generateImageFile(EntityType.COSTUME, costumeId, newFilename);
     }
 }

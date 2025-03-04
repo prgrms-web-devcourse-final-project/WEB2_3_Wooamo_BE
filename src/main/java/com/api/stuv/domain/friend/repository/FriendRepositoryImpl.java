@@ -4,16 +4,17 @@ import com.api.stuv.domain.friend.dto.dto.FriendListDTO;
 import com.api.stuv.domain.friend.dto.dto.FriendRecommendDTO;
 import com.api.stuv.domain.friend.entity.FriendFollowStatus;
 import com.api.stuv.domain.friend.entity.FriendStatus;
-import static com.api.stuv.domain.friend.entity.QFriend.friend;
 import com.api.stuv.domain.image.entity.EntityType;
-import com.api.stuv.domain.image.entity.QImageFile;
-import com.api.stuv.domain.user.entity.QUser;
-import com.api.stuv.domain.user.entity.QUserCostume;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import static com.api.stuv.domain.friend.entity.QFriend.friend;
+import static com.api.stuv.domain.user.entity.QUser.user;
+import static com.api.stuv.domain.user.entity.QUserCostume.userCostume;
+import static com.api.stuv.domain.image.entity.QImageFile.imageFile;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 
@@ -22,9 +23,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FriendRepositoryImpl implements FriendRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
-    private final QUser u = QUser.user;
-    private final QUserCostume uc = QUserCostume.userCostume;
-    private final QImageFile i = QImageFile.imageFile;
 
     // 내게 Follow 요청한 친구 목록 조회
     @Override
@@ -32,15 +30,15 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
         return jpaQueryFactory
                 .select(Projections.constructor(FriendListDTO.class,
                         friend.id,
-                        u.id,
-                        u.nickname,
-                        u.context,
-                        uc.costumeId,
-                        i.newFilename,
+                        user.id,
+                        user.nickname,
+                        user.context,
+                        userCostume.costumeId,
+                        imageFile.newFilename,
                         friend.status.stringValue()))
-                .from(friend).join(u).on(friend.userId.eq(u.id))
-                .leftJoin(uc).on(u.costumeId.eq(uc.id))
-                .leftJoin(i).on(uc.costumeId.eq(i.entityId).and(i.entityType.eq(EntityType.COSTUME)))
+                .from(friend).join(user).on(friend.userId.eq(user.id))
+                .leftJoin(userCostume).on(user.costumeId.eq(userCostume.id))
+                .leftJoin(imageFile).on(userCostume.costumeId.eq(imageFile.entityId).and(imageFile.entityType.eq(EntityType.COSTUME)))
                 .where(friend.friendId.eq(receiverId).and(friend.status.eq(FriendStatus.PENDING)))
                 .offset(pageable.getOffset()).limit(pageable.getPageSize()).fetch();
     }
@@ -60,15 +58,15 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
         return jpaQueryFactory
                 .select(Projections.constructor(FriendListDTO.class,
                         friend.id,
-                        u.id,
-                        u.nickname,
-                        u.context,
-                        uc.costumeId,
-                        i.newFilename,
+                        user.id,
+                        user.nickname,
+                        user.context,
+                        userCostume.costumeId,
+                        imageFile.newFilename,
                         friend.status.stringValue()))
-                .from(friend).join(u).on(friend.userId.eq(userId).and(friend.friendId.eq(u.id)).or(friend.friendId.eq(userId).and(friend.userId.eq(u.id))))
-                .leftJoin(uc).on(u.costumeId.eq(uc.id))
-                .leftJoin(i).on(uc.costumeId.eq(i.entityId).and(i.entityType.eq(EntityType.COSTUME)))
+                .from(friend).join(user).on(friend.userId.eq(userId).and(friend.friendId.eq(user.id)).or(friend.friendId.eq(userId).and(friend.userId.eq(user.id))))
+                .leftJoin(userCostume).on(user.costumeId.eq(userCostume.id))
+                .leftJoin(imageFile).on(userCostume.costumeId.eq(imageFile.entityId).and(imageFile.entityType.eq(EntityType.COSTUME)))
                 .where(friend.status.eq(FriendStatus.ACCEPTED))
                 .offset(pageable.getOffset()).limit(pageable.getPageSize()).fetch();
     }
@@ -92,22 +90,22 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
         return jpaQueryFactory
                 .select(Projections.constructor(FriendListDTO.class,
                         friend.id,
-                        u.id,
-                        u.nickname,
-                        u.context,
-                        uc.costumeId,
-                        i.newFilename,
+                        user.id,
+                        user.nickname,
+                        user.context,
+                        userCostume.costumeId,
+                        imageFile.newFilename,
                         Expressions.cases()
                                 .when(friend.userId.eq(userId).and(friend.status.eq(FriendStatus.PENDING))).then(FriendFollowStatus.ME.toString())
                                 .when(friend.friendId.eq(userId).and(friend.status.eq(FriendStatus.PENDING))).then(FriendFollowStatus.OTHER.toString())
                                 .otherwise(FriendFollowStatus.NONE.toString())))
-                .from(u)
-                .leftJoin(friend).on(friend.userId.eq(userId).and(friend.friendId.eq(u.id)).or(friend.friendId.eq(userId).and(friend.userId.eq(u.id))))
-                .leftJoin(uc).on(u.costumeId.eq(uc.id))
-                .leftJoin(i).on(uc.costumeId.eq(i.entityId))
-                .where(u.id.ne(userId)
-                        .and(u.nickname.contains(target).or(u.context.contains(target))))
-                .where(u.id.notIn(subQuery))
+                .from(user)
+                .leftJoin(friend).on(friend.userId.eq(userId).and(friend.friendId.eq(user.id)).or(friend.friendId.eq(userId).and(friend.userId.eq(user.id))))
+                .leftJoin(userCostume).on(user.costumeId.eq(userCostume.id))
+                .leftJoin(imageFile).on(userCostume.costumeId.eq(imageFile.entityId))
+                .where(user.id.ne(userId)
+                        .and(user.nickname.contains(target).or(user.context.contains(target))))
+                .where(user.id.notIn(subQuery))
                 .offset(pageable.getOffset()).limit(pageable.getPageSize()).fetch();
     }
 
@@ -117,9 +115,9 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
                 .select(friend.userId.when(userId).then(friend.friendId).otherwise(friend.userId))
                 .from(friend).where(friend.userId.eq(userId).or(friend.friendId.eq(userId)).and(friend.status.eq(FriendStatus.ACCEPTED)));
 
-        return jpaQueryFactory.select(u.count()).from(u)
-                .where(u.id.ne(userId).and(u.nickname.contains(target).or(u.context.contains(target))))
-                .where(u.id.notIn(subQuery))
+        return jpaQueryFactory.select(user.count()).from(user)
+                .where(user.id.ne(userId).and(user.nickname.contains(target).or(user.context.contains(target))))
+                .where(user.id.notIn(subQuery))
                 .fetchOne();
     }
 
@@ -127,19 +125,19 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
     @Override
     public List<FriendRecommendDTO> recommendFriend(Long userId) {
         JPQLQuery<Long> subQuery = JPAExpressions
-                .select(u.id)
-                .from(friend).join(u).on(friend.userId.eq(u.id).and(friend.friendId.eq(userId)).or(friend.friendId.eq(u.id).and(friend.userId.eq(userId))));
+                .select(user.id)
+                .from(friend).join(user).on(friend.userId.eq(user.id).and(friend.friendId.eq(userId)).or(friend.friendId.eq(user.id).and(friend.userId.eq(userId))));
 
         return jpaQueryFactory
                 .select(Projections.constructor(FriendRecommendDTO.class,
-                        u.id,
-                        u.nickname,
-                        u.context,
-                        uc.costumeId,
-                        i.newFilename))
-                .from(u).leftJoin(uc).on(u.costumeId.eq(uc.id))
-                .leftJoin(i).on(uc.costumeId.eq(i.entityId).and(i.entityType.eq(EntityType.COSTUME)))
-                .where(u.id.ne(userId).and(u.id.notIn(subQuery)))
+                        user.id,
+                        user.nickname,
+                        user.context,
+                        userCostume.costumeId,
+                        imageFile.newFilename))
+                .from(user).leftJoin(userCostume).on(user.costumeId.eq(userCostume.id))
+                .leftJoin(imageFile).on(userCostume.costumeId.eq(imageFile.entityId).and(imageFile.entityType.eq(EntityType.COSTUME)))
+                .where(user.id.ne(userId).and(user.id.notIn(subQuery)))
                 .orderBy(Expressions.numberTemplate(Double.class, "RAND()").asc())
                 .limit(3).fetch();
     }
