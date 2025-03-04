@@ -1,9 +1,9 @@
 package com.api.stuv.domain.shop.service;
 
 import com.api.stuv.domain.auth.util.TokenUtil;
-import com.api.stuv.domain.shop.dto.PaymentConfirmRequest;
-import com.api.stuv.domain.shop.dto.PaymentRequest;
-import com.api.stuv.domain.shop.dto.PaymentResponse;
+import com.api.stuv.domain.shop.dto.payments.PaymentConfirmRequest;
+import com.api.stuv.domain.shop.dto.payments.PaymentRequest;
+import com.api.stuv.domain.shop.dto.payments.PaymentResponse;
 import com.api.stuv.domain.shop.entity.Payment;
 import com.api.stuv.domain.shop.exception.PaymentsMismatchException;
 import com.api.stuv.domain.shop.exception.PaymentsNotFoundException;
