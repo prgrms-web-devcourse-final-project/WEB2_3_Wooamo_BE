@@ -1,6 +1,6 @@
 package com.api.stuv.domain.friend.service;
 
-import com.api.stuv.domain.friend.dto.FriendFollowResponse;
+import com.api.stuv.domain.friend.dto.response.FriendFollowResponse;
 import com.api.stuv.domain.friend.entity.Friend;
 import com.api.stuv.domain.friend.entity.FriendStatus;
 import com.api.stuv.domain.friend.repository.FriendRepository;

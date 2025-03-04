@@ -1,16 +1,17 @@
 package com.api.stuv.domain.friend.repository;
 
-import com.api.stuv.domain.friend.dto.FriendFollowListResponse;
-import com.api.stuv.domain.friend.dto.FriendResponse;
-import com.api.stuv.global.response.PageResponse;
+import com.api.stuv.domain.friend.dto.dto.FriendListDTO;
+import com.api.stuv.domain.friend.dto.dto.FriendRecommendDTO;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 public interface FriendRepositoryCustom {
-    PageResponse<FriendFollowListResponse> getFriendFollowList(Long receiverId, Pageable pageable, String imageUrl);
-    PageResponse<FriendResponse> getFriendList(Long receiverId, Pageable pageable, String imageUrl);
-    PageResponse<FriendResponse> searchUser(Long userId, String target, Pageable pageable);
-    List<FriendResponse> recommendFriend(Long userId);
+    List<FriendListDTO> getFriendFollowList(Long receiverId, Pageable pageable);
+    List<FriendListDTO> getFriendList(Long receiverId, Pageable pageable);
+    List<FriendListDTO> searchUser(Long userId, String target, Pageable pageable);
+    List<FriendRecommendDTO> recommendFriend(Long userId);
+    Long getTotalFriendFollowListPage(Long receiverId);
     Long getTotalFriendListPage(Long userId);
+    Long getTotalSearchUserPage(Long userId, String target);
 }

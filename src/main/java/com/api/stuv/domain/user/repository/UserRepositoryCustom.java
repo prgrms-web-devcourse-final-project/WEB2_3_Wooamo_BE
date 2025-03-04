@@ -3,6 +3,8 @@ package com.api.stuv.domain.user.repository;
 import com.api.stuv.domain.user.dto.*;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface UserRepositoryCustom {
@@ -12,4 +14,5 @@ public interface UserRepositoryCustom {
     List<GetCostumeDTO> getUserCostume(@Param("userId") Long userId);
     ImageUrlDTO getCostumeInfoByUserId(Long userId);
     List<UserProfileInfoDTO> findUserInfoByIds(List<Long> userIds);
+    Long countNewUserByWeekend(LocalDateTime startDate, LocalDateTime endDate);
 }

@@ -1,4 +1,4 @@
-package com.api.stuv.domain.board.dto;
+package com.api.stuv.domain.board.dto.request;
 
 import com.api.stuv.domain.board.entity.Board;
 import com.api.stuv.domain.board.entity.BoardType;

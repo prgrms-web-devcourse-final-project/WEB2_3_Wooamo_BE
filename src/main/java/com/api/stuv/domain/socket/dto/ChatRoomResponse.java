@@ -8,22 +8,18 @@ import java.time.LocalDateTime;
 public record ChatRoomResponse(
         String roomId,
         String roomType,
-        Long lastSenderId,
+        UserInfo lastUserInfo,
         String lastMessage,
         LocalDateTime createdAt,
-        String profile,
         int unreadCount
 ) {
-    public static ChatRoomResponse from(ChatRoom room, ChatMessage latestMessage, String profile, int unreadCount) {
-        boolean isPrivate = "PRIVATE".equals(room.getRoomType());
-
+    public static ChatRoomResponse from(ChatRoom room, UserInfo lastUserInfo, ChatMessage latestMessage, int unreadCount) {
         return new ChatRoomResponse(
                 room.getRoomId(),
                 room.getRoomType(),
-                isPrivate ? (latestMessage != null ? latestMessage.getSenderId() : null) : null,
+                lastUserInfo,
                 latestMessage != null ? latestMessage.getMessage() : "대화 내역 없음",
                 latestMessage != null ? latestMessage.getCreatedAt() : LocalDateTime.MIN,
-                isPrivate ? profile : null,
                 unreadCount
         );
     }

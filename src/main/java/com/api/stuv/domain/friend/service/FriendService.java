@@ -2,12 +2,13 @@ package com.api.stuv.domain.friend.service;
 
 import com.api.stuv.domain.alert.entity.AlertType;
 import com.api.stuv.domain.alert.service.AlertService;
-import com.api.stuv.domain.friend.dto.FriendFollowListResponse;
-import com.api.stuv.domain.friend.dto.FriendFollowResponse;
-import com.api.stuv.domain.friend.dto.FriendResponse;
+import com.api.stuv.domain.friend.dto.response.FriendFollowResponse;
+import com.api.stuv.domain.friend.dto.response.FriendResponse;
 import com.api.stuv.domain.friend.entity.Friend;
 import com.api.stuv.domain.friend.entity.FriendStatus;
 import com.api.stuv.domain.friend.repository.FriendRepository;
+import com.api.stuv.domain.image.entity.EntityType;
+import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.domain.user.entity.User;
 import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.*;
@@ -27,8 +28,8 @@ public class FriendService {
     private final UserRepository userRepository;
     private final FriendRepository friendRepository;
     private final AlertService alertService;
+    private final S3ImageService s3ImageService;
 
-    // TODO: 알림 기능 추가시 알림 생성 로직 추가
     @Transactional
     public FriendFollowResponse requestFriend(Long userId, Long receiverId) {
         User sender = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
@@ -56,15 +57,30 @@ public class FriendService {
         return FriendFollowResponse.from(friend);
     }
 
-    // TODO: profile image 경로 맞는지 확인
     @Transactional(readOnly = true)
-    public PageResponse<FriendFollowListResponse> getFriendFollowList(Long userId, Pageable pageable) {
-        return friendRepository.getFriendFollowList(userId, pageable, "http://localhost:8080/api/v1/costume/");
+    public PageResponse<FriendResponse> getFriendFollowList(Long userId, Pageable pageable) {
+        List<FriendResponse> frinedList = friendRepository.getFriendFollowList(userId, pageable).stream().map( dto -> new FriendResponse(
+                dto.friendId(),
+                null,
+                dto.userId(),
+                dto.nickname(),
+                dto.context(),
+                getCostume(dto.costumeId(), dto.newFilename()),
+                null)).toList();
+        return PageResponse.applyPage(frinedList, pageable, friendRepository.getTotalFriendFollowListPage(userId));
     }
 
     @Transactional(readOnly = true)
     public PageResponse<FriendResponse> getFriendList(Long userId, Pageable pageable) {
-        return friendRepository.getFriendList(userId, pageable, "http://localhost:8080/api/v1/costume/");
+        List<FriendResponse> frinedList = friendRepository.getFriendList(userId, pageable).stream().map( dto -> new FriendResponse(
+                dto.friendId(),
+                dto.userId(),
+                null,
+                dto.nickname(),
+                dto.context(),
+                getCostume(dto.costumeId(), dto.newFilename()),
+                null)).toList();
+        return PageResponse.applyPage(frinedList, pageable, friendRepository.getTotalFriendListPage(userId));
     }
 
     @Transactional
@@ -77,11 +93,30 @@ public class FriendService {
 
     @Transactional(readOnly = true)
     public PageResponse<FriendResponse> searchUser(Long userId, String target, Pageable pageable) {
-        return friendRepository.searchUser(userId, target, pageable);
+        List<FriendResponse> userList = friendRepository.searchUser(userId, target, pageable).stream().map(dto -> new FriendResponse(
+                null,
+                dto.userId(),
+                null,
+                dto.nickname(),
+                dto.context(),
+                getCostume(dto.costumeId(), dto.newFilename()),
+                dto.status())).toList();
+        return PageResponse.applyPage(userList, pageable, friendRepository.getTotalSearchUserPage(userId, target));
     }
 
     @Transactional(readOnly = true)
     public List<FriendResponse> randomRecommendFriend(Long userId) {
-        return friendRepository.recommendFriend(userId);
+        return friendRepository.recommendFriend(userId).stream().map(dto -> new FriendResponse(
+                null,
+                dto.userId(),
+                null,
+                dto.nickname(),
+                dto.context(),
+                getCostume(dto.costumeId(), dto.newFilename()),
+                null)).toList();
+    }
+
+    private String getCostume(Long costumeId, String newFilename) {
+        return s3ImageService.generateImageFile(EntityType.COSTUME, costumeId, newFilename);
     }
 }

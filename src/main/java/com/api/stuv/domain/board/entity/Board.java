@@ -1,6 +1,6 @@
 package com.api.stuv.domain.board.entity;
 
-import com.api.stuv.domain.board.dto.BoardUpdateRequest;
+import com.api.stuv.domain.board.dto.request.BoardUpdateRequest;
 import com.api.stuv.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

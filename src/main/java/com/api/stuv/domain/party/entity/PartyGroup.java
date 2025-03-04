@@ -1,5 +1,6 @@
 package com.api.stuv.domain.party.entity;
 
+import com.api.stuv.domain.admin.dto.request.EventPartyRequest;
 import com.api.stuv.domain.party.dto.request.PartyCreateRequest;
 import com.api.stuv.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -42,8 +43,8 @@ public class PartyGroup extends BaseTimeEntity {
     @Column(nullable = false)
     private PartyStatus status;
 
-    public PartyGroup(String name, String context, BigDecimal bettingPoint, Long recruitCap, LocalDate startDate, LocalDate endDate, PartyStatus status) {
-        this.isEvent = false;
+    public PartyGroup(Boolean isEvent, String name, String context, BigDecimal bettingPoint, Long recruitCap, LocalDate startDate, LocalDate endDate, PartyStatus status) {
+        this.isEvent = isEvent != null ? isEvent : false;
         this.name = name;
         this.context = context;
         this.bettingPoint = bettingPoint;
@@ -55,6 +56,20 @@ public class PartyGroup extends BaseTimeEntity {
 
     public static PartyGroup create(PartyCreateRequest request) {
         return new PartyGroup(
+                false,
+                request.name(),
+                request.context(),
+                request.bettingPointCap(),
+                request.recruitCap(),
+                request.startDate(),
+                request.endDate(),
+                PartyStatus.PENDING
+        );
+    }
+
+    public static PartyGroup createEvent(EventPartyRequest request) {
+        return new PartyGroup(
+                true,
                 request.name(),
                 request.context(),
                 request.bettingPointCap(),

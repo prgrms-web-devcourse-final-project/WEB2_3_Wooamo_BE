@@ -1,4 +1,4 @@
-package com.api.stuv.domain.friend.dto;
+package com.api.stuv.domain.friend.dto.response;
 
 import com.api.stuv.domain.friend.entity.Friend;
 import com.api.stuv.domain.friend.entity.FriendStatus;
