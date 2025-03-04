@@ -4,7 +4,6 @@ import com.api.stuv.domain.board.dto.dto.BoardDetailDTO;
 import com.api.stuv.domain.board.dto.dto.BoardListDTO;
 import com.api.stuv.domain.image.entity.EntityType;
 import com.querydsl.core.types.Projections;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +13,7 @@ import static com.api.stuv.domain.user.entity.QUser.user;
 import static com.api.stuv.domain.user.entity.QUserCostume.userCostume;
 import static com.api.stuv.domain.image.entity.QImageFile.imageFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -22,11 +22,10 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 
     @Override
     public List<BoardListDTO> getBoardList(String title, Pageable pageable) {
-        JPQLQuery<String> imageSubQuery = JPAExpressions
-                .select(imageFile.newFilename)
+        JPQLQuery<LocalDateTime> imageSubQuery = jpaQueryFactory
+                .select(imageFile.createdAt.min())
                 .from(imageFile)
-                .where(imageFile.entityId.eq(board.id).and(imageFile.entityType.eq(EntityType.BOARD)))
-                .groupBy(imageFile.entityId);
+                .where(imageFile.entityId.eq(board.id).and(imageFile.entityType.eq(EntityType.BOARD)));
         return jpaQueryFactory
                 .select(Projections.constructor(BoardListDTO.class,
                         board.id,
@@ -35,10 +34,11 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
                         board.context,
                         board.confirmedCommentId.isNotNull(),
                         board.createdAt,
-                        imageSubQuery
+                        imageFile.newFilename
                 ))
-                .from(board)
+                .from(board).leftJoin(imageFile).on(board.id.eq(imageFile.entityId).and(imageFile.entityType.eq(EntityType.BOARD)))
                 .where(board.title.contains(title))
+                .where(imageFile.createdAt.isNull().or(imageFile.createdAt.eq(imageSubQuery)))
                 .offset(pageable.getOffset()).limit(pageable.getPageSize()).fetch();
     }
 
