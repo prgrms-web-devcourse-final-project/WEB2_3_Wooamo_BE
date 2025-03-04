@@ -169,6 +169,8 @@ public class AdminService {
 
     @Transactional
     public void createEventParty(EventPartyRequest request, MultipartFile image) {
-
+        PartyGroup party = PartyGroup.createEvent(request);
+        partyGroupRepository.save(party);
+        imageService.handleImage(party.getId(), image, EntityType.EVENT);
     }
 }

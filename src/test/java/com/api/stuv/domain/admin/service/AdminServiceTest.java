@@ -36,8 +36,8 @@ public class AdminServiceTest {
         // Given
         Pageable pageable = PageRequest.of(0, 10);
         List<PartyGroup> groups = List.of(
-                new PartyGroup("파티1", "설명1", BigDecimal.valueOf(100), 10L, LocalDate.now(), LocalDate.now().plusDays(10), PartyStatus.APPROVED),
-                new PartyGroup("파티2", "설명2", BigDecimal.valueOf(200), 20L, LocalDate.now(), LocalDate.now().plusDays(5), PartyStatus.PENDING)
+                new PartyGroup(false, "파티1", "설명1", BigDecimal.valueOf(100), 10L, LocalDate.now(), LocalDate.now().plusDays(10), PartyStatus.APPROVED),
+                new PartyGroup(false, "파티2", "설명2", BigDecimal.valueOf(200), 20L, LocalDate.now(), LocalDate.now().plusDays(5), PartyStatus.PENDING)
         );
 
         List<AdminPartyGroupResponse> responseList = groups.stream()
