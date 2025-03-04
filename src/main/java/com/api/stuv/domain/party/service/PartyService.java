@@ -95,7 +95,7 @@ public class PartyService {
     }
 
     public List<EventBannerResponse> getEventList() {
-        return partyRepository.findEventPartyList()
+        return partyRepository.findEventBannerList()
                 .stream()
                 .map(dto -> new EventBannerResponse(
                         s3ImageService.generateImageFile(EntityType.EVENT, dto.partyId(), dto.image()),

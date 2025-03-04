@@ -2,6 +2,7 @@ package com.api.stuv.domain.party.repository.party;
 
 import com.api.stuv.domain.admin.dto.response.AdminPartyAuthDetailResponse;
 import com.api.stuv.domain.admin.dto.response.AdminPartyGroupResponse;
+import com.api.stuv.domain.admin.dto.response.EventPartyResponse;
 import com.api.stuv.domain.image.entity.EntityType;
 import com.api.stuv.domain.image.entity.QImageFile;
 import com.api.stuv.domain.party.dto.MemberRewardStatusDTO;
@@ -194,7 +195,7 @@ public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
     }
 
     @Override
-    public List<EventBannerResponse> findEventPartyList() {
+    public List<EventBannerResponse> findEventBannerList() {
         LocalDate today = LocalDate.now();
         return factory
                 .select(Projections.constructor(
@@ -208,5 +209,35 @@ public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
                         .and(pg.isEvent.eq(true))
                         .and(pg.startDate.gt(today)))
                 .fetch();
+    }
+
+    @Override
+    public List<EventPartyResponse> findEventPartyList(Pageable pageable) {
+        return factory
+                .select(Projections.constructor(
+                        EventPartyResponse.class,
+                        pg.id,
+                        i.newFilename,
+                        pg.name,
+                        pg.bettingPoint
+                ))
+                .from(pg)
+                .leftJoin(i).on(pg.id.eq(i.entityId)
+                        .and(i.entityType.eq(EntityType.EVENT)))
+                .where(pg.isEvent.eq(true))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+    }
+
+    @Override
+    public Long countEventParty() {
+        return Optional.ofNullable(
+                factory
+                        .select(pg.id.count())
+                        .from(pg)
+                        .where(pg.isEvent.eq(true))
+                        .fetchOne()
+        ).orElse(0L);
     }
 }
