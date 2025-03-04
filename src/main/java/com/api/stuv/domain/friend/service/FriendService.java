@@ -40,7 +40,7 @@ public class FriendService {
             if (status.equals(FriendStatus.PENDING)) throw new DuplicateException(ErrorCode.FRIEND_REQUEST_ALREADY_EXIST);
             else if (status.equals(FriendStatus.ACCEPTED)) throw new DuplicateException(ErrorCode.FRIEND_REQUEST_ALREADY_ACCEPTED);
 
-        alertService.createAlert(receiverId, null, AlertType.FOLLOW, sender.getNickname());
+        alertService.createAlert(receiverId, null, AlertType.FOLLOW, null, sender.getNickname());
         return FriendFollowResponse.from(friendRepository.save(Friend.init(userId, receiverId)));
     }
 
