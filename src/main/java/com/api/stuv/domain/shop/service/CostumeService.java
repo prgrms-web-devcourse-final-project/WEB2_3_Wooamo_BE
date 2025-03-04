@@ -7,9 +7,10 @@ import com.api.stuv.domain.image.entity.ImageFile;
 import com.api.stuv.domain.image.exception.ImageFileNotFound;
 import com.api.stuv.domain.image.repository.ImageFileRepository;
 import com.api.stuv.domain.image.service.S3ImageService;
-import com.api.stuv.domain.shop.dto.CostumePurchaseRequest;
-import com.api.stuv.domain.shop.dto.CostumeRandomResponse;
-import com.api.stuv.domain.shop.dto.CostumeResponse;
+import com.api.stuv.domain.shop.dto.costume.CostumeDTO;
+import com.api.stuv.domain.shop.dto.costume.CostumePurchaseRequest;
+import com.api.stuv.domain.shop.dto.costume.CostumeRandomResponse;
+import com.api.stuv.domain.shop.dto.costume.CostumeResponse;
 import com.api.stuv.domain.shop.entity.Costume;
 import com.api.stuv.domain.shop.exception.CostumeAlreadyException;
 import com.api.stuv.domain.shop.exception.CostumeNotPurchaseException;
@@ -25,6 +26,7 @@ import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
 import com.api.stuv.global.response.PageResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,12 +49,25 @@ public class CostumeService {
 
     @Transactional(readOnly = true)
     public PageResponse<CostumeResponse> getCostumeList(Pageable pageable) {
-        return costumeRepository.getCostumeList(pageable);
+        PageResponse<CostumeDTO> responsePage = costumeRepository.getCostumeList(pageable);
+        List<CostumeResponse> costumeResponses = responsePage.getContents().stream()
+                .map(response -> new CostumeResponse(
+                        response.costumeId(),
+                        s3ImageService.generateImageFile(EntityType.COSTUME, response.costumeId(), response.imageName()),
+                        response.costumeName(),
+                        response.point()
+                )).toList();
+        return PageResponse.of(new PageImpl<>(costumeResponses, pageable, responsePage.getTotalElements()));
     }
 
     @Transactional(readOnly = true)
     public CostumeResponse getCostume(Long costumeId) {
-        return costumeRepository.getCostume(costumeId);
+        CostumeDTO response = costumeRepository.getCostume(costumeId).orElseThrow(CostumeNotFound::new);
+        return new CostumeResponse(
+                null,
+                s3ImageService.generateImageFile(EntityType.COSTUME, costumeId, response.imageName()),
+                response.costumeName(),
+                response.point());
     }
 
     @Transactional

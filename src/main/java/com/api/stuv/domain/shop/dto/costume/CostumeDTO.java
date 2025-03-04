@@ -1,13 +1,13 @@
-package com.api.stuv.domain.shop.dto;
+package com.api.stuv.domain.shop.dto.costume;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.math.BigDecimal;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record CostumeResponse(
+public record CostumeDTO(
         Long costumeId,
-        String image,
+        String imageName,
         String costumeName,
         BigDecimal point
 ) {}
