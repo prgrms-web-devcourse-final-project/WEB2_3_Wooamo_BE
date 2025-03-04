@@ -2,7 +2,6 @@ package com.api.stuv.domain.friend.service;
 
 import com.api.stuv.domain.alert.entity.AlertType;
 import com.api.stuv.domain.alert.service.AlertService;
-import com.api.stuv.domain.friend.dto.response.FriendFollowListResponse;
 import com.api.stuv.domain.friend.dto.response.FriendFollowResponse;
 import com.api.stuv.domain.friend.dto.response.FriendResponse;
 import com.api.stuv.domain.friend.entity.Friend;
@@ -59,20 +58,30 @@ public class FriendService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<FriendFollowListResponse> getFriendFollowList(Long userId, Pageable pageable) {
-        List<FriendFollowListResponse> frinedList = friendRepository.getFriendFollowList(userId, pageable).stream().map( dto -> new FriendFollowListResponse(
+    public PageResponse<FriendResponse> getFriendFollowList(Long userId, Pageable pageable) {
+        List<FriendResponse> frinedList = friendRepository.getFriendFollowList(userId, pageable).stream().map( dto -> new FriendResponse(
                 dto.friendId(),
+                null,
                 dto.userId(),
-                s3ImageService.generateImageFile(EntityType.COSTUME, dto.costumeId(), dto.newFilename()),
                 dto.nickname(),
-                dto.context())).toList();
-        Long totalPage = friendRepository.getTotalFriendFollowListPage(userId);
-        return PageResponse.applyPage(frinedList, pageable, totalPage);
+                dto.context(),
+                s3ImageService.generateImageFile(EntityType.COSTUME, dto.costumeId(), dto.newFilename()),
+                null)).toList();
+        return PageResponse.applyPage(frinedList, pageable, friendRepository.getTotalFriendFollowListPage(userId));
     }
 
+    // TODO: 데이터 처리 서비스 단으로 분리
     @Transactional(readOnly = true)
     public PageResponse<FriendResponse> getFriendList(Long userId, Pageable pageable) {
-        return friendRepository.getFriendList(userId, pageable, "http://localhost:8080/api/v1/costume/");
+        List<FriendResponse> frinedList = friendRepository.getFriendList(userId, pageable).stream().map( dto -> new FriendResponse(
+                dto.friendId(),
+                dto.userId(),
+                null,
+                dto.nickname(),
+                dto.context(),
+                s3ImageService.generateImageFile(EntityType.COSTUME, dto.costumeId(), dto.newFilename()),
+                null)).toList();
+        return PageResponse.applyPage(frinedList, pageable, friendRepository.getTotalFriendListPage(userId));
     }
 
     @Transactional
@@ -83,11 +92,13 @@ public class FriendService {
         friendRepository.delete(friend);
     }
 
+    // TODO: 데이터 처리 서비스 단으로 분리
     @Transactional(readOnly = true)
     public PageResponse<FriendResponse> searchUser(Long userId, String target, Pageable pageable) {
         return friendRepository.searchUser(userId, target, pageable);
     }
 
+    // TODO: 데이터 처리 서비스 단으로 분리
     @Transactional(readOnly = true)
     public List<FriendResponse> randomRecommendFriend(Long userId) {
         return friendRepository.recommendFriend(userId);

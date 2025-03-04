@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface FriendRepositoryCustom {
     List<FriendListDTO> getFriendFollowList(Long receiverId, Pageable pageable);
-    PageResponse<FriendResponse> getFriendList(Long receiverId, Pageable pageable, String imageUrl);
+    List<FriendListDTO> getFriendList(Long receiverId, Pageable pageable);
     PageResponse<FriendResponse> searchUser(Long userId, String target, Pageable pageable);
     List<FriendResponse> recommendFriend(Long userId);
     Long getTotalFriendFollowListPage(Long receiverId);

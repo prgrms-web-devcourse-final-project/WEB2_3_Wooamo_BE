@@ -52,29 +52,35 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
     public Long getTotalFriendFollowListPage(Long receiverId) {
         return jpaQueryFactory
                 .select(f.count())
-                .from(f).join(u).on(f.userId.eq(u.id))
+                .from(f)
                 .where(f.friendId.eq(receiverId).and(f.status.eq(FriendStatus.PENDING)))
                 .fetchOne();
     }
 
     @Override
-    public PageResponse<FriendResponse> getFriendList(Long userId, Pageable pageable, String imageUrl) {
-        List<FriendResponse> response = jpaQueryFactory
-                .select(f.id, u.id, u.nickname, u.context, uc.costumeId, i.newFilename)
-                .from(f).join(u).on(f.userId.eq(userId).and(f.friendId.eq(u.id))
-                        .or(f.friendId.eq(userId).and(f.userId.eq(u.id))))
+    public List<FriendListDTO> getFriendList(Long userId, Pageable pageable) {
+        return jpaQueryFactory
+                .select(Projections.constructor(FriendListDTO.class,
+                        f.id,
+                        u.id,
+                        u.nickname,
+                        u.context,
+                        uc.costumeId,
+                        i.newFilename))
+                .from(f).join(u).on(f.userId.eq(userId).and(f.friendId.eq(u.id)).or(f.friendId.eq(userId).and(f.userId.eq(u.id))))
                 .leftJoin(uc).on(u.costumeId.eq(uc.id))
                 .leftJoin(i).on(uc.costumeId.eq(i.entityId).and(i.entityType.eq(EntityType.COSTUME)))
                 .where(f.status.eq(FriendStatus.ACCEPTED))
-                .offset(pageable.getOffset()).limit(pageable.getPageSize()).fetch()
-                .stream().map( tuple -> new FriendResponse(
-                        tuple.get(f.id),
-                        tuple.get(u.id),
-                        tuple.get(u.nickname),
-                        tuple.get(u.context),
-                        s3ImageService.generateImageFile(EntityType.COSTUME, tuple.get(uc.costumeId), tuple.get(i.newFilename)),
-                        null)).toList();
-        return PageResponse.of(new PageImpl<>(response, pageable, getTotalFriendListPage(userId)));
+                .offset(pageable.getOffset()).limit(pageable.getPageSize()).fetch();
+    }
+
+    @Override
+    public Long getTotalFriendListPage(Long userId) {
+        return jpaQueryFactory
+                .select(f.count())
+                .from(f)
+                .where((f.userId.eq(userId).or(f.friendId.eq(userId))).and(f.status.eq(FriendStatus.ACCEPTED)))
+                .fetchOne();
     }
 
     @Override
@@ -94,7 +100,7 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
                                 .when(f.friendId.eq(userId).and(f.status.eq(FriendStatus.PENDING))).then(FriendFollowStatus.OTHER.toString())
                                 .otherwise(FriendFollowStatus.NONE.toString()))
                 .from(u)
-                .leftJoin(f).on((f.userId.eq(userId).and(f.friendId.eq(u.id))).or(f.friendId.eq(userId).and(f.userId.eq(u.id))))
+                .leftJoin(f).on(f.userId.eq(userId).and(f.friendId.eq(u.id)).or(f.friendId.eq(userId).and(f.userId.eq(u.id))))
                 .leftJoin(uc).on(u.costumeId.eq(uc.id))
                 .leftJoin(i).on(uc.costumeId.eq(i.entityId))
                 .where(u.id.ne(userId)
@@ -104,6 +110,7 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
                 .fetch().stream().map(tuple -> new FriendResponse(
                         null,
                         tuple.get(u.id),
+                        null,
                         tuple.get(u.nickname),
                         tuple.get(u.context),
                         s3ImageService.generateImageFile(EntityType.COSTUME, tuple.get(uc.costumeId), tuple.get(i.newFilename)),
@@ -125,6 +132,7 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
                 .fetch().stream().map(tuple -> new FriendResponse(
                         null,
                         tuple.get(u.id),
+                        null,
                         tuple.get(u.nickname),
                         tuple.get(u.context),
                         s3ImageService.generateImageFile(EntityType.COSTUME, tuple.get(uc.costumeId), tuple.get(i.newFilename)),
@@ -139,10 +147,6 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
                 .fetch();
         friendIds.add(userId);
         return friendIds;
-    }
-
-    public Long getTotalFriendListPage(Long userId) {
-        return jpaQueryFactory.select(f.count()).from(f).where((f.userId.eq(userId).or(f.friendId.eq(userId))).and(f.status.eq(FriendStatus.ACCEPTED))).fetchOne();
     }
 
     private Long getTotalSearchUserPage(Long userId, String target, JPQLQuery<Long> subQuery) {
