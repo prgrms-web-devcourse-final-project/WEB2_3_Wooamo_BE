@@ -4,8 +4,11 @@ import com.api.stuv.domain.admin.dto.MemberDetailDTO;
 import com.api.stuv.domain.admin.dto.request.ConfirmRequest;
 import com.api.stuv.domain.admin.dto.request.CostumeRequest;
 import com.api.stuv.domain.admin.dto.response.AdminPartyAuthDetailResponse;
+import com.api.stuv.domain.admin.dto.response.PointSalesResponse;
+import com.api.stuv.domain.admin.dto.response.WeeklyInfoResponse;
 import com.api.stuv.domain.admin.exception.CostumeNotFound;
 import com.api.stuv.domain.admin.exception.InvalidPointFormat;
+import com.api.stuv.domain.image.dto.ImageDTO;
 import com.api.stuv.domain.image.dto.ImageResponse;
 import com.api.stuv.domain.image.entity.EntityType;
 import com.api.stuv.domain.image.entity.ImageFile;
@@ -23,6 +26,9 @@ import com.api.stuv.domain.party.repository.member.GroupMemberRepository;
 import com.api.stuv.domain.party.repository.party.PartyGroupRepository;
 import com.api.stuv.domain.shop.entity.Costume;
 import com.api.stuv.domain.shop.repository.CostumeRepository;
+import com.api.stuv.domain.shop.repository.PaymentRepository;
+import com.api.stuv.domain.user.repository.PointHistoryRepository;
+import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.DateOutOfRangeException;
 import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
@@ -35,7 +41,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
 @Service
@@ -49,6 +58,9 @@ public class AdminService {
     private final PartyGroupRepository partyGroupRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final QuestConfirmRepository questConfirmRepository;
+    private final UserRepository userRepository;
+    private final PointHistoryRepository historyRepository;
+    private final PaymentRepository paymentRepository;
 
     @Transactional
     public void createCostume(CostumeRequest request, MultipartFile file) {
@@ -96,7 +108,7 @@ public class AdminService {
         Tuple tp = questConfirmRepository.findGroupMemberConfirmImageByDate(partyId, memberId, date);
         if (tp == null) throw new NotFoundException(ErrorCode.CONFIRM_NOT_FOUND);
 
-        return new ImageResponse(s3ImageService.generateImageFile(EntityType.CONFIRM, tp.get(1, Long.class), tp.get(2, String.class)));
+        return new ImageResponse(s3ImageService.generateImageFile(EntityType.CONFIRM, tp.get(0, Long.class), tp.get(1, String.class)));
     }
 
     @Transactional
@@ -118,5 +130,26 @@ public class AdminService {
         if (groupMemberRepository.isMemberNotProgressByGroupId(partyId)) {
             partyGroupRepository.updatePartyStatusForPartyGroup(partyId, PartyStatus.APPROVED);
         }
+    }
+
+    public WeeklyInfoResponse weeklyInfo() {
+        LocalDateTime startOfWeek = LocalDate.now()
+                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+                .atStartOfDay();
+
+        LocalDateTime endOfWeek = LocalDate.now()
+                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+                .with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
+                .atTime(23, 59, 59);
+
+        Long users = userRepository.countNewUserByWeekend(startOfWeek, endOfWeek);
+        ImageDTO imageDTO = costumeRepository.findCostumeByBestSales();
+        BigDecimal point = historyRepository.sumWeekendSalesPoint(startOfWeek, endOfWeek);
+
+        return new WeeklyInfoResponse(users, s3ImageService.generateImageFile(EntityType.COSTUME, imageDTO.entityId(), imageDTO.image()), point);
+    }
+
+    public List<PointSalesResponse> getPointSalesList() {
+        return paymentRepository.findPointSalesList();
     }
 }

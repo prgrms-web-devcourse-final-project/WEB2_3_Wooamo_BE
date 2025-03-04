@@ -49,5 +49,9 @@ public class ReissueService {
         if (!"refresh".equals(jwtUtil.getCategory(refreshToken))) {
             throw new IllegalArgumentException("Invalid refresh token category");
         }
+
+        if(!redisService.exists(refreshToken)) {
+            throw new IllegalArgumentException("Invalid refresh token");
+        }
     }
 }

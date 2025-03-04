@@ -21,7 +21,9 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 public class UserRepositoryImpl implements UserRepositoryCustom{
@@ -196,4 +198,14 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
         );
     }
 
+    @Override
+    public Long countNewUserByWeekend(LocalDateTime startDate, LocalDateTime endDate) {
+        return Optional.ofNullable(jpaQueryFactory
+                .select(
+                        u.id.count()
+                ).from(u)
+                .where(u.createdAt.between(startDate, endDate))
+                .fetchOne())
+                .orElse(0L);
+    }
 }
