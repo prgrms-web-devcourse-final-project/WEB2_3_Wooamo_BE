@@ -50,7 +50,7 @@ public class ReissueService {
             throw new IllegalArgumentException("Invalid refresh token category");
         }
 
-        if(!redisService.exist(refreshToken)) {
+        if(!redisService.exists(refreshToken)) {
             throw new IllegalArgumentException("Invalid refresh token");
         }
     }
