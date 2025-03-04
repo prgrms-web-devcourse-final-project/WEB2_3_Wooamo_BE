@@ -27,21 +27,6 @@ public class ChatRoomDetailService {
     private final UserRepository userRepository;
     private final S3ImageService s3ImageService;
 
-    // 삭제
-    public List<String> getRoomIdsBySenderId(Long senderId) {
-        List<ChatRoom> chatRooms = chatRoomRepository.findByMembersContaining(senderId);
-
-        if (chatRooms.isEmpty()) {
-            throw new NotFoundException(ErrorCode.CHAT_ROOM_NOT_FOUND);
-        }
-
-        return chatRooms
-                .stream()
-                .map(ChatRoom::getRoomId)
-                .distinct()
-                .collect(Collectors.toList());
-    }
-
     public List<ChatRoomResponse> getSortedRoomListBySenderId(Long senderId) {
         List<ChatRoom> chatRooms = chatRoomRepository.findByMembersContaining(senderId);
 
