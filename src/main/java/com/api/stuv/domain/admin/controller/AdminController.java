@@ -3,6 +3,7 @@ package com.api.stuv.domain.admin.controller;
 import com.api.stuv.domain.admin.dto.request.ConfirmRequest;
 import com.api.stuv.domain.admin.dto.request.CostumeRequest;
 import com.api.stuv.domain.admin.dto.response.AdminPartyAuthDetailResponse;
+import com.api.stuv.domain.admin.dto.response.PointSalesResponse;
 import com.api.stuv.domain.admin.dto.response.WeeklyInfoResponse;
 import com.api.stuv.domain.image.dto.ImageResponse;
 import com.api.stuv.domain.admin.service.AdminService;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -37,6 +39,15 @@ public class AdminController {
         return ResponseEntity.ok()
                 .body(ApiResponse.success(
                         adminService.weeklyInfo()
+                ));
+    }
+
+    @GetMapping("/payment")
+    @Operation(summary = "최근 매출 내역 조회 API", description = "최근 5개 까지의 매출 내역을 조회할 수 있습니다.")
+    public ResponseEntity<ApiResponse<List<PointSalesResponse>>> getAdminPointSales() {
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(
+                        adminService.getPointSalesList()
                 ));
     }
 
