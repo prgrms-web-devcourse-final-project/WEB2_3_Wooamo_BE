@@ -1,9 +1,6 @@
 package com.api.stuv.domain.socket.repository;
 
 import com.api.stuv.domain.socket.entity.ChatRoom;
-import jakarta.transaction.Transactional;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

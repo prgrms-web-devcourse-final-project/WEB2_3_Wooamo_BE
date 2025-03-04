@@ -1,11 +1,8 @@
 package com.api.stuv.domain.socket.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.PrePersist;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -18,7 +15,6 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 @Builder
 @Document(collection = "chat_message")
 public class ChatMessage {

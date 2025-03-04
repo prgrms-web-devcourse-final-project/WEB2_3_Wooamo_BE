@@ -3,6 +3,7 @@ package com.api.stuv.domain.socket.service;
 import com.api.stuv.domain.socket.dto.ChatMessageRequest;
 import com.api.stuv.domain.socket.dto.ChatMessageResponse;
 import com.api.stuv.domain.socket.dto.ReadByResponse;
+import com.api.stuv.domain.socket.dto.UserInfo;
 import com.api.stuv.domain.socket.entity.ChatMessage;
 import com.api.stuv.domain.socket.repository.ChatMessageRepository;
 import com.api.stuv.domain.socket.repository.ChatRoomRepository;
@@ -26,7 +27,7 @@ public class ChatMessageService {
     private final ChatRoomMemberService chatRoomMemberService; // 총 멤버 정보를 관리하는 서비스
 
     //메세지 불러오기
-    public List<ChatMessageResponse> getMessagesByRoomIdPagination(String roomId, Pageable pageable) {
+    public List<ChatMessageResponse> getMessagesByRoomId(String roomId, Pageable pageable) {
 
         List<ChatMessageResponse> messages = chatMessageRepository
                 .findByRoomIdOrderByCreatedAtDesc(roomId, pageable)
@@ -34,11 +35,12 @@ public class ChatMessageService {
                 .stream()
                 .map(chatMessage -> {
                     int unreadCount = chatRoomMemberService.getRoomMemberCount(chatMessage.getRoomId()) - chatMessage.getReadBy().size();
+                    UserInfo userInfo = chatRoomMemberService.getUserInfo(chatMessage.getSenderId());
 
                     return new ChatMessageResponse(
                             chatMessage.getId(),
                             chatMessage.getRoomId(),
-                            chatMessage.getSenderId(),
+                            userInfo,
                             chatMessage.getMessage(),
                             unreadCount
                     );
@@ -52,14 +54,15 @@ public class ChatMessageService {
 
     // 메시지 저장
     @Transactional
-    public ChatMessageResponse  saveMessage(ChatMessageRequest request) {
+    public ChatMessageResponse saveMessage(ChatMessageRequest request) {
         chatRoomRepository.findByRoomId(request.roomId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+        UserInfo userInfo = chatRoomMemberService.getUserInfo(request.userInfo().userId());
 
         ChatMessage savedMessage = chatMessageRepository.save(
                 ChatMessage.builder()
                         .roomId(request.roomId())
-                        .senderId(request.senderId())
+                        .senderId(request.userInfo().userId())
                         .message(request.message())
                         .readBy(request.readBy())
                         .createdAt(LocalDateTime.now())
@@ -67,13 +70,13 @@ public class ChatMessageService {
         );
 
         // 기본적으로 DB에 저장된 readByCount (읽은 인원 수)
-        ChatMessageResponse response = ChatMessageResponse.from(savedMessage);
-        int unreadCount = chatRoomMemberService.getRoomMemberCount(request.roomId()) - response.readByCount();
+        int unreadCount = chatRoomMemberService.getRoomMemberCount(request.roomId()) - savedMessage.getReadBy().size();
+
         return new ChatMessageResponse(
-                response.chatId(),
-                response.roomId(),
-                response.senderId(),
-                response.message(),
+                savedMessage.getId(),
+                savedMessage.getRoomId(),
+                userInfo,
+                savedMessage.getMessage(),
                 unreadCount
         );
     }

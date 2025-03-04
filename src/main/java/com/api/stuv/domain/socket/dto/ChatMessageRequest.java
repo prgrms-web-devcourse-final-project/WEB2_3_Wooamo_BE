@@ -4,7 +4,7 @@ import java.util.List;
 
 public record ChatMessageRequest(
         String roomId,
-        Long senderId,
+        UserInfo userInfo,
         String message,
         List<Long> readBy
 ) {}
