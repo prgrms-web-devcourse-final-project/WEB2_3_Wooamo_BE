@@ -80,22 +80,6 @@ public class CostumeRepositoryImpl implements CostumeRepositoryCustom {
 
     @Override
     public ImageDTO findCostumeByBestSales() {
-        jpaQueryFactory
-                .select(Projections.constructor(
-                        ImageDTO.class,
-                        qCostume.id,
-                        qImageFile.newFilename
-                ))
-                .from(qCostume)
-                .leftJoin(uc).on(qCostume.id.eq(uc.costumeId))
-                .leftJoin(qImageFile).on(qCostume.id.eq(qImageFile.entityId)
-                        .and(qImageFile.entityType.eq(EntityType.COSTUME)))
-                .where(qCostume.id.ne(1L))
-                .groupBy(qCostume.id, qImageFile.newFilename)
-                .orderBy(uc.count().desc())
-                .fetch()
-                .forEach(System.out::println);
-
         return jpaQueryFactory
                 .select(Projections.constructor(
                         ImageDTO.class,

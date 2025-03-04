@@ -4,6 +4,7 @@ import com.api.stuv.domain.admin.dto.MemberDetailDTO;
 import com.api.stuv.domain.admin.dto.request.ConfirmRequest;
 import com.api.stuv.domain.admin.dto.request.CostumeRequest;
 import com.api.stuv.domain.admin.dto.response.AdminPartyAuthDetailResponse;
+import com.api.stuv.domain.admin.dto.response.PointSalesResponse;
 import com.api.stuv.domain.admin.dto.response.WeeklyInfoResponse;
 import com.api.stuv.domain.admin.exception.CostumeNotFound;
 import com.api.stuv.domain.admin.exception.InvalidPointFormat;
@@ -25,6 +26,7 @@ import com.api.stuv.domain.party.repository.member.GroupMemberRepository;
 import com.api.stuv.domain.party.repository.party.PartyGroupRepository;
 import com.api.stuv.domain.shop.entity.Costume;
 import com.api.stuv.domain.shop.repository.CostumeRepository;
+import com.api.stuv.domain.shop.repository.PaymentRepository;
 import com.api.stuv.domain.user.repository.PointHistoryRepository;
 import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.DateOutOfRangeException;
@@ -58,6 +60,7 @@ public class AdminService {
     private final QuestConfirmRepository questConfirmRepository;
     private final UserRepository userRepository;
     private final PointHistoryRepository historyRepository;
+    private final PaymentRepository paymentRepository;
 
     @Transactional
     public void createCostume(CostumeRequest request, MultipartFile file) {
@@ -144,5 +147,9 @@ public class AdminService {
         BigDecimal point = historyRepository.sumWeekendSalesPoint(startOfWeek, endOfWeek);
 
         return new WeeklyInfoResponse(users, s3ImageService.generateImageFile(EntityType.COSTUME, imageDTO.entityId(), imageDTO.image()), point);
+    }
+
+    public List<PointSalesResponse> getPointSalesList() {
+        return paymentRepository.findPointSalesList();
     }
 }
