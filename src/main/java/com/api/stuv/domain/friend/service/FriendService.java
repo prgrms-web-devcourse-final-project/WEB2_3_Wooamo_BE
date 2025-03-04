@@ -70,7 +70,6 @@ public class FriendService {
         return PageResponse.applyPage(frinedList, pageable, friendRepository.getTotalFriendFollowListPage(userId));
     }
 
-    // TODO: 데이터 처리 서비스 단으로 분리
     @Transactional(readOnly = true)
     public PageResponse<FriendResponse> getFriendList(Long userId, Pageable pageable) {
         List<FriendResponse> frinedList = friendRepository.getFriendList(userId, pageable).stream().map( dto -> new FriendResponse(
@@ -92,10 +91,17 @@ public class FriendService {
         friendRepository.delete(friend);
     }
 
-    // TODO: 데이터 처리 서비스 단으로 분리
     @Transactional(readOnly = true)
     public PageResponse<FriendResponse> searchUser(Long userId, String target, Pageable pageable) {
-        return friendRepository.searchUser(userId, target, pageable);
+        List<FriendResponse> userList = friendRepository.searchUser(userId, target, pageable).stream().map(dto -> new FriendResponse(
+                null,
+                dto.userId(),
+                null,
+                dto.nickname(),
+                dto.context(),
+                s3ImageService.generateImageFile(EntityType.COSTUME, dto.costumeId(), dto.newFilename()),
+                dto.status())).toList();
+        return PageResponse.applyPage(userList, pageable, friendRepository.getTotalSearchUserPage(userId, target));
     }
 
     // TODO: 데이터 처리 서비스 단으로 분리

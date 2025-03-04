@@ -10,14 +10,12 @@ import com.api.stuv.domain.image.entity.QImageFile;
 import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.domain.user.entity.QUser;
 import com.api.stuv.domain.user.entity.QUserCostume;
-import com.api.stuv.global.response.PageResponse;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -40,7 +38,8 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
                         u.nickname,
                         u.context,
                         uc.costumeId,
-                        i.newFilename))
+                        i.newFilename,
+                        f.status.stringValue()))
                 .from(f).join(u).on(f.userId.eq(u.id))
                 .leftJoin(uc).on(u.costumeId.eq(uc.id))
                 .leftJoin(i).on(uc.costumeId.eq(i.entityId).and(i.entityType.eq(EntityType.COSTUME)))
@@ -66,7 +65,8 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
                         u.nickname,
                         u.context,
                         uc.costumeId,
-                        i.newFilename))
+                        i.newFilename,
+                        f.status.stringValue()))
                 .from(f).join(u).on(f.userId.eq(userId).and(f.friendId.eq(u.id)).or(f.friendId.eq(userId).and(f.userId.eq(u.id))))
                 .leftJoin(uc).on(u.costumeId.eq(uc.id))
                 .leftJoin(i).on(uc.costumeId.eq(i.entityId).and(i.entityType.eq(EntityType.COSTUME)))
@@ -84,13 +84,15 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
     }
 
     @Override
-    public PageResponse<FriendResponse> searchUser(Long userId, String target, Pageable pageable) {
+    public List<FriendListDTO> searchUser(Long userId, String target, Pageable pageable) {
         JPQLQuery<Long> subQuery = JPAExpressions
                 .select(f.userId.when(userId).then(f.friendId).otherwise(f.userId))
                 .from(f).where(f.userId.eq(userId).or(f.friendId.eq(userId)).and(f.status.eq(FriendStatus.ACCEPTED)));
 
-        List<FriendResponse> response = jpaQueryFactory
-                .select(u.id,
+        return jpaQueryFactory
+                .select(Projections.constructor(FriendListDTO.class,
+                        f.id,
+                        u.id,
                         u.nickname,
                         u.context,
                         uc.costumeId,
@@ -98,7 +100,7 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
                         Expressions.cases()
                                 .when(f.userId.eq(userId).and(f.status.eq(FriendStatus.PENDING))).then(FriendFollowStatus.ME.toString())
                                 .when(f.friendId.eq(userId).and(f.status.eq(FriendStatus.PENDING))).then(FriendFollowStatus.OTHER.toString())
-                                .otherwise(FriendFollowStatus.NONE.toString()))
+                                .otherwise(FriendFollowStatus.NONE.toString())))
                 .from(u)
                 .leftJoin(f).on(f.userId.eq(userId).and(f.friendId.eq(u.id)).or(f.friendId.eq(userId).and(f.userId.eq(u.id))))
                 .leftJoin(uc).on(u.costumeId.eq(uc.id))
@@ -106,17 +108,19 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
                 .where(u.id.ne(userId)
                         .and(u.nickname.contains(target).or(u.context.contains(target))))
                 .where(u.id.notIn(subQuery))
-                .offset(pageable.getOffset()).limit(pageable.getPageSize())
-                .fetch().stream().map(tuple -> new FriendResponse(
-                        null,
-                        tuple.get(u.id),
-                        null,
-                        tuple.get(u.nickname),
-                        tuple.get(u.context),
-                        s3ImageService.generateImageFile(EntityType.COSTUME, tuple.get(uc.costumeId), tuple.get(i.newFilename)),
-                        tuple.get(5, String.class))).toList();
+                .offset(pageable.getOffset()).limit(pageable.getPageSize()).fetch();
+    }
 
-        return PageResponse.of(new PageImpl<>(response, pageable, getTotalSearchUserPage(userId, target, subQuery)));
+    @Override
+    public Long getTotalSearchUserPage(Long userId, String target) {
+        JPQLQuery<Long> subQuery = JPAExpressions
+                .select(f.userId.when(userId).then(f.friendId).otherwise(f.userId))
+                .from(f).where(f.userId.eq(userId).or(f.friendId.eq(userId)).and(f.status.eq(FriendStatus.ACCEPTED)));
+
+        return jpaQueryFactory.select(u.count()).from(u)
+                .where(u.id.ne(userId).and(u.nickname.contains(target).or(u.context.contains(target))))
+                .where(u.id.notIn(subQuery))
+                .fetchOne();
     }
 
     @Override
@@ -147,12 +151,5 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
                 .fetch();
         friendIds.add(userId);
         return friendIds;
-    }
-
-    private Long getTotalSearchUserPage(Long userId, String target, JPQLQuery<Long> subQuery) {
-        return jpaQueryFactory.select(u.count()).from(u)
-                .where(u.id.ne(userId).and(u.nickname.contains(target).or(u.context.contains(target))))
-                .where(u.id.notIn(subQuery))
-                .fetchOne();
     }
 }
