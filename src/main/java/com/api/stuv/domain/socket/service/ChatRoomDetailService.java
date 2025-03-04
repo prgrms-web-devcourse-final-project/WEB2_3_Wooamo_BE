@@ -1,17 +1,18 @@
 package com.api.stuv.domain.socket.service;
 
+import com.api.stuv.domain.image.entity.EntityType;
+import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.domain.party.repository.party.PartyGroupRepository;
 import com.api.stuv.domain.socket.dto.ChatRoomResponse;
 import com.api.stuv.domain.socket.entity.ChatMessage;
 import com.api.stuv.domain.socket.entity.ChatRoom;
 import com.api.stuv.domain.socket.repository.ChatMessageRepository;
 import com.api.stuv.domain.socket.repository.ChatRoomRepository;
+import com.api.stuv.domain.user.dto.ImageUrlDTO;
 import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -25,6 +26,7 @@ public class ChatRoomDetailService {
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
     private final PartyGroupRepository partyGroupRepository;
+    private final S3ImageService s3ImageService;
 
 
     public List<ChatRoomResponse> getSortedRoomListBySenderId(Long senderId) {
@@ -38,9 +40,10 @@ public class ChatRoomDetailService {
                 .map(room -> {
                     ChatMessage latestMessage = chatMessageRepository.findTopByRoomIdOrderByCreatedAtDesc(room.getRoomId());
                     int unreadCount = chatMessageRepository.countUnreadMessages(room.getRoomId(), senderId);
+                    ImageUrlDTO response = userRepository.getCostumeInfoByUserId(latestMessage.getSenderId());
 
                     String profile = ("PRIVATE".equals(room.getRoomType()) && latestMessage != null)
-                            ? userRepository.getCostumeInfoByUserId(latestMessage.getSenderId())
+                            ? s3ImageService.generateImageFile(EntityType.COSTUME, response.entityId(), response.newFileName())
                             : null;
 
                     return ChatRoomResponse.from(room, latestMessage, profile, unreadCount);
