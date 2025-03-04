@@ -1,6 +1,7 @@
 package com.api.stuv.domain.party.repository.member;
 
 import com.api.stuv.domain.admin.dto.MemberDetailDTO;
+import com.api.stuv.domain.admin.dto.response.MemberDetailResponse;
 import com.api.stuv.domain.friend.entity.FriendStatus;
 import com.api.stuv.domain.friend.entity.QFriend;
 import com.api.stuv.domain.image.entity.EntityType;
@@ -13,12 +14,10 @@ import com.api.stuv.domain.party.entity.QuestStatus;
 import com.api.stuv.domain.user.entity.QUser;
 import com.api.stuv.domain.user.entity.QUserCostume;
 import com.api.stuv.domain.user.entity.UserStatus;
-import com.api.stuv.global.response.PageResponse;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
@@ -30,7 +29,6 @@ import java.util.Optional;
 public class GroupMemberRepositoryImpl implements GroupMemberRepositoryCustom {
 
     private final JPAQueryFactory factory;
-    private final S3ImageService s3ImageService;
     private final QGroupMember gm = QGroupMember.groupMember;
     private final QQuestConfirm qc = QQuestConfirm.questConfirm;
     private final QUser u = QUser.user;
@@ -40,13 +38,14 @@ public class GroupMemberRepositoryImpl implements GroupMemberRepositoryCustom {
 
     @Override
     public List<MemberDetailDTO> findMemberListWithConfirmedByDate(Long partyId, LocalDate date) {
-        return factory.select(
+        return factory.select(Projections.constructor(
+                        MemberDetailDTO.class,
                         gm.id,
                         u.nickname,
                         qc.confirmStatus,
                         i.newFilename,
                         uc.costumeId
-                )
+                ))
                 .from(gm)
                 .leftJoin(u).on(gm.userId.eq(u.id))
                 .leftJoin(uc).on(u.costumeId.eq(uc.id))
@@ -54,15 +53,8 @@ public class GroupMemberRepositoryImpl implements GroupMemberRepositoryCustom {
                         .and(i.entityType.eq(EntityType.COSTUME)))
                 .leftJoin(qc).on(gm.id.eq(qc.memberId))
                 .where(gm.groupId.eq(partyId)
-                        .and(qc.isNotNull().and(qc.confirmDate.eq(date))))
-                .fetch()
-                .stream()
-                .map(tp -> new MemberDetailDTO(
-                        tp.get(gm.id),
-                        s3ImageService.generateImageFile(EntityType.COSTUME, tp.get(uc.costumeId), tp.get(i.newFilename)),
-                        tp.get(u.nickname),
-                        tp.get(qc.confirmStatus.stringValue())
-                )).toList();
+                        .and(qc.confirmDate.eq(date)))
+                .fetch();
     }
 
     @Override
