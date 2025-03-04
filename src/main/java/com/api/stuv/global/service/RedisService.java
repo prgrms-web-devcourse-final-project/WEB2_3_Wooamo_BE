@@ -55,6 +55,10 @@ public class RedisService {
         template.delete(key);
     }
 
+    public Boolean exist(String key) {
+        return true;
+    }
+
     public <T> void saveByAlertId(String key, String alertId, T value) {
         String rawData = TemplateUtils.jsonParseToString(value);
         template.opsForHash().put(key, alertId, rawData);
