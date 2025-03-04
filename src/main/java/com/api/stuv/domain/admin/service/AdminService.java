@@ -108,7 +108,7 @@ public class AdminService {
         Tuple tp = questConfirmRepository.findGroupMemberConfirmImageByDate(partyId, memberId, date);
         if (tp == null) throw new NotFoundException(ErrorCode.CONFIRM_NOT_FOUND);
 
-        return new ImageResponse(s3ImageService.generateImageFile(EntityType.CONFIRM, tp.get(1, Long.class), tp.get(2, String.class)));
+        return new ImageResponse(s3ImageService.generateImageFile(EntityType.CONFIRM, tp.get(0, Long.class), tp.get(1, String.class)));
     }
 
     @Transactional
