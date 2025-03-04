@@ -105,14 +105,12 @@ public class BoardService {
         commentRepository.delete(comment);
     }
 
-    // TODO : 이후 이미지 다운로드 기능 추가해 주세요!
     @Transactional(readOnly = true)
     public PageResponse<CommentResponse> getCommentList(Long boardId, Pageable pageable) {
         if ( !boardRepository.existsById(boardId) ) throw new NotFoundException(ErrorCode.BOARD_NOT_FOUND);
         return commentRepository.getCommentList(boardId, pageable);
     }
 
-    // TODO: 이후 알림 기능 추가
     @Transactional
     public void createComment(Long userId, Long boardId, String content) {
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
@@ -121,7 +119,6 @@ public class BoardService {
         commentRepository.save(Comment.create(boardId, userId, content));
     }
 
-    // TODO: 이후 알림 기능 추가
     @Transactional
     public void confirmComment(Long userId, Long commentId) {
         final int CONFIRM_COMMENT_POINT = 5;
