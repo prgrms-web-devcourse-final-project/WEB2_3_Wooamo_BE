@@ -1,6 +1,6 @@
 package com.api.stuv.domain.admin.service;
 
-import com.api.stuv.domain.admin.dto.MemberDetailDTO;
+import com.api.stuv.domain.admin.dto.response.MemberDetailResponse;
 import com.api.stuv.domain.admin.dto.request.ConfirmRequest;
 import com.api.stuv.domain.admin.dto.request.CostumeRequest;
 import com.api.stuv.domain.admin.dto.request.EventPartyRequest;
@@ -63,17 +63,23 @@ public class AdminService {
 
     @Transactional
     public void createCostume(CostumeRequest request, MultipartFile file) {
-        if(file == null || file.isEmpty()) {throw new ImageFileNotFound();}
-        if(request.point().compareTo(BigDecimal.ZERO) < 0) {throw new InvalidPointFormat();}
+        if (file == null || file.isEmpty()) {
+            throw new ImageFileNotFound();
+        }
+        if (request.point().compareTo(BigDecimal.ZERO) < 0) {
+            throw new InvalidPointFormat();
+        }
         Costume costume = Costume.createCostumeContents(request.costumeName(), request.point());
         costumeRepository.save(costume);
         imageService.handleImage(costume.getId(), file, EntityType.COSTUME);
     }
 
     @Transactional
-    public void modifyCostume(long costumeId, CostumeRequest request){
+    public void modifyCostume(long costumeId, CostumeRequest request) {
         Costume costume = costumeRepository.findById(costumeId).orElseThrow(CostumeNotFound::new);
-        if(request.point().compareTo(BigDecimal.ZERO) < 0) {throw new InvalidPointFormat();}
+        if (request.point().compareTo(BigDecimal.ZERO) < 0) {
+            throw new InvalidPointFormat();
+        }
         costume.modifyCostumeContents(request.costumeName(), request.point());
         costumeRepository.save(costume);
     }
@@ -94,16 +100,26 @@ public class AdminService {
         AdminPartyAuthDetailResponse response = partyGroupRepository.findPartyGroupById(partyId);
         if (response == null) throw new NotFoundException(ErrorCode.PARTY_NOT_FOUND);
         if (date == null) date = response.startDate();
-        if (date.isBefore(response.startDate()) || date.isAfter(response.endDate())) throw new DateOutOfRangeException(ErrorCode.PARTY_INVALID_DATE);
+        if (date.isBefore(response.startDate()) || date.isAfter(response.endDate()))
+            throw new DateOutOfRangeException(ErrorCode.PARTY_INVALID_DATE);
 
-        List<MemberDetailDTO> members = groupMemberRepository.findMemberListWithConfirmedByDate(partyId, date);
-
-        return AdminPartyAuthDetailResponse.from(response, members);
+        return AdminPartyAuthDetailResponse.from(
+                response,
+                groupMemberRepository.findMemberListWithConfirmedByDate(partyId, date)
+                        .stream()
+                        .map(dto -> new MemberDetailResponse(
+                                dto.memberId(),
+                                s3ImageService.generateImageFile(EntityType.COSTUME, dto.costumeId(), dto.filename()),
+                                dto.nickname(),
+                                dto.status().toString()
+                        )).toList()
+        );
     }
 
     public ImageResponse getGroupMemberConfirmImageByDate(Long partyId, Long memberId, LocalDate date) {
         PartyGroup partyGroup = partyGroupRepository.findById(partyId).orElseThrow(() -> new NotFoundException(ErrorCode.PARTY_NOT_FOUND));
-        if (date.isBefore(partyGroup.getStartDate()) || date.isAfter(partyGroup.getEndDate())) throw new DateOutOfRangeException(ErrorCode.PARTY_INVALID_DATE);
+        if (date.isBefore(partyGroup.getStartDate()) || date.isAfter(partyGroup.getEndDate()))
+            throw new DateOutOfRangeException(ErrorCode.PARTY_INVALID_DATE);
         Tuple tp = questConfirmRepository.findGroupMemberConfirmImageByDate(partyId, memberId, date);
         if (tp == null) throw new NotFoundException(ErrorCode.CONFIRM_NOT_FOUND);
 
@@ -114,9 +130,11 @@ public class AdminService {
     public void changeGroupMemberConfirmedStatusByDate(Long partyId, Long memberId, ConfirmRequest request) {
         PartyGroup party = partyGroupRepository.findById(partyId).orElseThrow(() -> new NotFoundException(ErrorCode.PARTY_NOT_FOUND));
 
-        if (request.date().isBefore(party.getStartDate()) || request.date().isAfter(party.getEndDate())) throw new DateOutOfRangeException(ErrorCode.PARTY_INVALID_DATE);
+        if (request.date().isBefore(party.getStartDate()) || request.date().isAfter(party.getEndDate()))
+            throw new DateOutOfRangeException(ErrorCode.PARTY_INVALID_DATE);
 
-        if (questConfirmRepository.findGroupMemberConfirmImageByDate(partyId, memberId, request.date()) == null) throw new NotFoundException(ErrorCode.CONFIRM_NOT_FOUND);
+        if (questConfirmRepository.findGroupMemberConfirmImageByDate(partyId, memberId, request.date()) == null)
+            throw new NotFoundException(ErrorCode.CONFIRM_NOT_FOUND);
 
         ConfirmStatus confirmStatus = request.auth() ? ConfirmStatus.SUCCESS : ConfirmStatus.FAIL;
         questConfirmRepository.updateConfirmStatusByDate(memberId, confirmStatus, request.date());
