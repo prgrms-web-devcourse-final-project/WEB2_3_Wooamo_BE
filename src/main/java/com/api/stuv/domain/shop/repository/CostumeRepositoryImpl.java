@@ -3,7 +3,6 @@ package com.api.stuv.domain.shop.repository;
 import com.api.stuv.domain.image.dto.ImageDTO;
 import com.api.stuv.domain.image.entity.EntityType;
 import com.api.stuv.domain.image.entity.QImageFile;
-import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.domain.shop.entity.QCostume;
 import com.api.stuv.domain.user.entity.QUserCostume;
 import com.api.stuv.domain.shop.dto.costume.CostumeDTO;
