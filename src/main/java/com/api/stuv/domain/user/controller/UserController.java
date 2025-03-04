@@ -63,10 +63,9 @@ public class UserController {
     }
 
     @Operation(summary = "카카오 로그인 API", description = "카카오 로그인 API 입니다.")
-    @GetMapping("/kakaoLogin")
-    private ResponseEntity<ApiResponse<String>> kakaoLogin(@RequestParam("code") String code, HttpServletResponse response, HttpServletRequest request) throws IOException {
+    @GetMapping("/kakaoLogin/{code}")
+    private ResponseEntity<ApiResponse<String>> kakaoLogin(@PathVariable("code") String code, HttpServletResponse response, HttpServletRequest request) throws IOException {
 //        response.sendRedirect(url + "/"); TODO: 개발 완료되면 해당 코드로 변경
-        response.sendRedirect("http://localhost:3000/");
         return ResponseEntity.ok()
                 .body(ApiResponse.success(kakaoService.kakaoLogin(code, response, request)));
     }
@@ -99,10 +98,6 @@ public class UserController {
     @Operation(summary = "프로필 수정 API", description = "자기소개와 링크를 수정합니다.")
     @PutMapping
     private ResponseEntity<ApiResponse<ModifyProfileResponse>> modifyProfile(@RequestBody @Valid ModifyProfileRequest modifyProfileRequest){
-        System.out.println(modifyProfileRequest.context());
-        System.out.println(modifyProfileRequest.link());
-
-        userService.modifyProfile(modifyProfileRequest);
         return ResponseEntity.ok()
                 .body(ApiResponse.success(userService.modifyProfile(modifyProfileRequest)));
     }
@@ -110,7 +105,6 @@ public class UserController {
     @Operation(summary = "투두리스트 추가 API", description = "오늘의 투두 리스트를 추가합니다.")
     @PostMapping("/todo")
     private ResponseEntity<ApiResponse<AddTodoResponse>> addTodoList(@RequestBody @Valid AddTodoRequest addTodoRequest){
-        System.out.println(addTodoRequest.todo());
 
         return ResponseEntity.ok()
                 .body(ApiResponse.success(todoService.addTodoList(addTodoRequest)));
