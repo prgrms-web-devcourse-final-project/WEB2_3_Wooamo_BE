@@ -7,10 +7,7 @@ import com.api.stuv.domain.image.entity.ImageFile;
 import com.api.stuv.domain.image.repository.ImageFileRepository;
 import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.domain.timer.repository.StudyTimeRepository;
-import com.api.stuv.domain.user.dto.GetCostumeDTO;
-import com.api.stuv.domain.user.dto.MyInformationDTO;
-import com.api.stuv.domain.user.dto.UserBoardListDTO;
-import com.api.stuv.domain.user.dto.UserInformationDTO;
+import com.api.stuv.domain.user.dto.*;
 import com.api.stuv.domain.user.dto.request.*;
 import com.api.stuv.domain.user.dto.response.*;
 import com.api.stuv.domain.user.entity.*;
@@ -269,20 +266,20 @@ public class UserService {
         }
     }
 
-    public List<GetCostume> getUserCostume() {
+    public List<ImageUrlDTO> getUserCostume() {
         Long userId = tokenUtil.getUserId();
         if(userId == null){
             throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
         }
 
-        List<GetCostumeDTO> responses  = userRepository.getUserCostume(userId);
+        List<ImageUrlDTO> responses  = userRepository.getUserCostume(userId);
         if(responses.isEmpty()) { throw new NotFoundException(ErrorCode.USER_NOT_FOUND); }
         return responses.stream()
-                .map(costumeList -> new GetCostume(
-                        costumeList.costumeId(),
+                .map(costumeList -> new ImageUrlDTO(
+                        costumeList.entityId(),
                         costumeList.newFileName() == null ? null : s3ImageService.generateImageFile(
                                 EntityType.COSTUME,
-                                costumeList.costumeId(),
+                                costumeList.entityId(),
                                 costumeList.newFileName()
                         )
                 )).toList();

@@ -11,7 +11,7 @@ public interface UserRepositoryCustom {
     UserInformationDTO getUserInformation(Long userId, Long myId, Long friends);
     MyInformationDTO getUserByMyId(@Param("myId") Long myId, @Param("friends") Long friends);
     List<UserBoardListDTO> getUserBoardList(@Param("userId") Long userId);
-    List<GetCostumeDTO> getUserCostume(@Param("userId") Long userId);
+    List<ImageUrlDTO> getUserCostume(@Param("userId") Long userId);
     ImageUrlDTO getCostumeInfoByUserId(Long userId);
     List<UserProfileInfoDTO> findUserInfoByIds(List<Long> userIds);
     Long countNewUserByWeekend(LocalDateTime startDate, LocalDateTime endDate);

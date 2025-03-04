@@ -103,9 +103,9 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
     }
 
     @Override
-    public List<GetCostumeDTO> getUserCostume(Long userId) {
+    public List<ImageUrlDTO> getUserCostume(Long userId) {
         return jpaQueryFactory
-                .select(Projections.constructor(GetCostumeDTO.class,
+                .select(Projections.constructor(ImageUrlDTO.class,
                                 userCostume.costumeId,
                                 imageFile.newFilename))
                 .from(userCostume)
