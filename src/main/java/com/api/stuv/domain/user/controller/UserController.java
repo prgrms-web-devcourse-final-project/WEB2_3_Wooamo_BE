@@ -65,7 +65,6 @@ public class UserController {
     @Operation(summary = "카카오 로그인 API", description = "카카오 로그인 API 입니다.")
     @GetMapping("/kakaoLogin/{code}")
     private ResponseEntity<ApiResponse<String>> kakaoLogin(@PathVariable("code") String code, HttpServletResponse response, HttpServletRequest request) throws IOException {
-//        response.sendRedirect(url + "/"); TODO: 개발 완료되면 해당 코드로 변경
         return ResponseEntity.ok()
                 .body(ApiResponse.success(kakaoService.kakaoLogin(code, response, request)));
     }
