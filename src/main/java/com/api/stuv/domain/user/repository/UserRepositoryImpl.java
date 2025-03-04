@@ -156,9 +156,9 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
     public Long countNewUserByWeekend(LocalDateTime startDate, LocalDateTime endDate) {
         return Optional.ofNullable(jpaQueryFactory
                 .select(
-                        u.id.count()
-                ).from(u)
-                .where(u.createdAt.between(startDate, endDate))
+                        user.id.count()
+                ).from(user)
+                .where(user.createdAt.between(startDate, endDate))
                 .fetchOne())
                 .orElse(0L);
     }
