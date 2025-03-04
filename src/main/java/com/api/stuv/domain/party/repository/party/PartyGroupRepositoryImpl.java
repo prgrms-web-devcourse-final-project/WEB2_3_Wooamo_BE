@@ -152,6 +152,7 @@ public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
                                 PartyDetailResponse.class,
                                 pg.id,
                                 pg.name,
+                                pg.context,
                                 pg.recruitCap,
                                 gm.id.count(),
                                 pg.startDate,

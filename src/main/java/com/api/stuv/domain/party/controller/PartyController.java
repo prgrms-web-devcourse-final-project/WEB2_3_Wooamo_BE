@@ -12,8 +12,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -104,6 +106,18 @@ public class PartyController {
                         partyService.getPartyMemberList(partyId, tokenUtil.getUserId(), PageRequest.of(page, size))
                 ));
     }
+
+    @PostMapping(value = "/{partyId}/verify", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "팟 일일 인증 API", description = "회원이 팟의 목표에 대한 일일 인증을 등록할 수 있습니다.")
+    public ResponseEntity<ApiResponse<Void>> verifyParty(
+            @PathVariable Long partyId,
+            @RequestPart MultipartFile image
+    ) {
+        partyService.dailyVerifyParty(tokenUtil.getUserId(), partyId, image);
+        return ResponseEntity.ok()
+                .body(ApiResponse.success());
+    }
+
 }
 
 

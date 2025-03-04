@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface GroupMemberRepositoryCustom {
     List<MemberDetailDTO> findMemberListWithConfirmedByDate(Long partyId, LocalDate date);
@@ -17,4 +18,5 @@ public interface GroupMemberRepositoryCustom {
     Long countSuccessGroupMembers(Long partyId);
     Long countAllGroupMembers(Long partyId);
     List<MemberDTO> findMemberList(Long partyId, Long userId, Pageable pageable);
+    Optional<Long> findIdByGroupIdAndUserId(Long groupId, Long userId);
 }

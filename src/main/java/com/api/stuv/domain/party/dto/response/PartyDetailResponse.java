@@ -6,6 +6,7 @@ import java.time.LocalDate;
 public record PartyDetailResponse(
         Long partyId,
         String name,
+        String context,
         Long recruitCap,
         Long recruitCnt,
         LocalDate startDate,
