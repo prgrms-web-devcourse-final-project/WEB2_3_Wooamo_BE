@@ -23,7 +23,7 @@ public class QuestConfirmRepositoryImpl implements QuestConfirmRepositoryCustom 
 
     @Override
     public Tuple findGroupMemberConfirmImageByDate(Long partyId, Long memberId, LocalDate date) {
-        return factory.select(qc.memberId, i.newFilename)
+        return factory.select(qc.id, i.newFilename)
                 .from(qc)
                 .join(gm).on(gm.id.eq(qc.memberId))
                 .join(i).on(qc.id.eq(i.entityId)

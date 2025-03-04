@@ -105,7 +105,7 @@ public class TimerScheduler {
                 continue;
             }
 
-            user.earnReward(rewardType);
+            user.updatePoint(rewardType.getValue());
 
             PointHistory rewardHistory = new PointHistory(
                     dto.userId(),

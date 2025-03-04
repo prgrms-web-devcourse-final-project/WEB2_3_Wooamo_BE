@@ -21,9 +21,9 @@ public class AlertService {
     private final RedisPublisher redisPublisher;
 
     // 알림 생성
-    public void createAlert(Long targetUserId, Long typeId, AlertType alertType, String nickname) {
+    public void createAlert(Long targetUserId, Long typeId, AlertType alertType, String title, String nickname) {
         String alertId = UUID.randomUUID().toString();
-        Alert alert = new Alert(alertId, typeId, alertType, nickname, false, LocalDateTime.now());
+        Alert alert = new Alert(alertId, typeId, alertType, title, nickname, false, LocalDateTime.now());
         System.out.println("alertResponse = " + alert);
         redisService.saveByAlertId(getKey(targetUserId), alertId, alert);
         redisPublisher.publish(targetUserId, alert);

@@ -1,4 +1,4 @@
-package com.api.stuv.domain.friend.dto;
+package com.api.stuv.domain.friend.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public record FriendResponse(
         Long friendId,
         Long userId,
+        Long senderId,
         String nickname,
         String context,
         String profile,

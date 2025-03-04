@@ -1,6 +1,12 @@
 package com.api.stuv.domain.shop.controller;
 
-import com.api.stuv.domain.shop.dto.*;
+import com.api.stuv.domain.shop.dto.costume.CostumePurchaseRequest;
+import com.api.stuv.domain.shop.dto.costume.CostumeRandomRequest;
+import com.api.stuv.domain.shop.dto.costume.CostumeRandomResponse;
+import com.api.stuv.domain.shop.dto.costume.CostumeResponse;
+import com.api.stuv.domain.shop.dto.payments.PaymentConfirmRequest;
+import com.api.stuv.domain.shop.dto.payments.PaymentRequest;
+import com.api.stuv.domain.shop.dto.payments.PaymentResponse;
 import com.api.stuv.domain.shop.service.CostumeService;
 import com.api.stuv.domain.shop.service.PaymentService;
 import com.api.stuv.global.response.ApiResponse;

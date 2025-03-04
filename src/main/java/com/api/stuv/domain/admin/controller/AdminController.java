@@ -2,10 +2,10 @@ package com.api.stuv.domain.admin.controller;
 
 import com.api.stuv.domain.admin.dto.request.ConfirmRequest;
 import com.api.stuv.domain.admin.dto.request.CostumeRequest;
-import com.api.stuv.domain.admin.dto.response.AdminPartyAuthDetailResponse;
+import com.api.stuv.domain.admin.dto.request.EventPartyRequest;
+import com.api.stuv.domain.admin.dto.response.*;
 import com.api.stuv.domain.image.dto.ImageResponse;
 import com.api.stuv.domain.admin.service.AdminService;
-import com.api.stuv.domain.admin.dto.response.AdminPartyGroupResponse;
 import com.api.stuv.global.exception.ValidationException;
 import com.api.stuv.global.response.ApiResponse;
 import com.api.stuv.global.response.PageResponse;
@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,6 +30,24 @@ import java.time.LocalDate;
 public class AdminController {
 
     private final AdminService adminService;
+
+    @GetMapping
+    @Operation(summary = "주간 서비스 이용 정보 조회 API", description = "주간 서비스 이용 정보를 볼 수 있습니다.")
+    public ResponseEntity<ApiResponse<WeeklyInfoResponse>> getAdminPartyGroups() {
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(
+                        adminService.weeklyInfo()
+                ));
+    }
+
+    @GetMapping(value = "/payment")
+    @Operation(summary = "최근 매출 내역 조회 API", description = "최근 5개 까지의 매출 내역을 조회할 수 있습니다.")
+    public ResponseEntity<ApiResponse<List<PointSalesResponse>>> getAdminPointSales() {
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(
+                        adminService.getPointSalesList()
+                ));
+    }
 
     @PostMapping(value = "/costume", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "코스튬 등록 API", description = "신규 코스튬을 등록합니다.")
@@ -99,4 +118,29 @@ public class AdminController {
 
         return ResponseEntity.ok().body(ApiResponse.success());
     }
+
+    @GetMapping(value = "/event")
+    @Operation(summary = "관리자 이벤트 배너 조회 API", description = "이벤트 배너의 목록을 조회할 수 있습니다.")
+    public ResponseEntity<ApiResponse<PageResponse<EventPartyResponse>>> eventListWithBanner (
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok()
+                .body(ApiResponse.success(
+                        adminService.getEventList(PageRequest.of(page, size))
+                ));
+    }
+
+    @PostMapping(value = "/event", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "관리자 이벤트 팟 등록 API", description = "이벤트 배너와 팟을 등록할 수 있습니다.")
+    public ResponseEntity<ApiResponse<Void>> createEventListWithBanner (
+            @RequestPart EventPartyRequest contents,
+            @RequestPart MultipartFile image
+            ) {
+        adminService.createEventParty(contents, image);
+        return ResponseEntity.ok()
+                .body(ApiResponse.success());
+    }
+
+
 }

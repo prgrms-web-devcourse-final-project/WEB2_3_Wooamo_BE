@@ -1,4 +1,4 @@
-package com.api.stuv.domain.shop.dto;
+package com.api.stuv.domain.shop.dto.costume;
 
 public record CostumeRandomResponse(
         String image,

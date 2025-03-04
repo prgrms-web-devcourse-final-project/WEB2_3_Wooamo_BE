@@ -1,6 +1,5 @@
-package com.api.stuv.domain.shop.dto;
+package com.api.stuv.domain.shop.dto.costume;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
