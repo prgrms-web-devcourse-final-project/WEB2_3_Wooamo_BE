@@ -9,5 +9,5 @@ public record FriendResponse(
         String nickname,
         String context,
         String profile,
-        String followFrom
+        String status
 ) {}
