@@ -54,8 +54,6 @@ public class UserService {
 
     public void registerUser(UserRequest userRequest) {
         String email = userRequest.email();
-        String password = userRequest.password();
-        String nickname = userRequest.nickname() != null? userRequest.nickname() : randomName.getRandomName();
 
         if(!redisService.find(email, String.class).equals("Verified") || redisService.find(email, String.class) == null){
             throw new BadRequestException(ErrorCode.NOT_VERIFICATION_EMAIL);
@@ -75,8 +73,6 @@ public class UserService {
 
     public void registerKakaoUser(KakaoUserRequest kakaoUserRequest) {
         String email = kakaoUserRequest.email();
-        String password = kakaoUserRequest.password();
-        String nickname = kakaoUserRequest.nickname();
         Long socialId = kakaoUserRequest.socialId();
 
         Boolean isExist = userRepository.existsByEmail(email);
