@@ -2,6 +2,7 @@ package com.api.stuv.domain.auth.jwt;
 
 import com.api.stuv.domain.auth.dto.CustomUserDetails;
 import com.api.stuv.domain.user.dto.request.LoginRequest;
+import com.api.stuv.domain.user.dto.response.LoginResponse;
 import com.api.stuv.global.exception.AccessDeniedException;
 import com.api.stuv.global.exception.BadRequestException;
 import com.api.stuv.global.exception.ErrorCode;
@@ -110,9 +111,10 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.setHeader("access", access);
         response.addCookie(createCookie("refresh", refresh));
 
+        LoginResponse loginResponse = new LoginResponse(role);
         response.setStatus(HttpStatus.OK.value());
         response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.success()));
+        response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.success(loginResponse)));
     }
 
     @Override
