@@ -43,8 +43,8 @@ public class ChatRoomDetailService {
 
                     String lastSenderNickname = (lastSenderId != null) ? userRepository.findNicknameByUserId(lastSenderId) : "";
 
-                    ImageUrlDTO response = userRepository.getCostumeInfoByUserId(latestMessage.getSenderId());
-                    String lastSenderProfile = (lastSenderId != null) ? s3ImageService.generateImageFile(EntityType.COSTUME, response.entityId(), response.newFileName()) : "";
+                    ImageUrlDTO response = (lastSenderId != null) ? userRepository.getCostumeInfoByUserId(lastSenderId) : null;
+                    String lastSenderProfile = (response != null) ? s3ImageService.generateImageFile(EntityType.COSTUME, response.entityId(), response.newFileName()) : null;
 
                     UserInfo lastUserInfo = new UserInfo(lastSenderId, lastSenderNickname, lastSenderProfile);
 

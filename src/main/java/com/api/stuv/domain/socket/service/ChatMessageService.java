@@ -46,8 +46,8 @@ public class ChatMessageService {
                         Long senderId = chatMessage.getSenderId();
                         String senderNickname = (senderId != null) ? userRepository.findNicknameByUserId(senderId) : "";
 
-                        ImageUrlDTO response = userRepository.getCostumeInfoByUserId(senderId);
-                        String senderProfile = (senderId != null) ? s3ImageService.generateImageFile(EntityType.COSTUME, response.entityId(), response.newFileName()) : "";
+                        ImageUrlDTO response = (senderId != null) ? userRepository.getCostumeInfoByUserId(senderId) : null;
+                        String senderProfile = (response != null) ? s3ImageService.generateImageFile(EntityType.COSTUME, response.entityId(), response.newFileName()) : null;
 
                         userInfo = new UserInfo(senderId, senderNickname, senderProfile);
                     }
