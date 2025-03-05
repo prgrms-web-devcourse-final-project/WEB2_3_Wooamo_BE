@@ -44,7 +44,8 @@ public class ChatRoomMemberService {
     // 특정 채팅방의 사용자 목록을 업데이트 (새로운 멤버 추가 시)
     public void updateRoomMembers(String roomId) {
         ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.CHAT_ROOM_NOT_FOUND));        List<Long> members = chatRoom.getMembers();
+                .orElseThrow(() -> new NotFoundException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+        List<Long> members = chatRoom.getMembers();
         roomSessions.put(roomId, new ArrayList<>(members));
     }
     // 읽음 처리 계산
@@ -81,7 +82,7 @@ public class ChatRoomMemberService {
 
         System.out.println("유저 세션: " + userSessions);
     }
-    // 사용자가 특정 방에서 나가면 userSessions에서 제거 (단, 다른 방에 남아 있다면 유지)
+    // 사용자가 특정 방에서 나가면 userSessions에서 제거
     public void userLeaveRoom(Long userId, String roomId) {
         Set<Long> members = userRoomSessions.get(roomId);
         if (members != null) {
@@ -106,7 +107,7 @@ public class ChatRoomMemberService {
         return userSessions.getOrDefault(userId, null);
     }
 
-    // 특정 채팅방의 사용자 목록 반환 (닉네임, 프로필 포함)
+    // 특정 채팅방의 사용자 목록 반환
     public List<UserInfo> getRoomMemberInfos(String roomId) {
         Set<Long> userIds = userRoomSessions.getOrDefault(roomId, Collections.emptySet());
 

@@ -26,7 +26,15 @@ public class ChatController {
     private final ChatRoomMemberService chatRoomMemberService;
     private final TokenUtil tokenUtil;
 
-    @Operation(summary = "채팅방 목록 리스트 API", description = "user가 포함된 채팅방 목록을 가져옵니다.")
+    @Operation(summary = "타이틀별 채팅방 목록 조회 API", description = "user가 포함된 채팅방을 타이틀별로 구분하여 정보를 가져옵니다.")
+    @GetMapping("/listInfoByTitle")
+    public ResponseEntity<ApiResponse<List<ChatRoomInfoResponse>>> getRoomInfoListBySenderId(
+    ) {
+        List<ChatRoomInfoResponse> roomList = chatRoomDetailService.getChatRoomInfoByUserId(tokenUtil.getUserId());
+        return ResponseEntity.ok(ApiResponse.success(roomList));
+    }
+
+    @Operation(summary = "채팅방 목록 조회 API", description = "user가 포함된 채팅방 목록을 가져옵니다.")
     @GetMapping("/list")
     public ResponseEntity<ApiResponse<List<ChatRoomResponse>>> getRoomListBySenderId() {
         List<ChatRoomResponse> roomList = chatRoomDetailService.getSortedRoomListBySenderId(tokenUtil.getUserId());

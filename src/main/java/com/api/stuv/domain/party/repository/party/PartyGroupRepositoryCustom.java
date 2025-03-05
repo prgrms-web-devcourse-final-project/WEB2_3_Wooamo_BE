@@ -26,4 +26,5 @@ public interface PartyGroupRepositoryCustom {
     Optional<MemberRewardStatusDTO> findCompleteParty(Long partyId, Long userId);
     List<EventPartyResponse> findEventPartyList(Pageable pageable);
     Long countEventParty();
+    Long findGroupIdByRoomName(String roomName);
 }
