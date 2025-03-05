@@ -112,7 +112,7 @@ public class AdminService {
                                 dto.memberId(),
                                 s3ImageService.generateImageFile(EntityType.COSTUME, dto.costumeId(), dto.filename()),
                                 dto.nickname(),
-                                dto.status().toString()
+                                dto.status() != null ? dto.status().toString() : "NOT_AUTH"
                         )).toList()
         );
     }
