@@ -1,7 +1,9 @@
 package com.api.stuv.domain.socket.dto;
 
 import com.api.stuv.domain.socket.entity.ChatMessage;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public record ChatMessageResponse(
@@ -9,7 +11,9 @@ public record ChatMessageResponse(
         String roomId,
         UserInfo userInfo,
         String message,
-        Integer readByCount
+        Integer readByCount,
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+        LocalDateTime createdAt
 ) {
     public static ChatMessageResponse from(ChatMessage chatMessage, UserInfo userInfo) {
         List<Long> readBy = chatMessage.getReadBy();
@@ -19,7 +23,8 @@ public record ChatMessageResponse(
                 chatMessage.getRoomId(),
                 userInfo,
                 chatMessage.getMessage(),
-                count
+                count,
+                chatMessage.getCreatedAt()
                 );
     }
 }

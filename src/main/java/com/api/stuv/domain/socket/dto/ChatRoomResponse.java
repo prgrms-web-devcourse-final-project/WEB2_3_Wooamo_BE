@@ -2,6 +2,7 @@ package com.api.stuv.domain.socket.dto;
 
 import com.api.stuv.domain.socket.entity.ChatMessage;
 import com.api.stuv.domain.socket.entity.ChatRoom;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDateTime;
 
@@ -10,6 +11,7 @@ public record ChatRoomResponse(
         String roomType,
         UserInfo lastUserInfo,
         String lastMessage,
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime createdAt,
         int unreadCount
 ) {
