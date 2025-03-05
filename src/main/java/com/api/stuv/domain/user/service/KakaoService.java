@@ -4,6 +4,8 @@ import com.api.stuv.domain.auth.jwt.JWTUtil;
 import com.api.stuv.domain.user.dto.request.KakaoCodeRequest;
 import com.api.stuv.domain.user.dto.request.KakaoUserRequest;
 import com.api.stuv.domain.user.dto.request.UserRequest;
+import com.api.stuv.domain.user.dto.response.LoginResponse;
+import com.api.stuv.domain.user.entity.RoleType;
 import com.api.stuv.domain.user.entity.User;
 import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.ErrorCode;
@@ -172,22 +174,22 @@ public class KakaoService {
 
     //카카오 로그인 구현
     //정보가 있으면 로그인, 없으면 회원가입
-    public String kakaoLogin(KakaoCodeRequest kakaoCodeRequest, HttpServletResponse response, HttpServletRequest request) {
+    public LoginResponse kakaoLogin(KakaoCodeRequest kakaoCodeRequest, HttpServletResponse response, HttpServletRequest request) {
         String accessToken = getKakaoAccessToken(kakaoCodeRequest.code());
         KakaoUserRequest kakaoUser = getKakaoUser(accessToken);
 
         User user = userRepository.findBySocialId(kakaoUser.socialId());
+        RoleType role = user.getRole();
 
         if(user != null){
             login(kakaoUser, response, request);
-            return "로그인되었습니다.";
+            return new LoginResponse(role.getText());
         }
         else{
             userService.registerKakaoUser(kakaoUser);
             login(kakaoUser, response, request);
-            return "회원가입후 로그인 완료되었습니다.";
+            return new LoginResponse(role.getText());
         }
-
     }
 
     private Cookie createCookie(String key, String value) {
