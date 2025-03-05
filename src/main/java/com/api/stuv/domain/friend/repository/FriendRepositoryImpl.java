@@ -96,7 +96,7 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
                 .from(user)
                 .leftJoin(friend).on((friend.userId.eq(userId).and(friend.friendId.eq(user.id))).or(friend.friendId.eq(userId).and(friend.userId.eq(user.id))))
                 .leftJoin(userCostume).on(user.costumeId.eq(userCostume.id))
-                .leftJoin(imageFile).on(userCostume.costumeId.eq(imageFile.entityId))
+                .leftJoin(imageFile).on(userCostume.costumeId.eq(imageFile.entityId).and(imageFile.entityType.eq(EntityType.COSTUME)))
                 .where(user.id.ne(userId).and((user.nickname.contains(target)).or(user.context.contains(target)))
                     .and(friend.id.isNull().or(friend.status.eq(FriendStatus.PENDING).and(friend.userId.eq(userId)))))
                 .offset(pageable.getOffset()).limit(pageable.getPageSize()).fetch();
