@@ -86,14 +86,14 @@ public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
                         pg.id,
                         pg.name,
                         pg.recruitCap,
-                        gm.id.count(),
+                        gm.id.count().coalesce(0L),
                         pg.startDate,
                         pg.endDate,
                         Expressions.cases()
                                 .when(pg.status.eq(PartyStatus.APPROVED)).then(PartyStatus.APPROVED.getText())
                                 .otherwise(PartyStatus.PENDING.getText())))
                 .from(pg)
-                .join(gm).on(pg.id.eq(gm.groupId))
+                .leftJoin(gm).on(pg.id.eq(gm.groupId))
                 .orderBy(pg.createdAt.desc())
                 .groupBy(pg.id, pg.name, pg.recruitCap, pg.startDate, pg.endDate, pg.status);
 
