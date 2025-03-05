@@ -51,9 +51,9 @@ public class GroupMemberRepositoryImpl implements GroupMemberRepositoryCustom {
                 .leftJoin(uc).on(u.costumeId.eq(uc.id))
                 .leftJoin(i).on(uc.costumeId.eq(i.entityId)
                         .and(i.entityType.eq(EntityType.COSTUME)))
-                .leftJoin(qc).on(gm.id.eq(qc.memberId))
-                .where(gm.groupId.eq(partyId)
+                .leftJoin(qc).on(gm.id.eq(qc.memberId)
                         .and(qc.confirmDate.eq(date)))
+                .where(gm.groupId.eq(partyId))
                 .fetch();
     }
 
