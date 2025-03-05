@@ -1,11 +1,14 @@
 package com.api.stuv.domain.socket.service;
 
+import com.api.stuv.domain.image.entity.EntityType;
+import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.domain.socket.dto.ChatRoomResponse;
 import com.api.stuv.domain.socket.dto.UserInfo;
 import com.api.stuv.domain.socket.entity.ChatMessage;
 import com.api.stuv.domain.socket.entity.ChatRoom;
 import com.api.stuv.domain.socket.repository.ChatMessageRepository;
 import com.api.stuv.domain.socket.repository.ChatRoomRepository;
+import com.api.stuv.domain.user.dto.ImageUrlDTO;
 import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
@@ -22,6 +25,7 @@ public class ChatRoomDetailService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
+    private final S3ImageService s3ImageService;
 
     public List<ChatRoomResponse> getSortedRoomListBySenderId(Long senderId) {
         List<ChatRoom> chatRooms = chatRoomRepository.findByMembersContaining(senderId);
@@ -38,7 +42,9 @@ public class ChatRoomDetailService {
                     Long lastSenderId = (latestMessage != null) ? latestMessage.getSenderId() : null;
 
                     String lastSenderNickname = (lastSenderId != null) ? userRepository.findNicknameByUserId(lastSenderId) : "";
-                    String lastSenderProfile = (lastSenderId != null) ? userRepository.getCostumeInfoByUserId(lastSenderId) : "";
+
+                    ImageUrlDTO response = userRepository.getCostumeInfoByUserId(latestMessage.getSenderId());
+                    String lastSenderProfile = (lastSenderId != null) ? s3ImageService.generateImageFile(EntityType.COSTUME, response.entityId(), response.newFileName()) : "";
 
                     UserInfo lastUserInfo = new UserInfo(lastSenderId, lastSenderNickname, lastSenderProfile);
 
