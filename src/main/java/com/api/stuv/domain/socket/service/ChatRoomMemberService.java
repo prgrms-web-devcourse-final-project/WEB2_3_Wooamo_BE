@@ -1,8 +1,11 @@
 package com.api.stuv.domain.socket.service;
 
+import com.api.stuv.domain.image.entity.EntityType;
+import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.domain.socket.dto.UserInfo;
 import com.api.stuv.domain.socket.entity.ChatRoom;
 import com.api.stuv.domain.socket.repository.ChatRoomRepository;
+import com.api.stuv.domain.user.dto.ImageUrlDTO;
 import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
@@ -27,6 +30,7 @@ public class ChatRoomMemberService {
 
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
+    private final S3ImageService s3ImageService;
 
     @PostConstruct
     public void init() {
@@ -67,7 +71,10 @@ public class ChatRoomMemberService {
         userRoomSessions.get(roomId).forEach(memberId -> {
             userSessions.computeIfAbsent(memberId, id -> {
                 String nickname = userRepository.findNicknameByUserId(id);
-                String profileUrl = userRepository.getCostumeInfoByUserId(id);
+
+                ImageUrlDTO response = userRepository.getCostumeInfoByUserId(id);
+                String profileUrl = s3ImageService.generateImageFile(EntityType.COSTUME, response.entityId(), response.newFileName());
+
                 return new UserInfo(id, nickname, profileUrl);
             });
         });

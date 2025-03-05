@@ -7,20 +7,23 @@ import com.api.stuv.domain.image.entity.ImageFile;
 import com.api.stuv.domain.image.repository.ImageFileRepository;
 import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.domain.timer.repository.StudyTimeRepository;
+import com.api.stuv.domain.user.dto.*;
 import com.api.stuv.domain.user.dto.request.*;
 import com.api.stuv.domain.user.dto.response.*;
 import com.api.stuv.domain.user.entity.*;
 import com.api.stuv.domain.user.repository.PointHistoryRepository;
 import com.api.stuv.domain.user.repository.UserCostumeRepository;
 import com.api.stuv.domain.user.repository.UserRepository;
-import com.api.stuv.global.exception.*;
+import com.api.stuv.global.exception.BadRequestException;
+import com.api.stuv.global.exception.DuplicateException;
+import com.api.stuv.global.exception.ErrorCode;
+import com.api.stuv.global.exception.NotFoundException;
 import com.api.stuv.global.service.RedisService;
 import com.api.stuv.global.util.email.RandomCode;
 import com.api.stuv.global.util.email.RandomName;
 import com.api.stuv.global.util.email.provider.EmailProvider;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.token.TokenService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +34,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 
 @Service
@@ -134,19 +136,41 @@ public class UserService {
         Long friends = friendRepository.getTotalFriendListPage(userId);
         if (friends == null) friends = 0L;
 
-        UserInformationResponse information = userRepository.getUserInformation(userId, myId, friends);
-
-        return information;
+        UserInformationDTO information = userRepository.getUserInformation(userId, myId, friends);
+        return new UserInformationResponse(
+                information.userId(),
+                information.context(),
+                information.link(),
+                information.nickname(),
+                information.newFilename() == null ? null : s3ImageService.generateImageFile(
+                        EntityType.COSTUME,
+                        information.costumeId(),
+                        information.newFilename()
+                ),
+                information.status(),
+                information.friends(),
+                information.friendId()
+        );
     }
 
     public MyInformationResponse getMyInformation(){
-        Long myId = tokenUtil.getUserId();
+        Long myId = 1L;
         Long friends = friendRepository.getTotalFriendListPage(myId);
         if (friends == null) friends = 0L;
-
-        MyInformationResponse information = userRepository.getUserByMyId(myId, friends);
-
-        return information;
+        MyInformationDTO information = userRepository.getUserByMyId(myId, friends);
+        return new MyInformationResponse(
+                information.userId(),
+                information.context(),
+                information.link(),
+                information.nickname(),
+                information.point(),
+                information.role(),
+                information.newFilename() == null ? null : s3ImageService.generateImageFile(
+                        EntityType.COSTUME,
+                        information.costumeId(),
+                        information.newFilename()),
+                information.friends()
+        );
     }
 
     @Transactional
@@ -161,14 +185,28 @@ public class UserService {
         userRepository.save(user);
 
         ModifyProfileResponse modifyProfileResponse = new ModifyProfileResponse(userId);
+
+
         return modifyProfileResponse;
     }
 
     public List<UserBoardListResponse> getUserBoardList(Long userId){
 
-        List<UserBoardListResponse> userBoardList = userRepository.getUserBoardList(userId);
+        List<UserBoardListDTO> responses = userRepository.getUserBoardList(userId);
 
-        return userBoardList;
+        return responses.stream()
+                .map(response -> new UserBoardListResponse(
+                        response.boardId(),
+                        response.title(),
+                        response.context(),
+                        response.boardType(),
+                        response.createdAt(),
+                        response.newFileName() == null ? null : s3ImageService.generateImageFile(
+                                EntityType.BOARD,
+                                response.boardId(),
+                                response.newFileName()
+                        )
+                )).toList();
     }
 
     public UserQuestStateResponse userQuestState(){
@@ -228,15 +266,23 @@ public class UserService {
         }
     }
 
-    public List<GetCostume> getUserCostume() {
+    public List<ImageUrlDTO> getUserCostume() {
         Long userId = tokenUtil.getUserId();
         if(userId == null){
             throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
         }
 
-        List<GetCostume> costumeList = userRepository.getUserCostume(userId);
-
-        return costumeList;
+        List<ImageUrlDTO> responses  = userRepository.getUserCostume(userId);
+        if(responses.isEmpty()) { throw new NotFoundException(ErrorCode.USER_NOT_FOUND); }
+        return responses.stream()
+                .map(costumeList -> new ImageUrlDTO(
+                        costumeList.entityId(),
+                        costumeList.newFileName() == null ? null : s3ImageService.generateImageFile(
+                                EntityType.COSTUME,
+                                costumeList.entityId(),
+                                costumeList.newFileName()
+                        )
+                )).toList();
     }
 
     @Transactional
