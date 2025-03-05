@@ -70,10 +70,10 @@ public class ChatRoomMemberService {
         // 방의 모든 사용자 정보 추가
         userRoomSessions.get(roomId).forEach(memberId -> {
             userSessions.computeIfAbsent(memberId, id -> {
-                String nickname = userRepository.findNicknameByUserId(id);
+                String nickname = (id != null) ? userRepository.findNicknameByUserId(id) : "";
 
-                ImageUrlDTO response = userRepository.getCostumeInfoByUserId(id);
-                String profileUrl = s3ImageService.generateImageFile(EntityType.COSTUME, response.entityId(), response.newFileName());
+                ImageUrlDTO response = (id != null) ? userRepository.getCostumeInfoByUserId(id) : null;
+                String profileUrl = (response != null) ? s3ImageService.generateImageFile(EntityType.COSTUME, response.entityId(), response.newFileName()) : null;
 
                 return new UserInfo(id, nickname, profileUrl);
             });
