@@ -2,7 +2,6 @@ package com.api.stuv.domain.friend.repository;
 
 import com.api.stuv.domain.friend.dto.dto.FriendListDTO;
 import com.api.stuv.domain.friend.dto.dto.FriendRecommendDTO;
-import com.api.stuv.domain.friend.entity.FriendFollowStatus;
 import com.api.stuv.domain.friend.entity.FriendStatus;
 import com.api.stuv.domain.image.entity.EntityType;
 import com.querydsl.core.types.Projections;
@@ -83,10 +82,6 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
     // 유저 검색 ( 친구 목록에 없는 유저 + 현재 PENDING 상태인 유저 )
     @Override
     public List<FriendListDTO> searchUser(Long userId, String target, Pageable pageable) {
-        JPQLQuery<Long> subQuery = JPAExpressions
-                .select(friend.userId.when(userId).then(friend.friendId).otherwise(friend.userId))
-                .from(friend).where(friend.userId.eq(userId).or(friend.friendId.eq(userId)).and(friend.status.eq(FriendStatus.ACCEPTED)));
-
         return jpaQueryFactory
                 .select(Projections.constructor(FriendListDTO.class,
                         friend.id,
@@ -96,28 +91,23 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
                         userCostume.costumeId,
                         imageFile.newFilename,
                         Expressions.cases()
-                                .when(friend.userId.eq(userId).and(friend.status.eq(FriendStatus.PENDING))).then(FriendFollowStatus.ME.toString())
-                                .when(friend.friendId.eq(userId).and(friend.status.eq(FriendStatus.PENDING))).then(FriendFollowStatus.OTHER.toString())
-                                .otherwise(FriendFollowStatus.NONE.toString())))
+                                .when(friend.userId.eq(userId)).then(FriendStatus.PENDING.toString())
+                                .otherwise(FriendStatus.NOT_FRIEND.toString())))
                 .from(user)
-                .leftJoin(friend).on(friend.userId.eq(userId).and(friend.friendId.eq(user.id)).or(friend.friendId.eq(userId).and(friend.userId.eq(user.id))))
+                .leftJoin(friend).on((friend.userId.eq(userId).and(friend.friendId.eq(user.id))).or(friend.friendId.eq(userId).and(friend.userId.eq(user.id))))
                 .leftJoin(userCostume).on(user.costumeId.eq(userCostume.id))
                 .leftJoin(imageFile).on(userCostume.costumeId.eq(imageFile.entityId))
-                .where(user.id.ne(userId)
-                        .and(user.nickname.contains(target).or(user.context.contains(target))))
-                .where(user.id.notIn(subQuery))
+                .where(user.id.ne(userId).and((user.nickname.contains(target)).or(user.context.contains(target)))
+                    .and(friend.id.isNull().or(friend.status.eq(FriendStatus.PENDING).and(friend.userId.eq(userId)))))
                 .offset(pageable.getOffset()).limit(pageable.getPageSize()).fetch();
     }
 
     @Override
     public Long getTotalSearchUserPage(Long userId, String target) {
-        JPQLQuery<Long> subQuery = JPAExpressions
-                .select(friend.userId.when(userId).then(friend.friendId).otherwise(friend.userId))
-                .from(friend).where(friend.userId.eq(userId).or(friend.friendId.eq(userId)).and(friend.status.eq(FriendStatus.ACCEPTED)));
-
         return jpaQueryFactory.select(user.count()).from(user)
-                .where(user.id.ne(userId).and(user.nickname.contains(target).or(user.context.contains(target))))
-                .where(user.id.notIn(subQuery))
+                .leftJoin(friend).on(friend.userId.eq(userId).and(friend.friendId.eq(user.id)).or(friend.friendId.eq(userId).and(friend.userId.eq(user.id))))
+                .where(user.id.ne(userId))
+                .where(friend.id.isNull().or(friend.status.eq(FriendStatus.PENDING).and(friend.userId.eq(userId))))
                 .fetchOne();
     }
 
@@ -127,7 +117,6 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
         JPQLQuery<Long> subQuery = JPAExpressions
                 .select(user.id)
                 .from(friend).join(user).on(friend.userId.eq(user.id).and(friend.friendId.eq(userId)).or(friend.friendId.eq(user.id).and(friend.userId.eq(userId))));
-
         return jpaQueryFactory
                 .select(Projections.constructor(FriendRecommendDTO.class,
                         user.id,
