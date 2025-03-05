@@ -1,5 +1,7 @@
 package com.api.stuv.domain.socket.service;
 
+import com.api.stuv.domain.image.entity.EntityType;
+import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.domain.socket.dto.ChatMessageRequest;
 import com.api.stuv.domain.socket.dto.ChatMessageResponse;
 import com.api.stuv.domain.socket.dto.ReadByResponse;
@@ -7,6 +9,8 @@ import com.api.stuv.domain.socket.dto.UserInfo;
 import com.api.stuv.domain.socket.entity.ChatMessage;
 import com.api.stuv.domain.socket.repository.ChatMessageRepository;
 import com.api.stuv.domain.socket.repository.ChatRoomRepository;
+import com.api.stuv.domain.user.dto.ImageUrlDTO;
+import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
 import jakarta.transaction.Transactional;
@@ -24,6 +28,8 @@ import java.util.stream.Collectors;
 public class ChatMessageService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final UserRepository userRepository;
+    private final S3ImageService s3ImageService;
     private final ChatRoomMemberService chatRoomMemberService; // 총 멤버 정보를 관리하는 서비스
 
     //메세지 불러오기
@@ -36,13 +42,23 @@ public class ChatMessageService {
                 .map(chatMessage -> {
                     int unreadCount = chatRoomMemberService.getRoomMemberCount(chatMessage.getRoomId()) - chatMessage.getReadBy().size();
                     UserInfo userInfo = chatRoomMemberService.getUserInfo(chatMessage.getSenderId());
+                    if (userInfo == null) {
+                        Long senderId = chatMessage.getSenderId();
+                        String senderNickname = (senderId != null) ? userRepository.findNicknameByUserId(senderId) : "";
+
+                        ImageUrlDTO response = (senderId != null) ? userRepository.getCostumeInfoByUserId(senderId) : null;
+                        String senderProfile = (response != null) ? s3ImageService.generateImageFile(EntityType.COSTUME, response.entityId(), response.newFileName()) : null;
+
+                        userInfo = new UserInfo(senderId, senderNickname, senderProfile);
+                    }
 
                     return new ChatMessageResponse(
                             chatMessage.getId(),
                             chatMessage.getRoomId(),
                             userInfo,
                             chatMessage.getMessage(),
-                            unreadCount
+                            unreadCount,
+                            chatMessage.getCreatedAt()
                     );
                 })
                 .collect(Collectors.toList());
@@ -77,7 +93,8 @@ public class ChatMessageService {
                 savedMessage.getRoomId(),
                 userInfo,
                 savedMessage.getMessage(),
-                unreadCount
+                unreadCount,
+                savedMessage.getCreatedAt()
         );
     }
 
