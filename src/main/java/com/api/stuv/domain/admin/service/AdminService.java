@@ -84,6 +84,7 @@ public class AdminService {
         costumeRepository.save(costume);
     }
 
+    @Transactional
     public void deleteCostume(Long costumeId) {
         Costume costume = costumeRepository.findById(costumeId).orElseThrow(CostumeNotFound::new);
         ImageFile imageFile = imageFileRepository.findByEntityIdAndEntityType(costumeId, EntityType.COSTUME).orElseThrow(ImageFileNotFound::new);
