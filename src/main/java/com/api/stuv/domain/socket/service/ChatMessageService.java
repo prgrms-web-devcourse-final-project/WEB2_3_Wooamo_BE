@@ -50,7 +50,8 @@ public class ChatMessageService {
                             chatMessage.getRoomId(),
                             userInfo,
                             chatMessage.getMessage(),
-                            unreadCount
+                            unreadCount,
+                            chatMessage.getCreatedAt()
                     );
                 })
                 .collect(Collectors.toList());
@@ -85,7 +86,8 @@ public class ChatMessageService {
                 savedMessage.getRoomId(),
                 userInfo,
                 savedMessage.getMessage(),
-                unreadCount
+                unreadCount,
+                savedMessage.getCreatedAt()
         );
     }
 
