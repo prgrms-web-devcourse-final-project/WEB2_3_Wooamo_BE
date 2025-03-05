@@ -1,6 +1,9 @@
 package com.api.stuv.domain.auth.service;
 
 import com.api.stuv.domain.auth.jwt.JWTUtil;
+import com.api.stuv.global.exception.ErrorCode;
+import com.api.stuv.global.exception.NotFoundException;
+import com.api.stuv.global.exception.ValidationException;
 import com.api.stuv.global.service.RedisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,19 +42,19 @@ public class ReissueService {
 
     private void validateRefreshToken(String refreshToken) {
         if (refreshToken == null) {
-            throw new IllegalArgumentException("Not exist refresh token"); // 커스텀 예외
+            throw new NotFoundException(ErrorCode.EMPTY_REFRESH_TOKEN); // 커스텀 예외
         }
 
         if (jwtUtil.isExpired(refreshToken)) {
-            throw new IllegalArgumentException("refresh token is expired"); // 커스텀 예외
+            throw new NotFoundException(ErrorCode.EXPIRED_REFRESH_TOKEN); // 커스텀 예외
         }
 
         if (!"refresh".equals(jwtUtil.getCategory(refreshToken))) {
-            throw new IllegalArgumentException("Invalid refresh token category");
+            throw new NotFoundException(ErrorCode.EMPTY_REFRESH_TOKEN);
         }
 
         if(!redisService.exists(refreshToken)) {
-            throw new IllegalArgumentException("Invalid refresh token");
+            throw new NotFoundException(ErrorCode.EMPTY_REFRESH_TOKEN);
         }
     }
 }

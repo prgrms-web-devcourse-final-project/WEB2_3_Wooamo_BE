@@ -8,6 +8,7 @@ import com.api.stuv.global.exception.NotFoundException;
 import com.api.stuv.global.util.common.TemplateUtils;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
@@ -87,7 +88,10 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
 
     @Override
     public List<UserBoardListDTO> getUserBoardList(Long userId) {
-
+        JPQLQuery<LocalDateTime> imageSubQuery = jpaQueryFactory
+                .select(imageFile.createdAt.min())
+                .from(imageFile)
+                .where(imageFile.entityId.eq(board.id).and(imageFile.entityType.eq(EntityType.BOARD)));
         return jpaQueryFactory
                 .select(Projections.constructor(UserBoardListDTO.class,
                                 board.id,
@@ -97,7 +101,8 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
                                 TemplateUtils.timeFormater(board.createdAt),
                                 imageFile.newFilename))
                 .from(board)
-                .leftJoin(imageFile).on(board.id.eq(imageFile.entityId).and(imageFile.entityType.eq(EntityType.BOARD)))
+                .leftJoin(imageFile)
+                .on(board.id.eq(imageFile.entityId).and(imageFile.entityType.eq(EntityType.BOARD).and(imageFile.createdAt.eq(imageSubQuery))))
                 .where(board.userId.eq(userId))
                 .fetch();
     }
