@@ -154,7 +154,7 @@ public class UserService {
     }
 
     public MyInformationResponse getMyInformation(){
-        Long myId = 1L;
+        Long myId = tokenUtil.getUserId();
         Long friends = friendRepository.getTotalFriendListPage(myId);
         if (friends == null) friends = 0L;
         MyInformationDTO information = userRepository.getUserByMyId(myId, friends);
