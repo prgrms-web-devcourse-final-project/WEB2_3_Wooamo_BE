@@ -65,7 +65,7 @@ public class UserController {
 
     @Operation(summary = "카카오 로그인 API", description = "카카오 로그인 API 입니다.")
     @PostMapping("/kakaoLogin")
-    private ResponseEntity<ApiResponse<String>> kakaoLogin(@RequestBody KakaoCodeRequest code, HttpServletResponse response, HttpServletRequest request) throws IOException {
+    private ResponseEntity<ApiResponse<LoginResponse>> kakaoLogin(@RequestBody KakaoCodeRequest code, HttpServletResponse response, HttpServletRequest request) throws IOException {
         return ResponseEntity.ok()
                 .body(ApiResponse.success(kakaoService.kakaoLogin(code, response, request)));
     }
