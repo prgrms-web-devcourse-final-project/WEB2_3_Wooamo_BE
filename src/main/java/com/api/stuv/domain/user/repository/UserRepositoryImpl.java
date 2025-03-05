@@ -1,18 +1,8 @@
 package com.api.stuv.domain.user.repository;
 
-import com.api.stuv.domain.board.entity.QBoard;
-import com.api.stuv.domain.friend.entity.QFriend;
 import com.api.stuv.domain.friend.repository.FriendRepository;
 import com.api.stuv.domain.image.entity.EntityType;
-import com.api.stuv.domain.image.entity.QImageFile;
-import com.api.stuv.domain.image.service.S3ImageService;
-import com.api.stuv.domain.user.dto.UserProfileInfoDTO;
-import com.api.stuv.domain.user.dto.response.GetCostume;
-import com.api.stuv.domain.user.dto.response.UserBoardListResponse;
-import com.api.stuv.domain.user.dto.response.UserInformationResponse;
-import com.api.stuv.domain.user.dto.response.MyInformationResponse;
-import com.api.stuv.domain.user.entity.QUser;
-import com.api.stuv.domain.user.entity.QUserCostume;
+import com.api.stuv.domain.user.dto.*;
 import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
 import com.api.stuv.global.util.common.TemplateUtils;
@@ -25,56 +15,52 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static com.api.stuv.domain.board.entity.QBoard.board;
+import static com.api.stuv.domain.friend.entity.QFriend.friend;
+import static com.api.stuv.domain.image.entity.QImageFile.imageFile;
+import static com.api.stuv.domain.user.entity.QUser.user;
+import static com.api.stuv.domain.user.entity.QUserCostume.userCostume;
+
 @RequiredArgsConstructor
 public class UserRepositoryImpl implements UserRepositoryCustom{
     private final JPAQueryFactory jpaQueryFactory;
-    private final S3ImageService s3ImageService;
     private final FriendRepository friendRepository;
-    private final QUser u = QUser.user;
-    private final QImageFile i = QImageFile.imageFile;
-    private final QFriend f = QFriend.friend;
-    private final QBoard b = QBoard.board;
-    private final QUserCostume uc = QUserCostume.userCostume;
-
 
     @Override
-    public MyInformationResponse getUserByMyId(Long myId, Long friends) {
+    public MyInformationDTO getUserByMyId(Long myId, Long friends) {
         Tuple informationDetails = jpaQueryFactory
-                .select(u.id, u.context, u.blogLink, u.nickname, u.point, u.role, i.newFilename, uc.costumeId)
-                .from(u)
-                .leftJoin(uc).on(u.costumeId.eq(uc.id))
-                .leftJoin(i).on(uc.costumeId.eq(i.entityId).and(i.entityType.eq(EntityType.COSTUME)))
-                .where(u.id.eq(myId))
+                .select(user.id, user.context, user.blogLink, user.nickname, user.point, user.role, imageFile.newFilename, userCostume.costumeId)
+                .from(user)
+                .leftJoin(userCostume).on(user.costumeId.eq(userCostume.id))
+                .leftJoin(imageFile).on(userCostume.costumeId.eq(imageFile.entityId).and(imageFile.entityType.eq(EntityType.COSTUME)))
+                .where(user.id.eq(myId))
                 .fetchOne();
 
-
-        return new MyInformationResponse(
-                informationDetails.get(u.id),
-                informationDetails.get(u.context),
-                informationDetails.get(u.blogLink),
-                informationDetails.get(u.nickname),
-                informationDetails.get(u.point),
-                informationDetails.get(u.role),
-                informationDetails.get(i.newFilename) == null ? null : s3ImageService.generateImageFile(
-                        EntityType.COSTUME,
-                        informationDetails.get(uc.costumeId),
-                        informationDetails.get(i.newFilename)),
+        return new MyInformationDTO(
+                informationDetails.get(user.id),
+                informationDetails.get(user.context),
+                informationDetails.get(user.blogLink),
+                informationDetails.get(user.nickname),
+                informationDetails.get(user.point),
+                informationDetails.get(user.role),
+                informationDetails.get(imageFile.newFilename),
+                informationDetails.get(userCostume.costumeId),
                 friends
         );
     }
 
 
     @Override
-   public UserInformationResponse getUserInformation(Long userId, Long myId, Long friends) {
+   public UserInformationDTO getUserInformation(Long userId, Long myId, Long friends) {
        Tuple informationDetails = jpaQueryFactory
-               .select(u.id, u.context, u.blogLink, u.nickname, f.status, f.id, u.costumeId, i.newFilename, uc.costumeId)
-               .from(u)
-               .leftJoin(f).on
-                       (f.userId.eq(userId).and(f.friendId.eq(myId))
-                       .or(f.friendId.eq(userId).and(f.userId.eq(myId))))
-               .leftJoin(uc).on(u.costumeId.eq(uc.id))
-               .leftJoin(i).on(uc.costumeId.eq(i.entityId).and(i.entityType.eq(EntityType.COSTUME)))
-               .where(u.id.eq(userId))
+               .select(user.id, user.context, user.blogLink, user.nickname, friend.status, friend.id, user.costumeId, imageFile.newFilename, userCostume.costumeId)
+               .from(user)
+               .leftJoin(friend).on
+                       (friend.userId.eq(userId).and(friend.friendId.eq(myId))
+                       .or(friend.friendId.eq(userId).and(friend.userId.eq(myId))))
+               .leftJoin(userCostume).on(user.costumeId.eq(userCostume.id))
+               .leftJoin(imageFile).on(userCostume.costumeId.eq(imageFile.entityId).and(imageFile.entityType.eq(EntityType.COSTUME)))
+               .where(user.id.eq(userId))
                .fetchOne();
 
        if(informationDetails == null) {
@@ -82,78 +68,50 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
        }
 
        String status = null;
-       if(informationDetails.get(f.status) != null) {
-           status = informationDetails.get(f.status).toString();
+       if(informationDetails.get(friend.status) != null) {
+           status = informationDetails.get(friend.status).toString();
        }
 
-       return new UserInformationResponse(
-               informationDetails.get(u.id),
-               informationDetails.get(u.context),
-               informationDetails.get(u.blogLink),
-               informationDetails.get(u.nickname),
-               informationDetails.get(i.newFilename) == null ? null : s3ImageService.generateImageFile(
-                       EntityType.COSTUME,
-                       informationDetails.get(uc.costumeId),
-                       informationDetails.get(i.newFilename)
-               ),
+       return new UserInformationDTO(
+               informationDetails.get(user.id),
+               informationDetails.get(user.context),
+               informationDetails.get(user.blogLink),
+               informationDetails.get(user.nickname),
+               informationDetails.get(imageFile.newFilename),
+               informationDetails.get(userCostume.costumeId),
                status,
                friends,
-               informationDetails.get(f.id)
+               informationDetails.get(friend.id)
        );
     }
 
     @Override
-    public List<UserBoardListResponse> getUserBoardList(Long userId) {
-        List<Tuple> results = jpaQueryFactory
-                .select(b.id, b.title, b.context, b.boardType, TemplateUtils.timeFormater(b.createdAt), i.newFilename)
-                .from(b)
-                .leftJoin(i).on(b.id.eq(i.entityId).and(i.entityType.eq(EntityType.BOARD)))
-                .where(b.userId.eq(userId))
+    public List<UserBoardListDTO> getUserBoardList(Long userId) {
+
+        return jpaQueryFactory
+                .select(Projections.constructor(UserBoardListDTO.class,
+                                board.id,
+                                board.title,
+                                board.context,
+                                board.boardType,
+                                TemplateUtils.timeFormater(board.createdAt),
+                                imageFile.newFilename))
+                .from(board)
+                .leftJoin(imageFile).on(board.id.eq(imageFile.entityId).and(imageFile.entityType.eq(EntityType.BOARD)))
+                .where(board.userId.eq(userId))
                 .fetch();
-
-        List<UserBoardListResponse> query = results.stream()
-                .map(tuple -> new UserBoardListResponse(
-                        tuple.get(b.id),
-                        tuple.get(b.title),
-                        tuple.get(b.context),
-                        tuple.get(b.boardType),
-                        tuple.get(TemplateUtils.timeFormater(b.createdAt)),
-                        s3ImageService.generateImageFile(
-                                EntityType.BOARD,
-                                tuple.get(b.id),
-                                tuple.get(i.newFilename)
-                        )
-                ))
-                .toList();
-
-        return query;
     }
 
     @Override
-    public List<GetCostume> getUserCostume(Long userId) {
-        List<Tuple> list = jpaQueryFactory
-                .select(uc.costumeId, i.newFilename)
-                .from(uc)
-                .leftJoin(i).on(i.entityType.eq(EntityType.COSTUME).and(i.entityId.eq(uc.costumeId)))
-                .where(uc.userId.eq(userId))
+    public List<ImageUrlDTO> getUserCostume(Long userId) {
+        return jpaQueryFactory
+                .select(Projections.constructor(ImageUrlDTO.class,
+                                userCostume.costumeId,
+                                imageFile.newFilename))
+                .from(userCostume)
+                .leftJoin(imageFile).on(imageFile.entityType.eq(EntityType.COSTUME).and(imageFile.entityId.eq(userCostume.costumeId)))
+                .where(userCostume.userId.eq(userId))
                 .fetch();
-
-        if(list.isEmpty()) {
-            throw new NotFoundException(ErrorCode.COSTUME_NOT_FOUND);
-        }
-
-        List<GetCostume> query = list.stream()
-                .map(tuple -> new GetCostume(
-                        tuple.get(uc.costumeId),
-                        s3ImageService.generateImageFile(
-                                EntityType.COSTUME,
-                                tuple.get(uc.costumeId),
-                                tuple.get(i.newFilename)
-                        )
-                ))
-                .toList();
-
-        return query;
     }
 
     @Override
@@ -161,50 +119,46 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
         return jpaQueryFactory
                 .select(Projections.constructor(
                         UserProfileInfoDTO.class,
-                        u.id,
-                        u.nickname,
-                        i.newFilename,
-                        i.entityId
+                        user.id,
+                        user.nickname,
+                        imageFile.newFilename,
+                        imageFile.entityId
                 ))
-                .from(u)
-                .leftJoin(uc).on(u.costumeId.eq(uc.id))
-                .leftJoin(i).on(uc.costumeId.eq(i.entityId)
-                        .and(i.entityType.eq(EntityType.COSTUME)))
-                .where(u.id.in(userIds))
+                .from(user)
+                .leftJoin(userCostume).on(user.costumeId.eq(userCostume.id))
+                .leftJoin(imageFile).on(userCostume.costumeId.eq(imageFile.entityId)
+                        .and(imageFile.entityType.eq(EntityType.COSTUME)))
+                .where(user.id.in(userIds))
                 .fetch();
     }
 
     @Override
-    public String getCostumeInfoByUserId(Long userId) {
+    public ImageUrlDTO getCostumeInfoByUserId(Long userId) {
         Tuple costumeDetails = jpaQueryFactory
-                .select(i.entityId, i.newFilename)
-                .from(u)
-                .leftJoin(uc).on(u.costumeId.eq(uc.id))
-                .leftJoin(i).on(uc.costumeId.eq(i.entityId).and(i.entityType.eq(EntityType.COSTUME)))
-                .where(u.id.eq(userId))
+                .select(imageFile.entityId, imageFile.newFilename)
+                .from(user)
+                .leftJoin(userCostume).on(user.costumeId.eq(userCostume.id))
+                .leftJoin(imageFile).on(userCostume.costumeId.eq(imageFile.entityId).and(imageFile.entityType.eq(EntityType.COSTUME)))
+                .where(user.id.eq(userId))
                 .fetchFirst();
 
-        if (costumeDetails == null || costumeDetails.get(i.newFilename) == null) {
+        if (costumeDetails == null || costumeDetails.get(imageFile.newFilename) == null) {
             return null;
         }
 
-        Long entityId = costumeDetails.get(i.entityId);
-        String filename = costumeDetails.get(i.newFilename);
+        Long entityId = costumeDetails.get(imageFile.entityId);
+        String filename = costumeDetails.get(imageFile.newFilename);
 
-        return s3ImageService.generateImageFile(
-                EntityType.COSTUME,
-                entityId,
-                filename
-        );
+        return new ImageUrlDTO(entityId, filename);
     }
 
     @Override
     public Long countNewUserByWeekend(LocalDateTime startDate, LocalDateTime endDate) {
         return Optional.ofNullable(jpaQueryFactory
                 .select(
-                        u.id.count()
-                ).from(u)
-                .where(u.createdAt.between(startDate, endDate))
+                        user.id.count()
+                ).from(user)
+                .where(user.createdAt.between(startDate, endDate))
                 .fetchOne())
                 .orElse(0L);
     }

@@ -3,6 +3,7 @@ package com.api.stuv.domain.user.controller;
 import com.api.stuv.domain.timer.dto.response.RankInfoResponse;
 import com.api.stuv.domain.timer.dto.response.RankResponse;
 import com.api.stuv.domain.timer.service.TimerService;
+import com.api.stuv.domain.user.dto.ImageUrlDTO;
 import com.api.stuv.domain.user.dto.request.*;
 import com.api.stuv.domain.user.dto.response.*;
 import com.api.stuv.domain.user.service.KakaoService;
@@ -161,7 +162,7 @@ public class UserController {
 
     @Operation(summary = "코스튬 조회 API", description = "사용자의 코스튬 목록을 조회합니다.")
     @GetMapping("/costume")
-    public ResponseEntity<ApiResponse<List<GetCostume>>> getUserCostume() {
+    public ResponseEntity<ApiResponse<List<ImageUrlDTO>>> getUserCostume() {
 
         return ResponseEntity.ok()
                 .body(ApiResponse.success(userService.getUserCostume()));
