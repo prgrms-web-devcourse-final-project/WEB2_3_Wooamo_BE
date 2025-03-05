@@ -24,6 +24,7 @@ public enum ErrorCode {
     INVALID_ACCESS_TOKEN(400, -2001, "유효하지 않은 토큰입니다."),
     EXPIRED_ACCESS_TOKEN(400, -2002, "어세스 토큰이 만료되었습니다."),
     EXPIRED_REFRESH_TOKEN(400, -2003, "리프레시 토큰이 만료되었습니다."),
+    EMPTY_REFRESH_TOKEN(400, -2003, "리프레시 토큰이 없습니다."),
     INVALID_REFRESH_TOKEN(400, -2004, "잘못된 리프레시 토큰입니다."),
     INVALID_AUTHORITY_TOKEN(400, -2005, "권한 정보가 없는 토큰입니다."),
 
