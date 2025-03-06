@@ -134,7 +134,6 @@ public class ChatMessageController {
 
             // 저장된 메시지를 채팅방 구독자에게 전송
             messagingTemplate.convertAndSend("/topic/messages/" + message.roomId(), ApiResponse.success(savedMessage));
-            System.out.println("메세지 " + ApiResponse.success(savedMessage));
             // 채팅 목록 페이지에 있는 모든 사용자에게 업데이트 전송
             for (Long subscriberId : listPageSubscribers) {
                 List<ChatRoomResponse> roomList = chatRoomDetailService.getSortedRoomListBySenderId(
