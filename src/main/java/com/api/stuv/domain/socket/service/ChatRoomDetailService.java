@@ -86,7 +86,7 @@ public class ChatRoomDetailService {
 
     public String createGroupChatRoom(String groupName, Long userId, int maxMembers) {
         String roomId = groupName;
-        boolean exists = chatRoomRepository.existsByRoomId(roomId);
+        boolean exists = chatRoomRepository.existsByRoomId(groupName);
 
         if (exists) {
             throw new NotFoundException(ErrorCode.CHAT_ROOM_ALREADY_EXISTS);
@@ -96,7 +96,7 @@ public class ChatRoomDetailService {
         members.add(userId);
 
         ChatRoom chatRoom = ChatRoom.builder()
-                .roomId(roomId)
+                .roomId(UUID.randomUUID().toString().replace("-", ""))
                 .roomType("GROUP")
                 .roomName(groupName)
                 .members(members)
@@ -106,7 +106,7 @@ public class ChatRoomDetailService {
 
         chatRoomRepository.save(chatRoom);
 
-        return roomId;
+        return chatRoom.getRoomId();
     }
 
     public void addUserToGroupChat(String roomId, Long newUserId) {
