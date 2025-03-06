@@ -29,6 +29,7 @@ public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
     private final QPartyGroup pg = QPartyGroup.partyGroup;
     private final QGroupMember gm = QGroupMember.groupMember;
     private final QImageFile i = QImageFile.imageFile;
+    private final QQuestConfirm qc = QQuestConfirm.questConfirm;
 
     @Override
     public PageResponse<PartyGroupResponse> findPendingGroupsByName(String name, Pageable pageable) {
@@ -44,7 +45,7 @@ public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
                 .join(gm).on(pg.id.eq(gm.groupId))
                 .where(pg.startDate.gt(LocalDate.now())
                         .and(name != null ? pg.name.contains(name) : null))
-                .orderBy(pg.startDate.desc())
+                .orderBy(pg.startDate.desc(), pg.createdAt.desc())
                 .groupBy(pg.id, pg.name, pg.recruitCap, pg.startDate);
 
         return PageResponse.applyPage(query, pageable, countPendingGroupsByName(name));
@@ -74,7 +75,7 @@ public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
                 .where(pg.startDate.loe(LocalDate.now())
                         .and(pg.endDate.goe(LocalDate.now()))
                         .and(gm.userId.eq(userId)))
-                .orderBy(pg.endDate.desc())
+                .orderBy(pg.endDate.asc(), pg.createdAt.asc())
                 .groupBy(pg.id, pg.name, pg.recruitCap, pg.endDate)
                 .fetch();
     }
@@ -94,7 +95,7 @@ public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
                                 .otherwise(PartyStatus.PENDING.getText())))
                 .from(pg)
                 .leftJoin(gm).on(pg.id.eq(gm.groupId))
-                .orderBy(pg.createdAt.desc())
+                .orderBy(pg.startDate.asc(), pg.createdAt.asc())
                 .groupBy(pg.id, pg.name, pg.recruitCap, pg.startDate, pg.endDate, pg.status);
 
         return PageResponse.applyPage(query, pageable, countAllPartyGroupsWithApproved());
@@ -167,6 +168,7 @@ public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
 
     @Override
     public Optional<PartyDetailResponse> findDetailByUserId(Long partyId, Long userId) {
+        LocalDate today = LocalDate.now();
         return Optional.ofNullable(
                 factory
                         .select(Projections.constructor(
@@ -184,6 +186,13 @@ public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
                                         .from(gm)
                                         .where(gm.groupId.eq(partyId)
                                                 .and(gm.userId.eq(userId)))
+                                        .exists(),
+                                factory
+                                        .selectOne()
+                                        .from(qc)
+                                        .leftJoin(gm).on(qc.memberId.eq(gm.id)
+                                                .and(gm.userId.eq(userId)))
+                                        .where(qc.confirmDate.eq(today))
                                         .exists()
                         ))
                         .from(pg)

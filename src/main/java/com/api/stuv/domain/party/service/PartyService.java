@@ -193,7 +193,7 @@ public class PartyService {
         LocalDate today = LocalDate.now();
 
         if (isValidatePeriod(party, today)) throw new BusinessException(ErrorCode.PARTY_INVALID_DATE);
-        if (confirmRepository.existsByIdAndConfirmDate(memberId, today)) throw new BusinessException(ErrorCode.ALREADY_AUTH_TODAY);
+        if (confirmRepository.existsByMemberIdAndConfirmDate(memberId, today)) throw new BusinessException(ErrorCode.ALREADY_AUTH_TODAY);
 
         QuestConfirm confirm = new QuestConfirm(memberId, today);
 

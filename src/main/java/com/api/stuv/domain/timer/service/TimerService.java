@@ -152,7 +152,6 @@ public class TimerService {
         for (String key : keys) {
             String studyTime = hashOps.get(key, today.toString());
             if (studyTime != null) {
-                System.out.println(Long.parseLong(studyTime));
                 totalStudyTime += Long.parseLong(studyTime);
             }
         }
