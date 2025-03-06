@@ -290,7 +290,6 @@ public class UserService {
 
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
         Long id = userCostumeRepository.findIdByCostumeId(costumeId, userId);
-        System.out.println(id);
         user.changeUserCostume(id);
         userRepository.save(user);
 

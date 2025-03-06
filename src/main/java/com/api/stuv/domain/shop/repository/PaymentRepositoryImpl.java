@@ -29,6 +29,9 @@ public class PaymentRepositoryImpl implements PaymentRepositoryCustom {
                 ))
                 .from(p)
                 .leftJoin(u).on(p.userId.eq(u.id))
+                .where(p.isPaymentSuccess.eq(true))
+                .orderBy(p.createdAt.desc())
+                .limit(10)
                 .fetch();
     }
 }

@@ -12,6 +12,7 @@ public record PartyDetailResponse(
         LocalDate startDate,
         LocalDate endDate,
         BigDecimal bettingPointCap,
-        boolean isJoined
+        boolean isJoined,
+        boolean isAuth
 ) {
 }

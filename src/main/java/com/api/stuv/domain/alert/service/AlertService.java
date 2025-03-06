@@ -24,7 +24,6 @@ public class AlertService {
     public void createAlert(Long targetUserId, Long typeId, AlertType alertType, String title, String nickname) {
         String alertId = UUID.randomUUID().toString();
         Alert alert = new Alert(alertId, typeId, alertType, title, nickname, false, LocalDateTime.now());
-        System.out.println("alertResponse = " + alert);
         redisService.saveByAlertId(getKey(targetUserId), alertId, alert);
         redisPublisher.publish(targetUserId, alert);
     }

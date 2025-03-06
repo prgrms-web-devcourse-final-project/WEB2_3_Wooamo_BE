@@ -8,5 +8,5 @@ import java.time.LocalDate;
 
 @Repository
 public interface QuestConfirmRepository extends JpaRepository<QuestConfirm, Long>, QuestConfirmRepositoryCustom {
-    boolean existsByIdAndConfirmDate(Long id, LocalDate confirmDate);
+    boolean existsByMemberIdAndConfirmDate(Long memberId, LocalDate confirmDate);
 }
