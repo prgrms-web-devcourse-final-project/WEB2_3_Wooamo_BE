@@ -167,4 +167,14 @@ public class UserRepositoryImpl implements UserRepositoryCustom{
                 .fetchOne())
                 .orElse(0L);
     }
+
+    @Override
+    public String findContextByUserId(Long userId) {
+        return jpaQueryFactory
+                .select(user.context)
+                .from(user)
+                .where(user.id.eq(userId))
+                .fetchOne();
+    }
+
 }

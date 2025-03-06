@@ -42,7 +42,7 @@ public class ChatMessageController {
         Long userId = readMessageRequest.userId();
 
         chatRoomMemberService.userJoinRoom(userId, roomId);
-        List<UserInfo> userInfo = chatRoomMemberService.getRoomMemberInfos(roomId);
+        ChatRoomTypeInfoResponse chatRoomTypeInfoResponse  = chatRoomDetailService.getChatRoomInfoByRoomName(userId, roomId);
 
         roomSessions.forEach((rooms, users) -> {
             if (!rooms.equals(roomId) && users.contains(userId)) {
@@ -64,7 +64,7 @@ public class ChatMessageController {
         logger.info("현재 채팅방 사용자: {}", roomSessions);
 
         chatMessageService.markMessagesAsRead(roomId, userId);
-        messagingTemplate.convertAndSend("/topic/users/" + roomId, ApiResponse.success(userInfo));
+        messagingTemplate.convertAndSend("/topic/users/" + roomId, ApiResponse.success(chatRoomTypeInfoResponse));
     }
 
     @Operation(summary = "채팅방 퇴장", description = "사용자가 채팅방에서 나갈 때 삭제합니다.")
