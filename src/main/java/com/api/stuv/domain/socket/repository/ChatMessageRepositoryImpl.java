@@ -1,6 +1,7 @@
 package com.api.stuv.domain.socket.repository;
 
 import com.api.stuv.domain.socket.entity.ChatMessage;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -53,4 +54,46 @@ public class ChatMessageRepositoryImpl implements ChatMessageRepositoryCustom {
         }
         return unreadCount;
     }
+
+    @Override
+    public List<ChatMessage> findMessagesByRoomIdWithPagination(String roomId, String lastChatId, int limit) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("room_id").is(roomId));
+
+        // lastChatId가 존재하면, 해당 _id보다 작은 메시지만 조회 (즉, 이전 메시지)
+        if (lastChatId != null && !lastChatId.isEmpty()) {
+            query.addCriteria(Criteria.where("_id").lt(new ObjectId(lastChatId)));
+        }
+
+        // 최신 메시지부터 정렬
+        query.with(Sort.by(Sort.Direction.DESC, "created_at"));
+        query.limit(limit);
+
+        return mongoTemplate.find(query, ChatMessage.class);
+    }
+
+//    @Override
+//    public List<ChatMessage> findMessagesByRoomIdWithPagination(String roomId, String lastChatId, int limit) {
+//        Query query = new Query();
+//        query.addCriteria(Criteria.where("room_id").is(roomId));
+//
+//        // lastChatId가 존재하면 해당 ID 포함하여 limit개 가져오기
+//        if (lastChatId != null && !lastChatId.isEmpty()) {
+//            query.addCriteria(Criteria.where("_id").lte(new ObjectId(lastChatId))); // lastChatId 포함
+//        }
+//
+//        // 최신순 정렬 후 limit 개수 가져오기
+//        query.with(Sort.by(Sort.Direction.DESC, "created_at"));
+//        query.limit(limit);
+//
+//        List<ChatMessage> messages = mongoTemplate.find(query, ChatMessage.class);
+//
+//        // lastChatId가 없을 때 최신 메시지 limit개 가져오기
+//        if (lastChatId == null || lastChatId.isEmpty()) {
+//            messages = mongoTemplate.find(query, ChatMessage.class);
+//        }
+//
+//        return messages;
+//    }
+
 }

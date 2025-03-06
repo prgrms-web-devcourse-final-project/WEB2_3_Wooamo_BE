@@ -20,7 +20,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,41 +33,34 @@ public class ChatMessageService {
     private final UserRepository userRepository;
     private final S3ImageService s3ImageService;
     private final ChatRoomMemberService chatRoomMemberService; // 총 멤버 정보를 관리하는 서비스
-
+    
     //메세지 불러오기
-    public List<ChatMessageResponse> getMessagesByRoomId(String roomId, Pageable pageable) {
-
-        List<ChatMessageResponse> messages = chatMessageRepository
-                .findByRoomIdOrderByCreatedAtDesc(roomId, pageable)
-                .getContent()
-                .stream()
-                .map(chatMessage -> {
-                    int unreadCount = chatRoomMemberService.getRoomMemberCount(chatMessage.getRoomId()) - chatMessage.getReadBy().size();
-                    UserInfo userInfo = chatRoomMemberService.getUserInfo(chatMessage.getSenderId());
-                    if (userInfo == null) {
-                        Long senderId = chatMessage.getSenderId();
-                        String senderNickname = (senderId != null) ? userRepository.findNicknameByUserId(senderId) : "";
-
-                        ImageUrlDTO response = (senderId != null) ? userRepository.getCostumeInfoByUserId(senderId) : null;
-                        String senderProfile = (response != null) ? s3ImageService.generateImageFile(EntityType.COSTUME, response.entityId(), response.newFileName()) : null;
-
-                        userInfo = new UserInfo(senderId, senderNickname, senderProfile);
-                    }
-
-                    return new ChatMessageResponse(
-                            chatMessage.getId(),
-                            chatMessage.getRoomId(),
-                            userInfo,
-                            chatMessage.getMessage(),
-                            unreadCount,
-                            chatMessage.getCreatedAt()
-                    );
-                })
-                .collect(Collectors.toList());
+    public List<ChatMessageResponse> getMessagesByRoomId(String roomId, String lastChatId, int limit) {
+        List<ChatMessage> messages = chatMessageRepository.findMessagesByRoomIdWithPagination(roomId, lastChatId, limit);
 
         Collections.reverse(messages);
+        Map<Long, UserInfo> userInfoCache = new HashMap<>();
 
-        return messages;
+        return messages.stream()
+                .map(chatMessage -> {
+                    Long senderId = chatMessage.getSenderId();
+                    UserInfo userInfo = userInfoCache.get(senderId);
+
+                    if (userInfo == null) {
+                        String senderNickname = (senderId != null) ? userRepository.findNicknameByUserId(senderId) : null;
+                        ImageUrlDTO response = (senderId != null) ? userRepository.getCostumeInfoByUserId(senderId) : null;
+                        String senderProfile = (response != null)
+                                ? s3ImageService.generateImageFile(EntityType.COSTUME, response.entityId(), response.newFileName())
+                                : null;
+
+                        userInfo = new UserInfo(senderId, senderNickname, senderProfile);
+
+                        userInfoCache.put(senderId, userInfo);
+                    }
+
+                    return ChatMessageResponse.from(chatMessage, userInfo);
+                })
+                .collect(Collectors.toList());
     }
 
     // 메시지 저장
