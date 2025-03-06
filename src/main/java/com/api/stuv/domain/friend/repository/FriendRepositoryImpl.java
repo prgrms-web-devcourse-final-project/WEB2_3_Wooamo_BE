@@ -9,6 +9,7 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+
 import static com.api.stuv.domain.friend.entity.QFriend.friend;
 import static com.api.stuv.domain.user.entity.QUser.user;
 import static com.api.stuv.domain.user.entity.QUserCostume.userCostume;
@@ -39,6 +40,7 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
                 .leftJoin(userCostume).on(user.costumeId.eq(userCostume.id))
                 .leftJoin(imageFile).on(userCostume.costumeId.eq(imageFile.entityId).and(imageFile.entityType.eq(EntityType.COSTUME)))
                 .where(friend.friendId.eq(receiverId).and(friend.status.eq(FriendStatus.PENDING)))
+                .orderBy(friend.createdAt.desc())
                 .offset(pageable.getOffset()).limit(pageable.getPageSize()).fetch();
     }
 
@@ -67,6 +69,7 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
                 .leftJoin(userCostume).on(user.costumeId.eq(userCostume.id))
                 .leftJoin(imageFile).on(userCostume.costumeId.eq(imageFile.entityId).and(imageFile.entityType.eq(EntityType.COSTUME)))
                 .where(friend.status.eq(FriendStatus.ACCEPTED))
+                .orderBy(friend.createdAt.desc())
                 .offset(pageable.getOffset()).limit(pageable.getPageSize()).fetch();
     }
 

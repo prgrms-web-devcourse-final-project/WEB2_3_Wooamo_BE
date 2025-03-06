@@ -39,6 +39,7 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
                 .from(board).leftJoin(imageFile).on(board.id.eq(imageFile.entityId).and(imageFile.entityType.eq(EntityType.BOARD)))
                 .where(board.title.contains(title))
                 .where(imageFile.createdAt.isNull().or(imageFile.createdAt.eq(imageSubQuery)))
+                .orderBy(board.createdAt.desc())
                 .offset(pageable.getOffset()).limit(pageable.getPageSize()).fetch();
     }
 
