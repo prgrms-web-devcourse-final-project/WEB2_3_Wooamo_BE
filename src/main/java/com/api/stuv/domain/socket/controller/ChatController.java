@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,14 +24,6 @@ public class ChatController {
     private final ChatRoomDetailService chatRoomDetailService;
     private final ChatRoomMemberService chatRoomMemberService;
     private final TokenUtil tokenUtil;
-
-    @Operation(summary = "타이틀별 채팅방 목록 조회 API", description = "user가 포함된 채팅방을 타이틀별로 구분하여 정보를 가져옵니다.")
-    @GetMapping("/listInfoByTitle")
-    public ResponseEntity<ApiResponse<List<ChatRoomInfoResponse>>> getRoomInfoListBySenderId(
-    ) {
-        List<ChatRoomInfoResponse> roomList = chatRoomDetailService.getChatRoomInfoByUserId(tokenUtil.getUserId());
-        return ResponseEntity.ok(ApiResponse.success(roomList));
-    }
 
     @Operation(summary = "채팅방 목록 조회 API", description = "user가 포함된 채팅방 목록을 가져옵니다.")
     @GetMapping("/list")
@@ -65,24 +56,24 @@ public class ChatController {
     @PostMapping("/group")
     public ResponseEntity<ApiResponse<String>> createGroupRoom(
             @RequestBody CreateGroupRoomRequest request) {
-        String roomId = chatRoomDetailService.createGroupChatRoom(request.groupName(), request.userId(), request.maxMembers());
+        String roomId = chatRoomDetailService.createGroupChatRoom(String.valueOf(request.groupId()),request.groupName(), request.userId(), request.maxMembers());
         return ResponseEntity.ok(ApiResponse.success(roomId));
     }
 
     @Operation(summary = "그룹 채팅방에 사용자 추가", description = "기존 그룹 채팅방에 새로운 사용자를 추가합니다.")
     @PostMapping("/group/{roomId}/addUser")
     public ResponseEntity<ApiResponse<Void>> addUserToGroupChat(
-            @PathVariable String roomId,
+            @PathVariable Long roomId,
             @RequestBody AddUserToGroupChatRequest request) {
-        chatRoomDetailService.addUserToGroupChat(roomId, request.newUserId());
-        chatRoomMemberService.updateRoomMembers(roomId);
+        chatRoomDetailService.addUserToGroupChat(String.valueOf(roomId), request.newUserId());
+        chatRoomMemberService.updateRoomMembers(String.valueOf(roomId));
         return ResponseEntity.ok(ApiResponse.success());
     }
 
     @Operation(summary = "채팅방 삭제", description = "roomId를 받아 해당 채팅방을 삭제합니다.")
     @DeleteMapping("/group/{roomId}")
-    public ResponseEntity<ApiResponse<Void>> deleteChatRoom(@PathVariable String roomId) {
-        chatRoomDetailService.deleteChatRoom(roomId);
+    public ResponseEntity<ApiResponse<Void>> deleteChatRoom(@PathVariable Long roomId) {
+        chatRoomDetailService.deleteChatRoom(String.valueOf(roomId));
         return ResponseEntity.ok(ApiResponse.success());
     }
 }
