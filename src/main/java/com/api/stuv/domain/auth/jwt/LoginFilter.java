@@ -43,8 +43,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         // 필터 경로를 "/api/user/login"으로 설정
         setFilterProcessesUrl("/api/user/login");
-
-
     }
 
     @Override

@@ -95,9 +95,7 @@ public class KakaoService {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
         params.add("client_id", apiKey);                // 🔑 카카오 REST API 키
-        //params.add("redirect_uri", redirectUri);        // 🔄 등록된 redirect_uri
-        //TODO: 배포 시 주소 변경
-        params.add("redirect_uri", "https://localhost:3000/api/kakaoLogin");
+        params.add("redirect_uri", redirectUri);        // 🔄 등록된 redirect_uri
         params.add("code", code);                       // 📝 받은 인가 코드
 
         HttpEntity<MultiValueMap<String, String>> kakaoTokenReq = new HttpEntity<>(params, headers);
