@@ -80,7 +80,6 @@ public class ChatRoomMemberService {
             });
         });
 
-        System.out.println("유저 세션: " + userSessions);
     }
     // 사용자가 특정 방에서 나가면 userSessions에서 제거
     public void userLeaveRoom(Long userId, String roomId) {
@@ -100,7 +99,6 @@ public class ChatRoomMemberService {
             userSessions.remove(userId);
         }
 
-        System.out.println("방 퇴장 후 유저 세션: " + userSessions);
     }
     // 사용자 정보 반환
     public UserInfo getUserInfo(Long userId) {
