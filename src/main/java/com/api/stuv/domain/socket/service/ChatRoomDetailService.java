@@ -28,8 +28,6 @@ public class ChatRoomDetailService {
     private final UserRepository userRepository;
     private final S3ImageService s3ImageService;
 
-
-
     public String createPrivateChatRoom(Long userId1, Long userId2) {
         List<Long> sortedIds = Arrays.asList(userId1, userId2);
         Collections.sort(sortedIds);
@@ -56,7 +54,7 @@ public class ChatRoomDetailService {
     }
 
     public String createGroupChatRoom(String groupId, String groupName, Long userId, int maxMembers) {
-        boolean exists = chatRoomRepository.existsByRoomId(groupName);
+        boolean exists = chatRoomRepository.existsByRoomId(groupId);
 
         if (exists) {
             throw new NotFoundException(ErrorCode.CHAT_ROOM_ALREADY_EXISTS);

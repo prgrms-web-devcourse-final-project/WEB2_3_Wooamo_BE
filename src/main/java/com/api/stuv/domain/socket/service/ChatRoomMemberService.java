@@ -22,9 +22,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ChatRoomMemberService {
 
-    // 방 이름(roomId)별로 멤버 ID 목록을 저장하는 ConcurrentMap
-    private final ConcurrentMap<String, List<Long>> roomSessions = new ConcurrentHashMap<>();
-    // 사용자 정보 저장
+    // 방 이름(roomId)별로 모든 멤버 ID 목록을 저장하는 -> ReadBy
+    private final ConcurrentMap<String, List<Long>> roomTotalMembersSessions = new ConcurrentHashMap<>();
+    // 사용자 정보 저장 -> UserInfo
     private final ConcurrentMap<String, Set<Long>> userRoomSessions = new ConcurrentHashMap<>();
     private final ConcurrentMap<Long, UserInfo> userSessions = new ConcurrentHashMap<>();
 
@@ -37,7 +37,7 @@ public class ChatRoomMemberService {
         // 서버 시작 시 모든 채팅방의 멤버 정보를 불러와 roomSessions 초기화
         List<ChatRoom> chatRooms = chatRoomRepository.findAll();
         for (ChatRoom chatRoom : chatRooms) {
-            roomSessions.put(chatRoom.getRoomId(), new ArrayList<>(chatRoom.getMembers()));
+            roomTotalMembersSessions.put(chatRoom.getRoomId(), new ArrayList<>(chatRoom.getMembers()));
         }
     }
 
@@ -46,22 +46,22 @@ public class ChatRoomMemberService {
         ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.CHAT_ROOM_NOT_FOUND));
         List<Long> members = chatRoom.getMembers();
-        roomSessions.put(roomId, new ArrayList<>(members));
+        roomTotalMembersSessions.put(roomId, new ArrayList<>(members));
     }
     // 읽음 처리 계산
     public int getRoomMemberCount(String roomId) {
-        List<Long> members = roomSessions.get(roomId);
+        List<Long> members = roomTotalMembersSessions.get(roomId);
         return (members != null) ? members.size() : 0;
     }
   // 특정 사용자가 현재 참여 중인 방 개수 반환
     public int getUserActiveRoomCount(Long userId) {
-        return (int) roomSessions.values().stream()
+        return (int) roomTotalMembersSessions.values().stream()
                 .filter(members -> members.contains(userId))
                 .count();
     }
     // 특정 채팅방의 사용자 목록 반환
     public List<Long> getRoomMembers(String roomId) {
-        return roomSessions.getOrDefault(roomId, List.of());
+        return roomTotalMembersSessions.getOrDefault(roomId, List.of());
     }
 
     // 사용자가 방에 입장하면 userSessions에 사용자 정보를 추가
