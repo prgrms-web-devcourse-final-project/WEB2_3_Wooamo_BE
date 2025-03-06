@@ -2,6 +2,7 @@ package com.api.stuv.domain.socket.service;
 
 import com.api.stuv.domain.image.entity.EntityType;
 import com.api.stuv.domain.image.service.S3ImageService;
+import com.api.stuv.domain.socket.dto.ChatRoomInfoResponse;
 import com.api.stuv.domain.socket.dto.ChatRoomResponse;
 import com.api.stuv.domain.socket.dto.GroupInfo;
 import com.api.stuv.domain.socket.dto.UserInfo;
@@ -36,7 +37,7 @@ public class ChatRoomDetailService {
         boolean exists = chatRoomRepository.existsByRoomId(roomId);
 
         if (exists) {
-            throw new NotFoundException(ErrorCode.CHAT_ROOM_ALREADY_EXISTS);
+            return roomId;
         }
 
         List<Long> members = List.of(sortedIds.get(0), sortedIds.get(1));
@@ -57,7 +58,7 @@ public class ChatRoomDetailService {
         boolean exists = chatRoomRepository.existsByRoomId(groupId);
 
         if (exists) {
-            throw new NotFoundException(ErrorCode.CHAT_ROOM_ALREADY_EXISTS);
+            return groupId;
         }
 
         List<Long> members = new ArrayList<>();
@@ -129,32 +130,62 @@ public class ChatRoomDetailService {
                     GroupInfo groupInfo = null;
 
                     if ("PRIVATE".equals(room.getRoomType())) {
-                        List<Long> members = room.getMembers();
-                        Long otherUserId = members.stream()
-                                .filter(id -> !id.equals(senderId))
-                                .findFirst()
-                                .orElse(null);
-
-                        if (otherUserId != null) {
-                            String nickName = userRepository.findNicknameByUserId(otherUserId);
-                            ImageUrlDTO userResponse = userRepository.getCostumeInfoByUserId(otherUserId);
-                            String profileImage = (userResponse != null) ?
-                                    s3ImageService.generateImageFile(EntityType.COSTUME, userResponse.entityId(), userResponse.newFileName()) : null;
-
-                            userInfo = new UserInfo(otherUserId, nickName, profileImage);
-                        }
+                        userInfo = getPrivateChatUserInfo(room, senderId);
                     } else if ("GROUP".equals(room.getRoomType())) {
-                        String groupId = room.getRoomId();
-                        int totalMembers = room.getMembers().size();
-                        String groupName = room.getRoomName();
-
-                        groupInfo = new GroupInfo(groupId, groupName, totalMembers);
+                        groupInfo = getGroupChatInfo(room);
                     }
 
                     return ChatRoomResponse.from(room, lastUserInfo, userInfo, groupInfo, latestMessage, unreadCount);
                 })
                 .sorted(Comparator.comparing(ChatRoomResponse::createdAt, Comparator.reverseOrder()))
                 .collect(Collectors.toList());
+    }
+
+    public List<ChatRoomInfoResponse> getChatRoomInfoByUserId(Long senderId) {
+        List<ChatRoom> chatRooms = chatRoomRepository.findByMembersContaining(senderId);
+
+        if (chatRooms.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return chatRooms.stream()
+                .map(room -> {
+                    if ("PRIVATE".equals(room.getRoomType())) {
+                        return ChatRoomInfoResponse.privateChat(room, getPrivateChatUserInfo(room, senderId));
+                    } else if ("GROUP".equals(room.getRoomType())) {
+                        return ChatRoomInfoResponse.groupChat(room, getGroupChatInfo(room));
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    private UserInfo getPrivateChatUserInfo(ChatRoom room, Long senderId) {
+        List<Long> members = room.getMembers();
+        Long otherUserId = members.stream()
+                .filter(id -> !id.equals(senderId))
+                .findFirst()
+                .orElse(null);
+
+        if (otherUserId == null) {
+            return null;
+        }
+
+        String nickName = userRepository.findNicknameByUserId(otherUserId);
+        ImageUrlDTO response = userRepository.getCostumeInfoByUserId(otherUserId);
+        String profileImage = (response != null) ?
+                s3ImageService.generateImageFile(EntityType.COSTUME, response.entityId(), response.newFileName()) : null;
+
+        return new UserInfo(otherUserId, nickName, profileImage);
+    }
+
+    private GroupInfo getGroupChatInfo(ChatRoom room) {
+        String groupId = room.getRoomId();
+        int totalMembers = room.getMembers().size();
+        String groupName = room.getRoomName();
+
+        return new GroupInfo(groupId, groupName, totalMembers);
     }
 
 }

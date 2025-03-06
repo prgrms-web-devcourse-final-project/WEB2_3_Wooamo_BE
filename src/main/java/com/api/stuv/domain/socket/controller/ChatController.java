@@ -32,6 +32,14 @@ public class ChatController {
         return ResponseEntity.ok(ApiResponse.success(roomList));
     }
 
+    @Operation(summary = "타입별 채팅방 목록 조회 API", description = "user가 포함된 채팅방을 타입별로 구분하여 정보를 가져옵니다.")
+    @GetMapping("/listInfoByType")
+    public ResponseEntity<ApiResponse<List<ChatRoomInfoResponse>>> getRoomInfoListBySenderId(
+    ) {
+        List<ChatRoomInfoResponse> roomList = chatRoomDetailService.getChatRoomInfoByUserId(tokenUtil.getUserId());
+        return ResponseEntity.ok(ApiResponse.success(roomList));
+    }
+
     @Operation(summary = "메세지 요청 API", description = "채팅방 메세지를 요청을 합니다.")
     @GetMapping("/{roomId}/messages")
     public ResponseEntity<ApiResponse<List<ChatMessageResponse>>> getMessagesByRoomIdPage(
