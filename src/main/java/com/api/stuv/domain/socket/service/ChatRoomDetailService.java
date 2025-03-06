@@ -2,9 +2,6 @@ package com.api.stuv.domain.socket.service;
 
 import com.api.stuv.domain.image.entity.EntityType;
 import com.api.stuv.domain.image.service.S3ImageService;
-import com.api.stuv.domain.party.repository.member.GroupMemberRepository;
-import com.api.stuv.domain.party.repository.party.PartyGroupRepository;
-import com.api.stuv.domain.socket.dto.ChatRoomInfoResponse;
 import com.api.stuv.domain.socket.dto.ChatRoomResponse;
 import com.api.stuv.domain.socket.dto.GroupInfo;
 import com.api.stuv.domain.socket.dto.UserInfo;
@@ -28,36 +25,10 @@ import java.util.stream.Collectors;
 public class ChatRoomDetailService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
-    private final PartyGroupRepository partyGroupRepository;
     private final UserRepository userRepository;
     private final S3ImageService s3ImageService;
 
-    public List<ChatRoomResponse> getSortedRoomListBySenderId(Long senderId) {
-        List<ChatRoom> chatRooms = chatRoomRepository.findByMembersContaining(senderId);
 
-        if (chatRooms.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return chatRooms.stream()
-                .map(room -> {
-                    ChatMessage latestMessage = chatMessageRepository.findTopByRoomIdOrderByCreatedAtDesc(room.getRoomId());
-                    int unreadCount = chatMessageRepository.countUnreadMessages(room.getRoomId(), senderId);
-
-                    Long lastSenderId = (latestMessage != null) ? latestMessage.getSenderId() : null;
-
-                    String lastSenderNickname = (lastSenderId != null) ? userRepository.findNicknameByUserId(lastSenderId) : "";
-
-                    ImageUrlDTO response = (lastSenderId != null) ? userRepository.getCostumeInfoByUserId(lastSenderId) : null;
-                    String lastSenderProfile = (response != null) ? s3ImageService.generateImageFile(EntityType.COSTUME, response.entityId(), response.newFileName()) : null;
-
-                    UserInfo lastUserInfo = new UserInfo(lastSenderId, lastSenderNickname, lastSenderProfile);
-
-                    return ChatRoomResponse.from(room, lastUserInfo, latestMessage, unreadCount);
-                })
-                .sorted(Comparator.comparing(ChatRoomResponse::createdAt, Comparator.reverseOrder()))
-                .collect(Collectors.toList());
-    }
 
     public String createPrivateChatRoom(Long userId1, Long userId2) {
         List<Long> sortedIds = Arrays.asList(userId1, userId2);
@@ -84,8 +55,7 @@ public class ChatRoomDetailService {
         return roomId;
     }
 
-    public String createGroupChatRoom(String groupName, Long userId, int maxMembers) {
-        String roomId = groupName;
+    public String createGroupChatRoom(String groupId, String groupName, Long userId, int maxMembers) {
         boolean exists = chatRoomRepository.existsByRoomId(groupName);
 
         if (exists) {
@@ -96,7 +66,7 @@ public class ChatRoomDetailService {
         members.add(userId);
 
         ChatRoom chatRoom = ChatRoom.builder()
-                .roomId(UUID.randomUUID().toString().replace("-", ""))
+                .roomId(String.valueOf(groupId))
                 .roomType("GROUP")
                 .roomName(groupName)
                 .members(members)
@@ -136,7 +106,8 @@ public class ChatRoomDetailService {
         chatMessageRepository.deleteByRoomId(roomId);
     }
 
-    public List<ChatRoomInfoResponse> getChatRoomInfoByUserId(Long senderId) {
+
+    public List<ChatRoomResponse> getSortedRoomListBySenderId(Long senderId) {
         List<ChatRoom> chatRooms = chatRoomRepository.findByMembersContaining(senderId);
 
         if (chatRooms.isEmpty()) {
@@ -145,44 +116,47 @@ public class ChatRoomDetailService {
 
         return chatRooms.stream()
                 .map(room -> {
+                    ChatMessage latestMessage = chatMessageRepository.findTopByRoomIdOrderByCreatedAtDesc(room.getRoomId());
+                    int unreadCount = chatMessageRepository.countUnreadMessages(room.getRoomId(), senderId);
+
+                    Long lastSenderId = (latestMessage != null) ? latestMessage.getSenderId() : null;
+                    String lastSenderNickname = (lastSenderId != null) ? userRepository.findNicknameByUserId(lastSenderId) : null;
+                    ImageUrlDTO response = (lastSenderId != null) ? userRepository.getCostumeInfoByUserId(lastSenderId) : null;
+                    String lastSenderProfile = (response != null) ?
+                            s3ImageService.generateImageFile(EntityType.COSTUME, response.entityId(), response.newFileName()) : null;
+
+                    UserInfo lastUserInfo = new UserInfo(lastSenderId, lastSenderNickname, lastSenderProfile);
+
+                    UserInfo userInfo = null;
+                    GroupInfo groupInfo = null;
+
                     if ("PRIVATE".equals(room.getRoomType())) {
-                        return handlePrivateChat(room, senderId);
+                        List<Long> members = room.getMembers();
+                        Long otherUserId = members.stream()
+                                .filter(id -> !id.equals(senderId))
+                                .findFirst()
+                                .orElse(null);
+
+                        if (otherUserId != null) {
+                            String nickName = userRepository.findNicknameByUserId(otherUserId);
+                            ImageUrlDTO userResponse = userRepository.getCostumeInfoByUserId(otherUserId);
+                            String profileImage = (userResponse != null) ?
+                                    s3ImageService.generateImageFile(EntityType.COSTUME, userResponse.entityId(), userResponse.newFileName()) : null;
+
+                            userInfo = new UserInfo(otherUserId, nickName, profileImage);
+                        }
                     } else if ("GROUP".equals(room.getRoomType())) {
-                        return handleGroupChat(room);
+                        String groupId = room.getRoomId();
+                        int totalMembers = room.getMembers().size();
+                        String groupName = room.getRoomName();
+
+                        groupInfo = new GroupInfo(groupId, groupName, totalMembers);
                     }
-                    return null;
+
+                    return ChatRoomResponse.from(room, lastUserInfo, userInfo, groupInfo, latestMessage, unreadCount);
                 })
-                .filter(Objects::nonNull)
+                .sorted(Comparator.comparing(ChatRoomResponse::createdAt, Comparator.reverseOrder()))
                 .collect(Collectors.toList());
     }
 
-    private ChatRoomInfoResponse handlePrivateChat(ChatRoom room, Long senderId) {
-        List<Long> members = room.getMembers();
-        Long otherUserId = members.stream()
-                .filter(id -> !id.equals(senderId))
-                .findFirst()
-                .orElse(null);
-
-        if (otherUserId == null) {
-            return null;
-        }
-
-        String nickName = userRepository.findNicknameByUserId(otherUserId);
-        ImageUrlDTO response = userRepository.getCostumeInfoByUserId(otherUserId);
-        String profileImage = (response != null) ?
-                s3ImageService.generateImageFile(EntityType.COSTUME, response.entityId(), response.newFileName())
-                : null;
-
-        UserInfo otherUserInfo = new UserInfo(otherUserId, nickName, profileImage);
-        return ChatRoomInfoResponse.privateChat(room, otherUserInfo);
-    }
-
-    private ChatRoomInfoResponse handleGroupChat(ChatRoom room) {
-        Long groupId = partyGroupRepository.findGroupIdByRoomName(room.getRoomName());
-        int totalMembers = room.getMembers().size();
-        String groupName = room.getRoomName();
-
-        GroupInfo groupInfo = new GroupInfo(groupId, groupName, totalMembers);
-        return ChatRoomInfoResponse.groupChat(room, groupInfo);
-    }
 }
