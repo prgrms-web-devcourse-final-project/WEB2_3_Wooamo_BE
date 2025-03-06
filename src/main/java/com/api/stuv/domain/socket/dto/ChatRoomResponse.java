@@ -21,7 +21,7 @@ public record ChatRoomResponse(
                 room.getRoomType(),
                 lastUserInfo,
                 latestMessage != null ? latestMessage.getMessage() : "대화 내역 없음",
-                latestMessage != null ? latestMessage.getCreatedAt() : LocalDateTime.MIN,
+                latestMessage != null ? latestMessage.getCreatedAt() : LocalDateTime.MAX,
                 unreadCount
         );
     }

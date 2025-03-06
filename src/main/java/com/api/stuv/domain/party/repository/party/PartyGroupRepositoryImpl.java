@@ -240,4 +240,12 @@ public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
                         .fetchOne()
         ).orElse(0L);
     }
+
+    @Override
+    public Long findGroupIdByRoomName(String roomName) {
+        return factory.select(pg.id)
+                .from(pg)
+                .where(pg.name.eq(roomName))
+                .fetchOne();
+    }
 }
