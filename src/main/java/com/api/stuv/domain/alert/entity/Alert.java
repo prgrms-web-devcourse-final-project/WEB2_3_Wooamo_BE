@@ -54,6 +54,5 @@ public class Alert {
 
     public void updateIsRead() {
         this.isRead = true;
-        this.expiredAt = LocalDateTime.now().plusDays(1L);
     }
 }
