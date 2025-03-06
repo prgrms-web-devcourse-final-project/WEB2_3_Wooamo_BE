@@ -75,5 +75,8 @@ jobs:
             sudo docker compose down
             sudo docker compose rm -f
             sudo docker rmi ${{ secrets.DOCKER_HUB_USERNAME }}/stuv-app:latest
+            sudo docker system prune -a -f
+            sudo docker volume prune -f
+            
             sudo docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/stuv-app:latest
             sudo docker compose --env-file /home/ubuntu/env/.env up -d
