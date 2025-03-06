@@ -15,4 +15,5 @@ public interface UserRepositoryCustom {
     ImageUrlDTO getCostumeInfoByUserId(Long userId);
     List<UserProfileInfoDTO> findUserInfoByIds(List<Long> userIds);
     Long countNewUserByWeekend(LocalDateTime startDate, LocalDateTime endDate);
+    String findContextByUserId(Long userId);
 }

@@ -2,10 +2,7 @@ package com.api.stuv.domain.socket.service;
 
 import com.api.stuv.domain.image.entity.EntityType;
 import com.api.stuv.domain.image.service.S3ImageService;
-import com.api.stuv.domain.socket.dto.ChatRoomInfoResponse;
-import com.api.stuv.domain.socket.dto.ChatRoomResponse;
-import com.api.stuv.domain.socket.dto.GroupInfo;
-import com.api.stuv.domain.socket.dto.UserInfo;
+import com.api.stuv.domain.socket.dto.*;
 import com.api.stuv.domain.socket.entity.ChatMessage;
 import com.api.stuv.domain.socket.entity.ChatRoom;
 import com.api.stuv.domain.socket.repository.ChatMessageRepository;
@@ -141,24 +138,27 @@ public class ChatRoomDetailService {
                 .collect(Collectors.toList());
     }
 
-    public List<ChatRoomInfoResponse> getChatRoomInfoByUserId(Long senderId) {
-        List<ChatRoom> chatRooms = chatRoomRepository.findByMembersContaining(senderId);
+    public ChatRoomTypeInfoResponse getChatRoomInfoByRoomName(Long senderId, String roomId) {
+        ChatRoom room = chatRoomRepository.findByRoomId(roomId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.CHAT_ROOM_NOT_FOUND));
 
-        if (chatRooms.isEmpty()) {
-            return Collections.emptyList();
+        if ("PRIVATE".equals(room.getRoomType())) {
+            UserInfo userInfo = getPrivateChatUserInfo(room, senderId);
+
+            String context = userRepository.findContextByUserId(userInfo.userId());
+
+            UserInfoWithContext UserInfoWithContext = new UserInfoWithContext(
+                    userInfo.userId(),
+                    userInfo.nickname(),
+                    userInfo.profile(),
+                    context
+            );
+
+            return ChatRoomTypeInfoResponse.privateChat(UserInfoWithContext);
+        } else if ("GROUP".equals(room.getRoomType())) {
+            return ChatRoomTypeInfoResponse.groupChat(getGroupChatInfo(room));
         }
-
-        return chatRooms.stream()
-                .map(room -> {
-                    if ("PRIVATE".equals(room.getRoomType())) {
-                        return ChatRoomInfoResponse.privateChat(room, getPrivateChatUserInfo(room, senderId));
-                    } else if ("GROUP".equals(room.getRoomType())) {
-                        return ChatRoomInfoResponse.groupChat(room, getGroupChatInfo(room));
-                    }
-                    return null;
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+        return null;
     }
 
     private UserInfo getPrivateChatUserInfo(ChatRoom room, Long senderId) {
@@ -186,6 +186,15 @@ public class ChatRoomDetailService {
         String groupName = room.getRoomName();
 
         return new GroupInfo(groupId, groupName, totalMembers);
+    }
+
+    private UserInfo getUserInfo(Long userId) {
+        String nickName = userRepository.findNicknameByUserId(userId);
+        ImageUrlDTO response = userRepository.getCostumeInfoByUserId(userId);
+        String profileImage = (response != null) ?
+                s3ImageService.generateImageFile(EntityType.COSTUME, response.entityId(), response.newFileName()) : null;
+
+        return new UserInfo(userId, nickName, profileImage);
     }
 
 }
