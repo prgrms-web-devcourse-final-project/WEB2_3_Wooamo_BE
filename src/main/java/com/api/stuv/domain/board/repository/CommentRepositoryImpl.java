@@ -37,6 +37,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                 .leftJoin(userCostume).on(user.costumeId.eq(userCostume.id))
                 .leftJoin(imageFile).on(userCostume.costumeId.eq(imageFile.entityId).and(imageFile.entityType.eq(EntityType.COSTUME)))
                 .where(comment.boardId.eq(boardId))
+                .orderBy(comment.createdAt.desc())
                 .offset(pageable.getOffset()).limit(pageable.getPageSize()).fetch();
     }
 
