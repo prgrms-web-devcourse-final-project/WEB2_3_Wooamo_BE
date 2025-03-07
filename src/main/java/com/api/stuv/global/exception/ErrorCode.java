@@ -89,7 +89,7 @@ public enum ErrorCode {
 
     // PARTY
     PARTY_NOT_FOUND(404, -11000, "해당 팟을 팢을 수 없습니다."),
-    PARTY_INVALID_DATE(400, -11001, "해당 날짜는 팟의 인증 기간이 아닙니다."),
+    AUTH_INVALID_DATE(400, -11001, "해당 날짜는 팟의 인증 기간이 아닙니다."),
     CONFIRM_NOT_FOUND(404, -11002, "해당 회원의 인증을 찾을 수 없습니다."),
     BETTING_AMOUNT_TOO_LOW(400, -11003, "베팅 포인트가 최소 포인트보다 낮습니다."),
     ALREADY_JOINED_PARTY(400, -11004, "이미 참가한 팟입니다."),
@@ -98,6 +98,7 @@ public enum ErrorCode {
     MEMBER_NOT_FOUND(400, -11007, "해당 팟에 참가하지 않은 회원입니다."),
     ALREADY_RECEIVED_REWARD(400, -11008, "이미 보상을 획득한 상태입니다."),
     MISSION_FAILED(400, -11009, "미션에 실패하여 보상을 받을 수 없습니다."),
+    PARTY_INVALID_DATE(400, -11010, "생성하려는 팟의 기간이 올바르지 않습니다."),
 
     //TIMER
     TIMER_NOT_EXIST(404, -12000, "저장된 타이머가 없습니다."),
