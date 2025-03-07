@@ -95,7 +95,7 @@ public class FriendService {
     @Transactional(readOnly = true)
     public PageResponse<FriendResponse> searchUser(Long userId, String target, Pageable pageable) {
         List<FriendResponse> userList = friendRepository.searchUser(userId, target, pageable).stream().map(dto -> new FriendResponse(
-                null,
+                dto.friendId(),
                 dto.userId(),
                 null,
                 dto.nickname(),
