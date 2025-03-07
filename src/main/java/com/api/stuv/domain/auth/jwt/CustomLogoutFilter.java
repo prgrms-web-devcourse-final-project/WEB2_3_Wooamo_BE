@@ -83,13 +83,14 @@ public class CustomLogoutFilter extends GenericFilterBean {
         }
 
         //DB에 저장되어 있는지 확인
-        String isExist = redisService.find(refresh, String.class);
-        if (isExist == null) {
-            log.error("refresh 토큰이 redis에 없습니다.");
-            //response status code
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
+//        String isExist = redisService.find(refresh, String.class);
+//        if (isExist == null) {
+//            log.error("refresh 토큰이 redis에 없습니다.");
+//            System.out.println(isExist);
+//            //response status code
+//            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+//            return;
+//        }
 
         //로그아웃 진행
         //Refresh 토큰 DB에서 제거
