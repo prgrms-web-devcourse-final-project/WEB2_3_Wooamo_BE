@@ -1,6 +1,7 @@
 package com.api.stuv.domain.socket.repository;
 
 import com.api.stuv.domain.socket.entity.ChatMessage;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -52,5 +53,20 @@ public class ChatMessageRepositoryImpl implements ChatMessageRepositoryCustom {
             }
         }
         return unreadCount;
+    }
+
+    @Override
+    public List<ChatMessage> findMessagesByRoomIdWithPagination(String roomId, String lastChatId, int limit) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("room_id").is(roomId));
+
+        if (lastChatId != null && !lastChatId.isEmpty()) {
+            query.addCriteria(Criteria.where("_id").lt(new ObjectId(lastChatId)));
+        }
+
+        query.with(Sort.by(Sort.Direction.DESC, "created_at"));
+        query.limit(limit);
+
+        return mongoTemplate.find(query, ChatMessage.class);
     }
 }
