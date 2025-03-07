@@ -102,7 +102,7 @@ public class AdminService {
         if (response == null) throw new NotFoundException(ErrorCode.PARTY_NOT_FOUND);
         if (date == null) date = response.startDate();
         if (date.isBefore(response.startDate()) || date.isAfter(response.endDate()))
-            throw new DateOutOfRangeException(ErrorCode.PARTY_INVALID_DATE);
+            throw new DateOutOfRangeException(ErrorCode.AUTH_INVALID_DATE);
 
         return AdminPartyAuthDetailResponse.from(
                 response,
@@ -120,7 +120,7 @@ public class AdminService {
     public ImageResponse getGroupMemberConfirmImageByDate(Long partyId, Long memberId, LocalDate date) {
         PartyGroup partyGroup = partyGroupRepository.findById(partyId).orElseThrow(() -> new NotFoundException(ErrorCode.PARTY_NOT_FOUND));
         if (date.isBefore(partyGroup.getStartDate()) || date.isAfter(partyGroup.getEndDate()))
-            throw new DateOutOfRangeException(ErrorCode.PARTY_INVALID_DATE);
+            throw new DateOutOfRangeException(ErrorCode.AUTH_INVALID_DATE);
         Tuple tp = questConfirmRepository.findGroupMemberConfirmImageByDate(partyId, memberId, date);
         if (tp == null) throw new NotFoundException(ErrorCode.CONFIRM_NOT_FOUND);
 
@@ -132,7 +132,7 @@ public class AdminService {
         PartyGroup party = partyGroupRepository.findById(partyId).orElseThrow(() -> new NotFoundException(ErrorCode.PARTY_NOT_FOUND));
 
         if (request.date().isBefore(party.getStartDate()) || request.date().isAfter(party.getEndDate()))
-            throw new DateOutOfRangeException(ErrorCode.PARTY_INVALID_DATE);
+            throw new DateOutOfRangeException(ErrorCode.AUTH_INVALID_DATE);
 
         if (questConfirmRepository.findGroupMemberConfirmImageByDate(partyId, memberId, request.date()) == null)
             throw new NotFoundException(ErrorCode.CONFIRM_NOT_FOUND);
