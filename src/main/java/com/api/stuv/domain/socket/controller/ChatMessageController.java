@@ -32,7 +32,8 @@ public class ChatMessageController {
     private final ChatRoomMemberService chatRoomMemberService;
     private final SimpMessagingTemplate messagingTemplate;
     private static final Logger logger = LoggerFactory.getLogger(ChatMessageController.class);
-    private final ConcurrentMap<String, List<Long>> roomSessions = new ConcurrentHashMap<>();
+//    private final ConcurrentMap<String, List<Long>> roomCache = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, Set<Long>> roomCache = new ConcurrentHashMap<>();
     private final Set<Long> listPageSubscribers = ConcurrentHashMap.newKeySet();
 
     @Operation(summary = "채팅방 입장", description = "사용자가 채팅방에 입장할 때 등록합니다.")
@@ -44,24 +45,10 @@ public class ChatMessageController {
         chatRoomMemberService.userJoinRoom(userId, roomId);
         ChatRoomTypeInfoResponse chatRoomTypeInfoResponse  = chatRoomDetailService.getChatRoomInfoByRoomName(userId, roomId);
 
-        roomSessions.forEach((rooms, users) -> {
-            if (!rooms.equals(roomId) && users.contains(userId)) {
-                users.remove(userId);
-                logger.info("{} 사용자가 기존 채팅방 {}에서 제거되었습니다.", userId, rooms);
-                if (users.isEmpty()) {
-                    roomSessions.remove(rooms);
-                }
-            }
-        });
+        roomCache.computeIfAbsent(roomId, key -> ConcurrentHashMap.newKeySet()).add(userId);
+        logger.info("{} 사용자가 채팅방 {}에 참여", userId, roomId);
 
-        List<Long> usersInNewRoom = roomSessions.computeIfAbsent(roomId, key -> Collections.synchronizedList(new ArrayList<>()));
-        if (!usersInNewRoom.contains(userId)) {
-            usersInNewRoom.add(userId);
-            logger.info("{} 사용자가 채팅방 {}에 참여", userId, roomId);
-        } else {
-            logger.info("{} 사용자가 이미 채팅방 {}에 참여 중", userId, roomId);
-        }
-        logger.info("현재 채팅방 사용자: {}", roomSessions);
+        logger.info("현재 채팅방 사용자: {}", roomCache);
 
         chatMessageService.markMessagesAsRead(roomId, userId);
         messagingTemplate.convertAndSend("/topic/users/" + roomId, ApiResponse.success(chatRoomTypeInfoResponse));
@@ -73,18 +60,19 @@ public class ChatMessageController {
         String roomId = readMessageRequest.roomId();
         Long userId = readMessageRequest.userId();
 
-        List<Long> users = roomSessions.get(roomId);
-        if (users != null) {
+        roomCache.computeIfPresent(roomId, (key, users) -> {
             users.remove(userId);
             if (users.isEmpty()) {
-                roomSessions.remove(roomId);
+                logger.info("채팅방 {}에 남은 사용자가 없어 삭제됩니다.", roomId);
+                return null;
             }
-        }
+            return users;
+        });
 
         chatRoomMemberService.userLeaveRoom(userId, roomId);
 
         logger.info("{} 사용자가 채팅방 {}에서 나감", userId, roomId);
-        logger.info("현재 채팅방 사용자: {}", roomSessions);
+        logger.info("현재 채팅방 사용자: {}", roomCache);
     }
 
     @Operation(summary = "채팅 목록 페이지 입장", description = "사용자가 채팅 목록 페이지에 들어올 때 등록합니다.")
@@ -120,15 +108,14 @@ public class ChatMessageController {
             logger.info("메시지 전송 [{} -> {}]: {}", message.userInfo().userId(), message.roomId(), message.message());
 
             // 현재 방에 있는 모든 사용자 가져오기
-            List<Long> usersInRoom = roomSessions.getOrDefault(message.roomId(), Collections.emptyList());
-            List<Long> readByList = new ArrayList<>(new HashSet<>(usersInRoom));
+            Set<Long> usersInRoom = roomCache.getOrDefault(message.roomId(), Collections.emptySet());
 
             ChatMessageResponse savedMessage = chatMessageService.saveMessage(
                     new ChatMessageRequest(
                             message.roomId(),
                             message.userInfo(),
                             message.message(),
-                            readByList
+                            new ArrayList<>(usersInRoom)
                     )
             );
 
