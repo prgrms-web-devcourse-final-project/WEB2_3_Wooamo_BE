@@ -1,6 +1,5 @@
 package com.api.stuv.domain.board.service;
 
-import com.api.stuv.domain.alert.service.AlertService;
 import com.api.stuv.domain.board.entity.Board;
 import com.api.stuv.domain.board.entity.BoardType;
 import com.api.stuv.domain.board.entity.Comment;
@@ -18,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -40,11 +40,12 @@ public class ConfirmCommentTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+
     @InjectMocks
     private BoardService boardService;
 
-    @Mock
-    private AlertService alertService;
 
     List<User> users = List.of(
             new User(1L, "user1", "user1", null, null, "user1", BigDecimal.valueOf(0), null, RoleType.USER, null),

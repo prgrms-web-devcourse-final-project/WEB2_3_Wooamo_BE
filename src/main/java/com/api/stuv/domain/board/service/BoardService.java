@@ -1,7 +1,7 @@
 package com.api.stuv.domain.board.service;
 
+import com.api.stuv.domain.alert.dto.AlertEventDTO;
 import com.api.stuv.domain.alert.entity.AlertType;
-import com.api.stuv.domain.alert.service.AlertService;
 import com.api.stuv.domain.board.dto.dto.BoardDetailDTO;
 import com.api.stuv.domain.board.dto.response.BoardDetailResponse;
 import com.api.stuv.domain.board.dto.request.BoardRequest;
@@ -29,6 +29,7 @@ import com.api.stuv.global.response.PageResponse;
 import com.api.stuv.global.util.common.TemplateUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,8 +49,8 @@ public class BoardService {
     private final UserRepository userRepository;
     private final ImageFileRepository imageFileRepository;
     private final ImageService imageService;
-    private final AlertService alertService;
     private final S3ImageService s3ImageService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public PageResponse<BoardResponse> getBoardList(String title, Pageable pageable) {
@@ -147,7 +148,8 @@ public class BoardService {
     public void createComment(Long userId, Long boardId, String content) {
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
         Board board = boardRepository.findById(boardId).orElseThrow(() -> new NotFoundException(ErrorCode.BOARD_NOT_FOUND));
-        if (!userId.equals(board.getUserId())) alertService.createAlert(board.getUserId(), boardId, AlertType.COMMENT, board.getTitle(), user.getNickname());
+        if (!userId.equals(board.getUserId()))
+            eventPublisher.publishEvent(new AlertEventDTO(board.getUserId(), boardId, AlertType.COMMENT, board.getTitle(), user.getNickname()));
         commentRepository.save(Comment.create(boardId, userId, content));
     }
 
@@ -162,7 +164,7 @@ public class BoardService {
         if (comment.getUserId().equals(userId)) throw new AccessDeniedException(ErrorCode.COMMENT_BY_WRITER);
         if (board.getConfirmedCommentId() != null) throw new AccessDeniedException(ErrorCode.COMMENT_ALREADY_CONFIRM);
         if (!board.getUserId().equals(userId)) throw new AccessDeniedException(ErrorCode.COMMENT_NOT_AUTHORIZED);
-        alertService.createAlert(comment.getUserId(), board.getId(), AlertType.CONFIRM, board.getTitle(), boardWitter.getNickname());
+        eventPublisher.publishEvent(new AlertEventDTO(comment.getUserId(), board.getId(), AlertType.CONFIRM, board.getTitle(), boardWitter.getNickname()));
         board.confirmComment(commentId);
         user.updatePoint(BigDecimal.valueOf(CONFIRM_COMMENT_POINT));
     }

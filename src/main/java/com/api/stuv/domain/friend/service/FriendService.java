@@ -1,7 +1,7 @@
 package com.api.stuv.domain.friend.service;
 
+import com.api.stuv.domain.alert.dto.AlertEventDTO;
 import com.api.stuv.domain.alert.entity.AlertType;
-import com.api.stuv.domain.alert.service.AlertService;
 import com.api.stuv.domain.friend.dto.response.FriendFollowResponse;
 import com.api.stuv.domain.friend.dto.response.FriendResponse;
 import com.api.stuv.domain.friend.entity.Friend;
@@ -13,6 +13,7 @@ import com.api.stuv.domain.user.entity.User;
 import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.*;
 import com.api.stuv.global.response.PageResponse;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +28,7 @@ public class FriendService {
 
     private final UserRepository userRepository;
     private final FriendRepository friendRepository;
-    private final AlertService alertService;
+    private final ApplicationEventPublisher eventPublisher;
     private final S3ImageService s3ImageService;
 
     @Transactional
@@ -37,11 +38,11 @@ public class FriendService {
         if ( userRepository.isDuplicateIds(Arrays.asList(userId, receiverId)) != 2 ) throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
 
         FriendStatus status = friendRepository.isFriendshipDuplicate(userId, receiverId);
-        if ( status != null )
-            if (status.equals(FriendStatus.PENDING)) throw new DuplicateException(ErrorCode.FRIEND_REQUEST_ALREADY_EXIST);
-            else if (status.equals(FriendStatus.ACCEPTED)) throw new DuplicateException(ErrorCode.FRIEND_REQUEST_ALREADY_ACCEPTED);
-
-        alertService.createAlert(receiverId, null, AlertType.FOLLOW, null, sender.getNickname());
+        if ( status != null ) {
+            if (status.equals(FriendStatus.PENDING)) { throw new DuplicateException(ErrorCode.FRIEND_REQUEST_ALREADY_EXIST); }
+            else if (status.equals(FriendStatus.ACCEPTED)) { throw new DuplicateException(ErrorCode.FRIEND_REQUEST_ALREADY_ACCEPTED); }
+        }
+        eventPublisher.publishEvent(new AlertEventDTO(receiverId, null, AlertType.FOLLOW, null, sender.getNickname()));
         return FriendFollowResponse.from(friendRepository.save(Friend.init(userId, receiverId)));
     }
 

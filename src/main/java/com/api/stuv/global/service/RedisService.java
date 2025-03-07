@@ -1,5 +1,6 @@
 package com.api.stuv.global.service;
 
+import com.api.stuv.domain.alert.dto.AlertExpireDTO;
 import com.api.stuv.domain.alert.entity.Alert;
 
 import com.api.stuv.global.util.common.TemplateUtils;
@@ -30,8 +31,8 @@ public class RedisService {
     private final ObjectMapper objectMapper;
 
     public void save(String key, Object value, Duration timeout) {
-        if (value instanceof String) {
-            stringTemplate.opsForValue().set(key, (String) value, timeout);
+        if (value instanceof String str) {
+            stringTemplate.opsForValue().set(key, str, timeout);
         } else {
             template.opsForValue().set(key, value, timeout);
         }
@@ -75,24 +76,20 @@ public class RedisService {
         return TemplateUtils.jsonParseToObject(rawData, Alert.class);
     }
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 10 * 60 * 1000)
     public void deleteAlertSchedule() {
         log.info("== Redis 의 expire alert 삭제 시작 ==");
         AtomicInteger count = new AtomicInteger();
         // Cursor 사용하여 alert 으로 시작하는 key 를 100개씩 조회 후 expiredAt 이 현재 시간보다 이전인 데이터 삭제
-        try (Cursor<String> cursor = template.scan(ScanOptions.scanOptions().match("alert:*").count(100).build())) {
-            cursor.forEachRemaining(key -> {
-                Map<Object, Object> entries = template.opsForHash().entries(key);
-
-                if (entries.isEmpty()) return;
-
-                Arrays.stream(TemplateUtils.jsonParseToObject(entries.values().toString(), Alert[].class))
-                        .filter(alert -> alert.getExpiredAt() != null &&
-                                alert.getExpiredAt().isBefore(LocalDateTime.now()))
-                        .forEach(alert -> {
-                            template.opsForHash().delete(key, alert.getAlertId());
-                            count.getAndIncrement();
-                        });
+        try (Cursor<Map.Entry<Object, Object>> cursor = template.opsForHash().scan("alert:expire", ScanOptions.scanOptions().count(100).build())) {
+            cursor.forEachRemaining(hash -> {
+                String key = hash.getKey().toString();
+                AlertExpireDTO dto = TemplateUtils.jsonParseToObject(hash.getValue().toString(), AlertExpireDTO.class);
+                if (dto.expiredAt().isBefore(LocalDateTime.now().plusDays(1))) {
+                    template.opsForHash().delete("alert:expire", key);
+                    template.opsForHash().delete("alert:" + dto.userId(), key);
+                    count.getAndIncrement();
+                }
             });
         }
         log.info("== Redis 의 expire alert 총 {} 개 삭제 완료 ==", count.get());
