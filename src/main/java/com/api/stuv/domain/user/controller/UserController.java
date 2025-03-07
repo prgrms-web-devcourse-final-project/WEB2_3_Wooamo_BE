@@ -1,5 +1,6 @@
 package com.api.stuv.domain.user.controller;
 
+import com.api.stuv.domain.auth.util.TokenUtil;
 import com.api.stuv.domain.timer.dto.response.RankInfoResponse;
 import com.api.stuv.domain.timer.dto.response.RankResponse;
 import com.api.stuv.domain.timer.service.TimerService;
@@ -32,6 +33,7 @@ public class UserController {
     private final KakaoService kakaoService;
     private final TodoService todoService;
     private final TimerService timerService;
+    private final TokenUtil tokenUtil;
 
     @Value("${frontend.server}")
     private String url;
@@ -187,5 +189,20 @@ public class UserController {
     public ResponseEntity<ApiResponse<List<RankInfoResponse>>> topUserRanking() {
         return ResponseEntity.ok()
                 .body(ApiResponse.success(timerService.getTopRankUser()));
+    }
+
+    @Operation(summary = "로그인 확인 여부 API", description = "로그인 확인 여부를 조회합니다")
+    @GetMapping("/isLogin")
+    public ResponseEntity<ApiResponse<Boolean>> isLogin() {
+        try {
+            Long userId = tokenUtil.getUserId();
+
+            return ResponseEntity.ok()
+                    .body(ApiResponse.success(true));
+        } catch (Exception e) {
+            return ResponseEntity.ok()
+                    .body(ApiResponse.success(false));
+        }
+
     }
 }
