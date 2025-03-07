@@ -125,13 +125,20 @@ public class PartyService {
 
     @Transactional
     public PartyIdResponse createParty(PartyCreateRequest dto, Long userId) {
+        LocalDate today = LocalDate.now();
+        if (today.isAfter(dto.startDate()) || today.isEqual(dto.startDate()) || dto.endDate().isBefore(dto.startDate())) throw new BusinessException(ErrorCode.PARTY_INVALID_DATE);
         if (isBettingPointInvalid(dto.bettingPointCap(), dto.userBettingPoint())) throw new BusinessException(ErrorCode.BETTING_AMOUNT_TOO_LOW);
+
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
         PartyGroup party = PartyGroup.create(dto);
         partyRepository.save(party);
 
+        user.subtractPoint(dto.userBettingPoint());
         GroupMember member = GroupMember.join(party.getId(), userId, dto.userBettingPoint());
+
         memberRepository.save(member);
+        userRepository.save(user);
 
         return new PartyIdResponse(party.getId());
     }
@@ -142,10 +149,13 @@ public class PartyService {
         if (party.isJoined()) throw new BusinessException(ErrorCode.ALREADY_JOINED_PARTY);
         if (isFullParty(party.recruitCap(), party.recruitCnt())) throw new BusinessException(ErrorCode.CANNOT_JOIN_FULL_PARTY);
         if (isBettingPointInvalid(party.bettingPointCap(), bettingPoint)) throw new BusinessException(ErrorCode.BETTING_AMOUNT_TOO_LOW);
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
 
+        user.subtractPoint(bettingPoint);
         GroupMember member = GroupMember.join(partyId, userId, bettingPoint);
 
         memberRepository.save(member);
+        userRepository.save(user);
     }
 
     @Transactional
@@ -192,7 +202,7 @@ public class PartyService {
 
         LocalDate today = LocalDate.now();
 
-        if (isValidatePeriod(party, today)) throw new BusinessException(ErrorCode.PARTY_INVALID_DATE);
+        if (isValidatePeriod(party, today)) throw new BusinessException(ErrorCode.AUTH_INVALID_DATE);
         if (confirmRepository.existsByMemberIdAndConfirmDate(memberId, today)) throw new BusinessException(ErrorCode.ALREADY_AUTH_TODAY);
 
         QuestConfirm confirm = new QuestConfirm(memberId, today);
