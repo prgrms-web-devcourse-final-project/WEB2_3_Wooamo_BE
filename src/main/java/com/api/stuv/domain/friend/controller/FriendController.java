@@ -48,13 +48,14 @@ public class FriendController {
     }
     
     @Operation(summary = "친구 목록 조회 API", description = "특정 유저의 친구 목록을 조회합니다.")
-    @GetMapping("")
+    @GetMapping("/{userId}")
     public ResponseEntity<ApiResponse<PageResponse<FriendResponse>>> getFriendList(
+            @PathVariable Long userId,
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "10") int size
     ) {
         return ResponseEntity.ok()
-                .body(ApiResponse.success(friendService.getFriendList(tokenUtil.getUserId(), PageRequest.of(page, size))));
+                .body(ApiResponse.success(friendService.getFriendList(userId, PageRequest.of(page, size))));
     }
     
     @Operation(summary = "친구 삭제 API", description = "특정 친구를 삭제합니다.")
