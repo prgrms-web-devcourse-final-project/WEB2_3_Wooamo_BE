@@ -128,7 +128,12 @@ public class UserService {
     }
 
     public UserInformationResponse getUserInformation(Long userId){
-        Long myId = tokenUtil.getUserId();
+        Long myId = null;
+        try {
+            myId = tokenUtil.getUserId();
+        } catch (Exception e) {
+            myId = 0L;
+        }
         Long friends = friendRepository.getTotalFriendListPage(userId);
         if (friends == null) friends = 0L;
 
