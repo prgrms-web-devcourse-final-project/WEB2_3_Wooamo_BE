@@ -32,7 +32,6 @@ public class ChatMessageController {
     private final ChatRoomMemberService chatRoomMemberService;
     private final SimpMessagingTemplate messagingTemplate;
     private static final Logger logger = LoggerFactory.getLogger(ChatMessageController.class);
-//    private final ConcurrentMap<String, List<Long>> roomCache = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, Set<Long>> roomCache = new ConcurrentHashMap<>();
     private final Set<Long> listPageSubscribers = ConcurrentHashMap.newKeySet();
 
