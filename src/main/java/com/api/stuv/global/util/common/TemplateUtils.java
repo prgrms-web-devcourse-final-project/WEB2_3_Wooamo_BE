@@ -1,5 +1,6 @@
 package com.api.stuv.global.util.common;
 
+import com.api.stuv.global.exception.SseErrorException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.core.types.dsl.DateTimePath;
 import com.querydsl.core.types.dsl.Expressions;
@@ -30,7 +31,7 @@ public class TemplateUtils {
         try {
             return objectMapper.writeValueAsString(object);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new SseErrorException(e.getMessage());
         }
     }
 
@@ -38,7 +39,7 @@ public class TemplateUtils {
         try {
             return objectMapper.readValue(json, clazz);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new SseErrorException(e.getMessage());
         }
     }
 }
