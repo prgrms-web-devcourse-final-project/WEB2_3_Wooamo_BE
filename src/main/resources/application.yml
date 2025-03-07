@@ -1,3 +1,7 @@
+info:
+  app:
+    name: STUV
+    company: 우리들은 아무것도 모른다
 frontend:
   server: ${FE_BASE:http://localhost:3000}
 spring:
@@ -23,6 +27,23 @@ server:
   servlet:
     session:
       timeout: 0
+management:
+  server:
+    port: 8080
+  info:
+    java:
+      enabled: true
+    os:
+      enabled: true
+    env:
+      enabled: true
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: "health, info, loggers, metrics, prometheus"
 ---
 spring:
   config:
@@ -33,14 +54,6 @@ spring:
     url: ${MARIA_URL}
     username: ${MARIA_USER}
     password: ${MARIA_PASSWORD}
-  kafka:
-    bootstrap-servers: ${KAFKA_URL}
-    consumer:
-      group-id: ${KAFKA_GROUP}
-      auto-offset-reset: earliest
-    producer:
-      retries: 3
-      acks: all
   jpa:
     hibernate:
       ddl-auto: update
@@ -89,14 +102,6 @@ spring:
     url: jdbc:h2:mem:stuv;MODE=MySQL
     username: sa
     password:
-  kafka:
-    bootstrap-servers: localhost:9092
-    consumer:
-      group-id: test-group
-      auto-offset-reset: earliest
-    producer:
-      retries: 3
-      acks: all
   jpa:
     hibernate:
       ddl-auto: create-drop
