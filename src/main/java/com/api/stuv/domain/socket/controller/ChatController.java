@@ -25,23 +25,22 @@ public class ChatController {
     private final ChatRoomMemberService chatRoomMemberService;
     private final TokenUtil tokenUtil;
 
+    @Operation(summary = "채팅방 메시지 조회", description = "채팅방의 메시지를 페이지네이션 방식으로 조회합니다.")
+    @GetMapping("/{roomId}/messages")
+    public ResponseEntity<ApiResponse<List<ChatMessageResponse>>> getMessagesByRoomIdPage(
+            @PathVariable String roomId,
+            @RequestParam(required = false) String lastChatId,
+            @RequestParam(defaultValue = "10") int limit) {
+
+        List<ChatMessageResponse> messages = chatMessageService.getMessagesByRoomId(roomId, lastChatId, limit);
+        return ResponseEntity.ok(ApiResponse.success(messages));
+    }
+
     @Operation(summary = "채팅방 목록 조회 API", description = "user가 포함된 채팅방 목록을 가져옵니다.")
     @GetMapping("/list")
     public ResponseEntity<ApiResponse<List<ChatRoomResponse>>> getRoomListBySenderId() {
         List<ChatRoomResponse> roomList = chatRoomDetailService.getSortedRoomListBySenderId(tokenUtil.getUserId());
         return ResponseEntity.ok(ApiResponse.success(roomList));
-    }
-
-    @Operation(summary = "메세지 요청 API", description = "채팅방 메세지를 요청을 합니다.")
-    @GetMapping("/{roomId}/messages")
-    public ResponseEntity<ApiResponse<List<ChatMessageResponse>>> getMessagesByRoomIdPage(
-            @PathVariable String roomId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-
-        return ResponseEntity.ok()
-                .body(ApiResponse.success(chatMessageService.getMessagesByRoomId(
-                roomId, PageRequest.of(page, size))));
     }
 
     @Operation(summary = "1:1 채팅방 생성", description = "두 사용자 간의 1:1 채팅방을 생성합니다.")
