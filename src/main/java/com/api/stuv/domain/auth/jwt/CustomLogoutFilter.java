@@ -109,8 +109,4 @@ public class CustomLogoutFilter extends GenericFilterBean {
         response.setContentType("application/json;charset=UTF-8");
         response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.success()));
     }
-
-    public void logout(String refresh, HttpServletRequest request, HttpServletResponse response) {
-
-    }
 }
