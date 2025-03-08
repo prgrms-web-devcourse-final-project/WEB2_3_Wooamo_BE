@@ -37,7 +37,7 @@ public class ChatMessageService {
     //메세지 불러오기
     public List<ChatMessageResponse> getMessagesByRoomId(String roomId, String lastChatId, int limit) {
         List<ChatMessage> messages = chatMessageRepository.findMessagesByRoomIdWithPagination(roomId, lastChatId, limit);
-
+        int totalMembers = chatRoomMemberService.getRoomMemberCount(roomId);
         Collections.reverse(messages);
         Map<Long, UserInfo> userInfoCache = new HashMap<>();
 
@@ -58,7 +58,9 @@ public class ChatMessageService {
                         userInfoCache.put(senderId, userInfo);
                     }
 
-                    return ChatMessageResponse.from(chatMessage, userInfo);
+                    int readByCount = (chatMessage.getReadBy() != null) ? chatMessage.getReadBy().size() : 0;
+
+                    return ChatMessageResponse.from(chatMessage, userInfo, totalMembers - readByCount);
                 })
                 .collect(Collectors.toList());
     }
