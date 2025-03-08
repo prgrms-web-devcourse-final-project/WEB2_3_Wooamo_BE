@@ -15,16 +15,14 @@ public record ChatMessageResponse(
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime createdAt
 ) {
-    public static ChatMessageResponse from(ChatMessage chatMessage, UserInfo userInfo) {
-        List<Long> readBy = chatMessage.getReadBy();
-        int count = (readBy != null) ? readBy.size() : 0;
+    public static ChatMessageResponse from(ChatMessage chatMessage, UserInfo userInfo, int readByCount) {
         return new ChatMessageResponse(
                 chatMessage.getId(),
                 chatMessage.getRoomId(),
                 userInfo,
                 chatMessage.getMessage(),
-                count,
+                readByCount,
                 chatMessage.getCreatedAt()
-                );
+        );
     }
 }
