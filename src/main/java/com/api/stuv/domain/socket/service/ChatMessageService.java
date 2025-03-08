@@ -41,6 +41,7 @@ public class ChatMessageService {
         Collections.reverse(messages);
         Map<Long, UserInfo> userInfoCache = new HashMap<>();
 
+        int totalMembers = chatRoomMemberService.getRoomMemberCount(roomId);
         return messages.stream()
                 .map(chatMessage -> {
                     Long senderId = chatMessage.getSenderId();
@@ -129,7 +130,6 @@ public class ChatMessageService {
     @Transactional
     public void markMessagesAsRead(String roomId, Long userId) {
         chatMessageRepository.updateManyReadBy(roomId, userId);
-        System.out.println("================markMessagesAsRead: " + roomId + " : "+ userId + "업데이트됨============");
     }
 
     // 읽음 처리된 메시지들의 readBy 리스트만 반환
