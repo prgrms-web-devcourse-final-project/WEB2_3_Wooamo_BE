@@ -25,6 +25,18 @@ public class ChatController {
     private final ChatRoomMemberService chatRoomMemberService;
     private final TokenUtil tokenUtil;
 
+    //    삭제 =========================================================
+    @Operation(summary = "채팅방 목록 API", description = "user가 포함된 채팅방 목록을 가져옵니다.")
+    @GetMapping("/{senderId}")
+    public ResponseEntity<ApiResponse<List<String>>> getRoomsBySenderId(
+            @PathVariable Long senderId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return ResponseEntity.ok()
+                .body(ApiResponse.success((chatRoomDetailService.getRoomIdsBySenderId(senderId))));
+    }
+
     @Operation(summary = "채팅방 메시지 조회", description = "채팅방의 메시지를 페이지네이션 방식으로 조회합니다.")
     @GetMapping("/{roomId}/messages")
     public ResponseEntity<ApiResponse<List<ChatMessageResponse>>> getMessagesByRoomIdPage(
@@ -48,7 +60,7 @@ public class ChatController {
     public ResponseEntity<ApiResponse<String>> createPrivateRoom(
             @RequestBody CreatePrivateRoomRequest request) {
         String roomId = chatRoomDetailService.createPrivateChatRoom(request.userId1(), request.userId2());
-        chatRoomMemberService.updateRoomMembers(String.valueOf(roomId));
+//        chatRoomMemberService.updateRoomMembers(String.valueOf(roomId));
         return ResponseEntity.ok(ApiResponse.success(roomId));
     }
 
@@ -57,7 +69,7 @@ public class ChatController {
     public ResponseEntity<ApiResponse<String>> createGroupRoom(
             @RequestBody CreateGroupRoomRequest request) {
         String roomId = chatRoomDetailService.createGroupChatRoom(String.valueOf(request.groupId()),request.groupName(), request.userId(), request.maxMembers());
-        chatRoomMemberService.updateRoomMembers(String.valueOf(roomId));
+//        chatRoomMemberService.updateRoomMembers(String.valueOf(roomId));
         return ResponseEntity.ok(ApiResponse.success(roomId));
     }
 
