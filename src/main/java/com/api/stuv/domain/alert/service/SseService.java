@@ -125,7 +125,7 @@ public class SseService {
         emitter.onError((e) -> {
             emitters.remove(userId);
             log.error("[SSE] Emitter error for client: {} | current emitters: {}", userId, emitters.size());
-            throw new RuntimeException(e);
+            throw new SseErrorException(e.getMessage());
         });
 
         scheduler.scheduleAtFixedRate(() -> {
