@@ -37,7 +37,7 @@ public class SseService {
         sseConfig(userId, emitter);
 
         try {
-            emitter.send(SseEmitter.event().comment("connected"));
+            emitter.send(SseEmitter.event().data("connected"));
             log.info("[SSE] {} user enter | current user count : {}", userId, emitters.size());
         } catch (IOException e) {
             log.error("[SSE] Error sending initial event to client: {} | Error : {}", userId, e.getMessage());
@@ -46,7 +46,7 @@ public class SseService {
         sendStoredAlert(userId, emitter);
 
         emitters.put(userId, emitter);
-
+        log.info("[SSE] {} 유저의 객체가 return 됐습니다 : {}", userId, emitter);
         return emitter;
     }
 
@@ -91,7 +91,7 @@ public class SseService {
         SseEmitter emitter = emitters.get(userId);
         if (emitter != null) {
             try {
-                emitter.send(SseEmitter.event().comment("disconnected"));
+                emitter.send(SseEmitter.event().data("disconnected"));
                 emitter.complete();
             } catch (IOException e) {
                 log.error("[SSE] Error sending disconnect event to client: {}", userId, e);
@@ -130,7 +130,7 @@ public class SseService {
 
         scheduler.scheduleAtFixedRate(() -> {
             try {
-                emitter.send(SseEmitter.event().comment("ping"));
+                emitter.send(SseEmitter.event().data("ping"));
             } catch (IOException e) {
                 log.error("[SSE] Error sending ping to client: {} | Error: {}", userId, e.getMessage());
                 emitter.completeWithError(e);
