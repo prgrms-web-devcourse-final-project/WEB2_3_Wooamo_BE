@@ -41,7 +41,7 @@ public class ChatMessageController {
         String roomId = readMessageRequest.roomId();
         Long userId = readMessageRequest.userId();
 
-        chatRoomMemberService.userJoinRoom(userId, roomId);
+        chatRoomMemberService.userJoinRoom(userId);
         ChatRoomTypeInfoResponse chatRoomTypeInfoResponse  = chatRoomDetailService.getChatRoomInfoByRoomName(userId, roomId);
 
         roomCache.computeIfAbsent(roomId, key -> ConcurrentHashMap.newKeySet()).add(userId);
@@ -51,6 +51,14 @@ public class ChatMessageController {
 
         chatMessageService.markMessagesAsRead(roomId, userId);
         messagingTemplate.convertAndSend("/topic/users/" + roomId, ApiResponse.success(chatRoomTypeInfoResponse));
+
+//        List<ReadByResponse> updatedReadByList = chatMessageService.getReadByForMessages(
+//                readMessageRequest.roomId(),
+//                PageRequest.of(0, 10)
+//        );
+//        messagingTemplate.convertAndSend("/topic/read/" + readMessageRequest.roomId(), ApiResponse.success((updatedReadByList)));
+        List<ChatMessageResponse> messages = chatMessageService.getMessagesByRoomId(roomId, null, 10);
+        messagingTemplate.convertAndSend("/topic/read/" + readMessageRequest.roomId(), ApiResponse.success((messages)));
     }
 
     @Operation(summary = "채팅방 퇴장", description = "사용자가 채팅방에서 나갈 때 삭제합니다.")
@@ -68,7 +76,7 @@ public class ChatMessageController {
             return users;
         });
 
-        chatRoomMemberService.userLeaveRoom(userId, roomId);
+        chatRoomMemberService.userLeaveRoom(userId);
 //        레디스로 옮기기 -> TTL
 
         logger.info("{} 사용자가 채팅방 {}에서 나감", userId, roomId);
@@ -142,12 +150,12 @@ public class ChatMessageController {
 
         chatMessageService.markMessagesAsRead(readMessageRequest.roomId(), readMessageRequest.userId());
 
-        List<ReadByResponse> updatedReadByList = chatMessageService.getReadByForMessages(
-                readMessageRequest.roomId(),
-                PageRequest.of(pageValue, sizeValue)
-        );
-
-        messagingTemplate.convertAndSend("/topic/read/" + readMessageRequest.roomId(), ApiResponse.success((updatedReadByList)));
+//        List<ReadByResponse> updatedReadByList = chatMessageService.getReadByForMessages(
+//                readMessageRequest.roomId(),
+//                PageRequest.of(pageValue, sizeValue)
+//        );
+//
+//        messagingTemplate.convertAndSend("/topic/read/" + readMessageRequest.roomId(), ApiResponse.success((updatedReadByList)));
     }
 
 

@@ -1,5 +1,6 @@
 package com.api.stuv.global.config;
 
+import com.api.stuv.domain.socket.dto.UserInfo;
 import com.api.stuv.global.service.RedisSubscriber;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,6 +21,7 @@ import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
@@ -80,14 +82,20 @@ public class RedisConfig {
 
     // 채팅방 사용자 관리 전용
     @Bean
-    @Qualifier("redisTemplateRoomConnected")
-    public RedisTemplate<String, Object> redisTemplateRoomConnected(RedisConnectionFactory connectionFactory) {
-        RedisTemplate<String, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(connectionFactory);
+    @Qualifier("redisTemplateUserInfo")
+    public RedisTemplate<String, UserInfo> redisTemplateUserInfo(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, UserInfo> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory);
+
         template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+
+        Jackson2JsonRedisSerializer<UserInfo> serializer =
+                new Jackson2JsonRedisSerializer<>(UserInfo.class);
+
+        template.setValueSerializer(serializer);
+        template.setHashValueSerializer(serializer);
         template.setHashKeySerializer(new StringRedisSerializer());
-        template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
+        template.afterPropertiesSet();
         return template;
     }
 
