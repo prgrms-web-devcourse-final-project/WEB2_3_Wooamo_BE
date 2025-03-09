@@ -1,0 +1,26 @@
+server:
+  http_listen_port: 3200
+
+ingester:
+  max_block_duration: 5m
+  trace_idle_period: 5s
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        http:
+        grpc:
+
+compactor:
+  compaction:
+    max_block_bytes: 50_000_000
+    block_retention: 72h
+
+storage:
+  trace:
+    backend: local
+    wal:
+      path: /tmp/tempo/wal
+    local:
+      path: /tmp/tempo/blocks
