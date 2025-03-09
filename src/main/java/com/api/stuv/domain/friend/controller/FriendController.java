@@ -39,23 +39,16 @@ public class FriendController {
     
     @Operation(summary = "친구 요청 목록 조회 API", description = "특정 유저의 친구 요청 목록을 조회합니다.")
     @GetMapping("/request")
-    public ResponseEntity<ApiResponse<PageResponse<FriendResponse>>> getFriendFollowList(
-            @RequestParam(required = false, defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "10") int size
-    ) {
+    public ResponseEntity<ApiResponse<List<FriendResponse>>> getFriendFollowList() {
         return ResponseEntity.ok()
-                .body(ApiResponse.success(friendService.getFriendFollowList(tokenUtil.getUserId(), PageRequest.of(page, size))));
+                .body(ApiResponse.success(friendService.getFriendFollowList(tokenUtil.getUserId())));
     }
     
     @Operation(summary = "친구 목록 조회 API", description = "특정 유저의 친구 목록을 조회합니다.")
     @GetMapping("/{userId}")
-    public ResponseEntity<ApiResponse<PageResponse<FriendResponse>>> getFriendList(
-            @PathVariable Long userId,
-            @RequestParam(required = false, defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "10") int size
-    ) {
+    public ResponseEntity<ApiResponse<List<FriendResponse>>> getFriendList(@PathVariable Long userId) {
         return ResponseEntity.ok()
-                .body(ApiResponse.success(friendService.getFriendList(userId, PageRequest.of(page, size))));
+                .body(ApiResponse.success(friendService.getFriendList(userId)));
     }
     
     @Operation(summary = "친구 삭제 API", description = "특정 친구를 삭제합니다.")
