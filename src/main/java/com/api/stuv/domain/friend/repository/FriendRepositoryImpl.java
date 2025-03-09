@@ -26,7 +26,7 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
 
     // 내게 Follow 요청한 친구 목록 조회
     @Override
-    public List<FriendListDTO> getFriendFollowList(Long receiverId, Pageable pageable) {
+    public List<FriendListDTO> getFriendFollowList(Long receiverId) {
         return jpaQueryFactory
                 .select(Projections.constructor(FriendListDTO.class,
                         friend.id,
@@ -40,22 +40,12 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
                 .leftJoin(userCostume).on(user.costumeId.eq(userCostume.id))
                 .leftJoin(imageFile).on(userCostume.costumeId.eq(imageFile.entityId).and(imageFile.entityType.eq(EntityType.COSTUME)))
                 .where(friend.friendId.eq(receiverId).and(friend.status.eq(FriendStatus.PENDING)))
-                .orderBy(friend.createdAt.desc())
-                .offset(pageable.getOffset()).limit(pageable.getPageSize()).fetch();
-    }
-
-    @Override
-    public Long getTotalFriendFollowListPage(Long receiverId) {
-        return jpaQueryFactory
-                .select(friend.count())
-                .from(friend)
-                .where(friend.friendId.eq(receiverId).and(friend.status.eq(FriendStatus.PENDING)))
-                .fetchOne();
+                .orderBy(friend.createdAt.desc()).fetch();
     }
 
     // 친구 목록 조회
     @Override
-    public List<FriendListDTO> getFriendList(Long userId, Pageable pageable) {
+    public List<FriendListDTO> getFriendList(Long userId) {
         return jpaQueryFactory
                 .select(Projections.constructor(FriendListDTO.class,
                         friend.id,
@@ -69,8 +59,7 @@ public class FriendRepositoryImpl implements FriendRepositoryCustom {
                 .leftJoin(userCostume).on(user.costumeId.eq(userCostume.id))
                 .leftJoin(imageFile).on(userCostume.costumeId.eq(imageFile.entityId).and(imageFile.entityType.eq(EntityType.COSTUME)))
                 .where(friend.status.eq(FriendStatus.ACCEPTED))
-                .orderBy(friend.createdAt.desc())
-                .offset(pageable.getOffset()).limit(pageable.getPageSize()).fetch();
+                .orderBy(friend.createdAt.desc()).fetch();
     }
 
     @Override

@@ -59,8 +59,8 @@ public class FriendService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<FriendResponse> getFriendFollowList(Long userId, Pageable pageable) {
-        List<FriendResponse> frinedList = friendRepository.getFriendFollowList(userId, pageable).stream().map( dto -> new FriendResponse(
+    public List<FriendResponse> getFriendFollowList(Long userId) {
+        return friendRepository.getFriendFollowList(userId).stream().map( dto -> new FriendResponse(
                 dto.friendId(),
                 null,
                 dto.userId(),
@@ -68,12 +68,11 @@ public class FriendService {
                 dto.context(),
                 getCostume(dto.costumeId(), dto.newFilename()),
                 null)).toList();
-        return PageResponse.applyPage(frinedList, pageable, friendRepository.getTotalFriendFollowListPage(userId));
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<FriendResponse> getFriendList(Long userId, Pageable pageable) {
-        List<FriendResponse> frinedList = friendRepository.getFriendList(userId, pageable).stream().map( dto -> new FriendResponse(
+    public List<FriendResponse> getFriendList(Long userId) {
+        return friendRepository.getFriendList(userId).stream().map( dto -> new FriendResponse(
                 dto.friendId(),
                 dto.userId(),
                 null,
@@ -81,7 +80,6 @@ public class FriendService {
                 dto.context(),
                 getCostume(dto.costumeId(), dto.newFilename()),
                 null)).toList();
-        return PageResponse.applyPage(frinedList, pageable, friendRepository.getTotalFriendListPage(userId));
     }
 
     @Transactional
