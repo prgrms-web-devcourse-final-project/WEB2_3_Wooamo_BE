@@ -39,25 +39,14 @@ public class ChatMessageService {
         List<ChatMessage> messages = chatMessageRepository.findMessagesByRoomIdWithPagination(roomId, lastChatId, limit);
         int totalMembers = chatRoomMemberService.getRoomMemberCount(roomId);
         Collections.reverse(messages);
-        Map<Long, UserInfo> userInfoCache = new HashMap<>();
 
         int totalMembers = chatRoomMemberService.getRoomMemberCount(roomId);
+
         return messages.stream()
                 .map(chatMessage -> {
                     Long senderId = chatMessage.getSenderId();
-                    UserInfo userInfo = userInfoCache.get(senderId);
 
-                    if (userInfo == null) {
-                        String senderNickname = (senderId != null) ? userRepository.findNicknameByUserId(senderId) : null;
-                        ImageUrlDTO response = (senderId != null) ? userRepository.getCostumeInfoByUserId(senderId) : null;
-                        String senderProfile = (response != null)
-                                ? s3ImageService.generateImageFile(EntityType.COSTUME, response.entityId(), response.newFileName())
-                                : null;
-
-                        userInfo = new UserInfo(senderId, senderNickname, senderProfile);
-
-                        userInfoCache.put(senderId, userInfo);
-                    }
+                    UserInfo userInfo = chatRoomMemberService.getUserInfo(senderId);
 
                     int readByCount = (chatMessage.getReadBy() != null) ? chatMessage.getReadBy().size() : 0;
 

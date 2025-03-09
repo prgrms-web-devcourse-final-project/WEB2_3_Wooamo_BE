@@ -41,7 +41,7 @@ public class ChatMessageController {
         String roomId = readMessageRequest.roomId();
         Long userId = readMessageRequest.userId();
 
-        chatRoomMemberService.userJoinRoom(userId, roomId);
+        chatRoomMemberService.userJoinRoom(userId);
         ChatRoomTypeInfoResponse chatRoomTypeInfoResponse  = chatRoomDetailService.getChatRoomInfoByRoomName(userId, roomId);
 
         roomCache.computeIfAbsent(roomId, key -> ConcurrentHashMap.newKeySet()).add(userId);
@@ -73,7 +73,7 @@ public class ChatMessageController {
             return users;
         });
 
-        chatRoomMemberService.userLeaveRoom(userId, roomId);
+        chatRoomMemberService.userLeaveRoom(userId);
 //        레디스로 옮기기 -> TTL
 
         logger.info("{} 사용자가 채팅방 {}에서 나감", userId, roomId);
