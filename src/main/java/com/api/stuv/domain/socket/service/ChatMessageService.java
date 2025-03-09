@@ -37,7 +37,7 @@ public class ChatMessageService {
     //메세지 불러오기
     public List<ChatMessageResponse> getMessagesByRoomId(String roomId, String lastChatId, int limit) {
         List<ChatMessage> messages = chatMessageRepository.findMessagesByRoomIdWithPagination(roomId, lastChatId, limit);
-        int totalMembers = chatRoomMemberService.getRoomMemberCount(roomId);
+
         Collections.reverse(messages);
 
         int totalMembers = chatRoomMemberService.getRoomMemberCount(roomId);
@@ -83,7 +83,6 @@ public class ChatMessageService {
                 })
                 .collect(Collectors.toList());
     }
-
 
     // 메시지 저장
     @Transactional
