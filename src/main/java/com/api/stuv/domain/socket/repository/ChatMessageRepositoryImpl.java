@@ -33,7 +33,8 @@ public class ChatMessageRepositoryImpl implements ChatMessageRepositoryCustom {
 
         mongoTemplate.updateMulti(query, update, ChatMessage.class);
     }
-
+    
+    //사용자가 안읽은 메세지 갯수
     @Override
     public int countUnreadMessages(String roomId, Long userId) {
         Query query = new Query()

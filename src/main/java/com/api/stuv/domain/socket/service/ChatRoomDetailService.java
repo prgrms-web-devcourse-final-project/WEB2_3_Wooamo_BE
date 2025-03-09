@@ -25,6 +25,23 @@ public class ChatRoomDetailService {
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
     private final S3ImageService s3ImageService;
+    private final ChatRoomMemberService chatRoomMemberService;
+
+
+    // 삭제 =========================================================
+    public List<String> getRoomIdsBySenderId(Long senderId) {
+        List<ChatRoom> chatRooms = chatRoomRepository.findByMembersContaining(senderId);
+
+        if (chatRooms.isEmpty()) {
+            throw new NotFoundException(ErrorCode.CHAT_ROOM_NOT_FOUND);
+        }
+
+        return chatRooms
+                .stream()
+                .map(ChatRoom::getRoomId)
+                .distinct()
+                .collect(Collectors.toList());
+    }
 
     public String createPrivateChatRoom(Long userId1, Long userId2) {
         List<Long> sortedIds = Arrays.asList(userId1, userId2);
@@ -116,12 +133,8 @@ public class ChatRoomDetailService {
                     int unreadCount = chatMessageRepository.countUnreadMessages(room.getRoomId(), senderId);
 
                     Long lastSenderId = (latestMessage != null) ? latestMessage.getSenderId() : null;
-                    String lastSenderNickname = (lastSenderId != null) ? userRepository.findNicknameByUserId(lastSenderId) : null;
-                    ImageUrlDTO response = (lastSenderId != null) ? userRepository.getCostumeInfoByUserId(lastSenderId) : null;
-                    String lastSenderProfile = (response != null) ?
-                            s3ImageService.generateImageFile(EntityType.COSTUME, response.entityId(), response.newFileName()) : null;
 
-                    UserInfo lastUserInfo = new UserInfo(lastSenderId, lastSenderNickname, lastSenderProfile);
+                    UserInfo lastUserInfo = chatRoomMemberService.getUserInfo(lastSenderId);
 
                     UserInfo userInfo = null;
                     GroupInfo groupInfo = null;
@@ -172,12 +185,7 @@ public class ChatRoomDetailService {
             return null;
         }
 
-        String nickName = userRepository.findNicknameByUserId(otherUserId);
-        ImageUrlDTO response = userRepository.getCostumeInfoByUserId(otherUserId);
-        String profileImage = (response != null) ?
-                s3ImageService.generateImageFile(EntityType.COSTUME, response.entityId(), response.newFileName()) : null;
-
-        return new UserInfo(otherUserId, nickName, profileImage);
+        return chatRoomMemberService.getUserInfo(otherUserId);
     }
 
     private GroupInfo getGroupChatInfo(ChatRoom room) {
@@ -189,12 +197,7 @@ public class ChatRoomDetailService {
     }
 
     private UserInfo getUserInfo(Long userId) {
-        String nickName = userRepository.findNicknameByUserId(userId);
-        ImageUrlDTO response = userRepository.getCostumeInfoByUserId(userId);
-        String profileImage = (response != null) ?
-                s3ImageService.generateImageFile(EntityType.COSTUME, response.entityId(), response.newFileName()) : null;
-
-        return new UserInfo(userId, nickName, profileImage);
+        return chatRoomMemberService.getUserInfo(userId);
     }
 
 }

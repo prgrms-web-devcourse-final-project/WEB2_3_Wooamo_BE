@@ -1,5 +1,6 @@
 package com.api.stuv.global.config;
 
+import com.api.stuv.domain.socket.dto.UserInfo;
 import com.api.stuv.global.service.RedisSubscriber;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
@@ -19,6 +21,7 @@ import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
@@ -72,6 +75,24 @@ public class RedisConfig {
         template.setHashKeySerializer(new StringRedisSerializer());
         template.setHashValueSerializer(serializer);
 
+        template.afterPropertiesSet();
+        return template;
+    }
+
+    // 채팅방 사용자 정보 관리
+    @Bean
+    public RedisTemplate<String, UserInfo> redisTemplateUserInfo(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, UserInfo> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory);
+
+        template.setKeySerializer(new StringRedisSerializer());
+
+        Jackson2JsonRedisSerializer<UserInfo> serializer =
+                new Jackson2JsonRedisSerializer<>(UserInfo.class);
+
+        template.setValueSerializer(serializer);
+        template.setHashValueSerializer(serializer);
+        template.setHashKeySerializer(new StringRedisSerializer());
         template.afterPropertiesSet();
         return template;
     }
