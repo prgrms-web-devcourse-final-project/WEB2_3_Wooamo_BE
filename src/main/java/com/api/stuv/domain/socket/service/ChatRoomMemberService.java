@@ -71,10 +71,6 @@ public class ChatRoomMemberService {
         }
     }
 
-    public void userLeaveRoom(Long userId) {
-//        redisTemplate.delete(USER_INFO_PREFIX + userId);
-    }
-
     // 사용자 정보 반환
     public UserInfo getUserInfo(Long userId) {
         String userKey = USER_INFO_PREFIX + userId;
@@ -88,23 +84,6 @@ public class ChatRoomMemberService {
         return userInfo;
     }
 
-    // 특정 채팅방의 사용자 목록 반환
-    public List<UserInfo> getRoomMemberInfos(String roomId) {
-        Set<Long> userIds = roomMembersCache.getOrDefault(roomId, Collections.emptySet());
-
-        return userIds.stream()
-                .map(this::getUserInfo)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-    }
-
-    // DB에서 특정 채팅방 멤버 목록을 불러와 캐시에 저장
-    private Set<Long> loadRoomMembersFromDB(String roomId) {
-        ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.CHAT_ROOM_NOT_FOUND));
-        return new HashSet<>(chatRoom.getMembers());
-    }
-
     // DB에서 사용자 정보 불러와 Redis에 저장
     private UserInfo loadUserInfoFromDB(Long userId) {
         String nickname = (userId != null) ? userRepository.findNicknameByUserId(userId) : "";
@@ -113,6 +92,16 @@ public class ChatRoomMemberService {
         String profileUrl = (response != null) ? s3ImageService.generateImageFile(EntityType.COSTUME, response.entityId(), response.newFileName()) : null;
 
         return new UserInfo(userId, nickname, profileUrl);
+    }
+
+    public void updateUserProfileInCache(Long userId, String newProfileUrl) {
+        String userKey = USER_INFO_PREFIX + userId;
+
+        UserInfo userInfo = redisTemplate.opsForValue().get(userKey);
+        if (userInfo != null) {
+            UserInfo updatedUserInfo = new UserInfo(userId, userInfo.nickname(), newProfileUrl);
+            redisTemplate.opsForValue().set(userKey, updatedUserInfo, Duration.ofMinutes(60));
+        }
     }
 
 }

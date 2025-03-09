@@ -6,6 +6,7 @@ import com.api.stuv.domain.image.entity.EntityType;
 import com.api.stuv.domain.image.entity.ImageFile;
 import com.api.stuv.domain.image.repository.ImageFileRepository;
 import com.api.stuv.domain.image.service.S3ImageService;
+import com.api.stuv.domain.socket.service.ChatRoomMemberService;
 import com.api.stuv.domain.timer.repository.StudyTimeRepository;
 import com.api.stuv.domain.user.dto.*;
 import com.api.stuv.domain.user.dto.request.*;
@@ -47,6 +48,7 @@ public class UserService {
     private final EmailProvider  emailProvider;
     private final RedisService redisService;
     private final S3ImageService s3ImageService;
+    private final ChatRoomMemberService chatRoomMemberService;
     private final RandomName randomName;
     private final TokenUtil tokenUtil;
     private final ImageFileRepository imageFileRepository;
@@ -305,6 +307,8 @@ public class UserService {
                         newFilename.getNewFilename());
 
         ChangeUserCostume changeUserCostume = new ChangeUserCostume(url);
+
+        chatRoomMemberService.updateUserProfileInCache(userId, url);
 
         return changeUserCostume;
     }

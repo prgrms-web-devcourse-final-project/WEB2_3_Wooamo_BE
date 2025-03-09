@@ -25,18 +25,6 @@ public class ChatController {
     private final ChatRoomMemberService chatRoomMemberService;
     private final TokenUtil tokenUtil;
 
-    //    삭제 =========================================================
-    @Operation(summary = "채팅방 목록 API", description = "user가 포함된 채팅방 목록을 가져옵니다.")
-    @GetMapping("/{senderId}")
-    public ResponseEntity<ApiResponse<List<String>>> getRoomsBySenderId(
-            @PathVariable Long senderId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-
-        return ResponseEntity.ok()
-                .body(ApiResponse.success((chatRoomDetailService.getRoomIdsBySenderId(senderId))));
-    }
-
     @Operation(summary = "채팅방 메시지 조회", description = "채팅방의 메시지를 페이지네이션 방식으로 조회합니다.")
     @GetMapping("/{roomId}/messages")
     public ResponseEntity<ApiResponse<List<ChatMessageResponse>>> getMessagesByRoomIdPage(
