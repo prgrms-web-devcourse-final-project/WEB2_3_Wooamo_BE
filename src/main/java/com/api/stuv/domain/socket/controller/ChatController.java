@@ -36,6 +36,16 @@ public class ChatController {
         return ResponseEntity.ok(ApiResponse.success(messages));
     }
 
+    @Operation(summary = "채팅방 메시지 범위 조회", description = "마지막 메시지부터 특정 메시지(lastChatId)까지 조회합니다.")
+    @GetMapping("/{roomId}/messages/until")
+    public ResponseEntity<ApiResponse<List<ChatMessageResponse>>> getMessagesUntilLastChatId(
+            @PathVariable String roomId,
+            @RequestParam String lastChatId) {
+
+        List<ChatMessageResponse> messages = chatMessageService.getMessagesUntilLastChatId(roomId, lastChatId);
+        return ResponseEntity.ok(ApiResponse.success(messages));
+    }
+
     @Operation(summary = "채팅방 목록 조회 API", description = "user가 포함된 채팅방 목록을 가져옵니다.")
     @GetMapping("/list")
     public ResponseEntity<ApiResponse<List<ChatRoomResponse>>> getRoomListBySenderId() {

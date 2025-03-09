@@ -65,6 +65,11 @@ public class ChatMessageController {
 
         chatMessageService.markMessagesAsRead(roomId, userId);
         messagingTemplate.convertAndSend("/topic/users/" + roomId, ApiResponse.success(chatRoomTypeInfoResponse));
+
+        Map<String, String> response = new HashMap<>();
+        response.put("userId", String.valueOf(userId));
+
+        messagingTemplate.convertAndSend("/topic/read/" + roomId, ApiResponse.success(response));
     }
 
     @Operation(summary = "채팅방 퇴장", description = "사용자가 채팅방에서 나갈 때 삭제합니다.")
@@ -143,25 +148,5 @@ public class ChatMessageController {
             }
         }
     }
-
-    @Operation(summary = "읽음 상태 업데이트", description = "채팅방의 메시지를 읽음 처리로 변경합니다.")
-    @MessageMapping("/chat/read")
-    public void updateReadBy(@Payload ReadMessageRequest readMessageRequest,
-                             @Header(value = "page", required = false) Integer page,
-                             @Header(value = "size", required = false) Integer size) {
-
-        int pageValue = (page != null) ? page : 0;
-        int sizeValue = (size != null) ? size : 10;
-
-        chatMessageService.markMessagesAsRead(readMessageRequest.roomId(), readMessageRequest.userId());
-
-        List<ReadByResponse> updatedReadByList = chatMessageService.getReadByForMessages(
-                readMessageRequest.roomId(),
-                PageRequest.of(pageValue, sizeValue)
-        );
-
-        messagingTemplate.convertAndSend("/topic/read/" + readMessageRequest.roomId(), ApiResponse.success((updatedReadByList)));
-    }
-
 
 }

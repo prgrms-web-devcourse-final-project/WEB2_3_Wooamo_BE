@@ -8,5 +8,6 @@ public interface ChatMessageRepositoryCustom {
     void updateManyReadBy(String roomId, Long userId);
     int countUnreadMessages(String roomId, Long userId);
     List<ChatMessage> findMessagesByRoomIdWithPagination(String roomId, String lastChatId, int limit);
+    List<ChatMessage> findMessagesUntilLastChatId(String roomId, String lastChatId);
 
 }
