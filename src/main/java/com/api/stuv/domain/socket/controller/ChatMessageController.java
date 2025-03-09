@@ -73,9 +73,6 @@ public class ChatMessageController {
             return users;
         });
 
-        chatRoomMemberService.userLeaveRoom(userId);
-//        레디스로 옮기기 -> TTL
-
         logger.info("{} 사용자가 채팅방 {}에서 나감", userId, roomId);
         logger.info("현재 채팅방 사용자: {}", roomCache);
     }
