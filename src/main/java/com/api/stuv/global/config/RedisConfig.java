@@ -49,7 +49,6 @@ public class RedisConfig {
     }
 
     @Bean
-    @Primary
     public RedisTemplate<String, Object> redisTemplate() {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory());
@@ -80,9 +79,8 @@ public class RedisConfig {
         return template;
     }
 
-    // 채팅방 사용자 관리 전용
+    // 채팅방 사용자 정보 관리
     @Bean
-    @Qualifier("redisTemplateUserInfo")
     public RedisTemplate<String, UserInfo> redisTemplateUserInfo(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, UserInfo> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);

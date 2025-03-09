@@ -70,7 +70,7 @@ public class ChatController {
     public ResponseEntity<ApiResponse<String>> createPrivateRoom(
             @RequestBody CreatePrivateRoomRequest request) {
         String roomId = chatRoomDetailService.createPrivateChatRoom(request.userId1(), request.userId2());
-//        chatRoomMemberService.updateRoomMembers(String.valueOf(roomId));
+        chatRoomMemberService.updateRoomMembers(String.valueOf(roomId));
         return ResponseEntity.ok(ApiResponse.success(roomId));
     }
 
@@ -79,7 +79,7 @@ public class ChatController {
     public ResponseEntity<ApiResponse<String>> createGroupRoom(
             @RequestBody CreateGroupRoomRequest request) {
         String roomId = chatRoomDetailService.createGroupChatRoom(String.valueOf(request.groupId()),request.groupName(), request.userId(), request.maxMembers());
-//        chatRoomMemberService.updateRoomMembers(String.valueOf(roomId));
+        chatRoomMemberService.updateRoomMembers(String.valueOf(roomId));
         return ResponseEntity.ok(ApiResponse.success(roomId));
     }
 

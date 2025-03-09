@@ -37,10 +37,9 @@ public class ChatMessageService {
     //메세지 불러오기
     public List<ChatMessageResponse> getMessagesByRoomId(String roomId, String lastChatId, int limit) {
         List<ChatMessage> messages = chatMessageRepository.findMessagesByRoomIdWithPagination(roomId, lastChatId, limit);
-
+        int totalMembers = chatRoomMemberService.getRoomMemberCount(roomId);
         Collections.reverse(messages);
 
-        int totalMembers = chatRoomMemberService.getRoomMemberCount(roomId);
 
         return messages.stream()
                 .map(chatMessage -> {
@@ -55,27 +54,17 @@ public class ChatMessageService {
                 .collect(Collectors.toList());
     }
 
+    //특정 메시지(lastChatId)까지 조회
     public List<ChatMessageResponse> getMessagesUntilLastChatId(String roomId, String lastChatId) {
         List<ChatMessage> messages = chatMessageRepository.findMessagesUntilLastChatId(roomId, lastChatId);
         int totalMembers = chatRoomMemberService.getRoomMemberCount(roomId);
         Collections.reverse(messages);
-        Map<Long, UserInfo> userInfoCache = new HashMap<>();
 
         return messages.stream()
                 .map(chatMessage -> {
                     Long senderId = chatMessage.getSenderId();
-                    UserInfo userInfo = userInfoCache.get(senderId);
 
-                    if (userInfo == null) {
-                        String senderNickname = (senderId != null) ? userRepository.findNicknameByUserId(senderId) : null;
-                        ImageUrlDTO response = (senderId != null) ? userRepository.getCostumeInfoByUserId(senderId) : null;
-                        String senderProfile = (response != null)
-                                ? s3ImageService.generateImageFile(EntityType.COSTUME, response.entityId(), response.newFileName())
-                                : null;
-
-                        userInfo = new UserInfo(senderId, senderNickname, senderProfile);
-                        userInfoCache.put(senderId, userInfo);
-                    }
+                    UserInfo userInfo = chatRoomMemberService.getUserInfo(senderId);
 
                     int readByCount = (chatMessage.getReadBy() != null) ? chatMessage.getReadBy().size() : 0;
 
@@ -83,7 +72,6 @@ public class ChatMessageService {
                 })
                 .collect(Collectors.toList());
     }
-
     // 메시지 저장
     @Transactional
     public ChatMessageResponse saveMessage(ChatMessageRequest request) {

@@ -31,14 +31,10 @@ public class ChatRoomMemberService {
     private final S3ImageService s3ImageService;
 
     @Autowired
-    @Qualifier("redisTemplateUserInfo")
     private final RedisTemplate<String, UserInfo> redisTemplate;
     private static final String USER_INFO_PREFIX = "user:info:";
     // 방별 사용자 목록 저장
     private final ConcurrentMap<String, Set<Long>> roomMembersCache = new ConcurrentHashMap<>();
-
-    // 사용자 정보 저장
-//    private final ConcurrentMap<Long, UserInfo> userInfoCache = new ConcurrentHashMap<>();
 
     @PostConstruct
     public void init() {
