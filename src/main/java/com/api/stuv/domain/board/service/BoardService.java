@@ -131,9 +131,9 @@ public class BoardService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<CommentResponse> getCommentList(Long boardId, Pageable pageable) {
+    public List<CommentResponse> getCommentList(Long boardId) {
         if (!boardRepository.existsById(boardId)) throw new NotFoundException(ErrorCode.BOARD_NOT_FOUND);
-        List<CommentResponse> commentList = commentRepository.getCommentList(boardId, pageable).stream().map(dto -> new CommentResponse(
+        return commentRepository.getCommentList(boardId).stream().map(dto -> new CommentResponse(
                 dto.commentId(),
                 dto.userId(),
                 dto.nickname(),
@@ -141,7 +141,6 @@ public class BoardService {
                 dto.createdAt().format(TemplateUtils.dateTimeFormatter),
                 dto.isConfirm() != null && dto.isConfirm().equals(dto.commentId()),
                 s3ImageService.generateImageFile(EntityType.COSTUME, dto.costumeId(), dto.newFilename()))).toList();
-        return PageResponse.applyPage(commentList, pageable, commentRepository.getCommentCount(boardId));
     }
 
     @Transactional

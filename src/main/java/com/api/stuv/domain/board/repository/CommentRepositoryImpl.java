@@ -6,7 +6,6 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Pageable;
 import static com.api.stuv.domain.board.entity.QBoard.board;
 import static com.api.stuv.domain.board.entity.QComment.comment;
 import static com.api.stuv.domain.image.entity.QImageFile.imageFile;
@@ -21,7 +20,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public List<CommentDTO> getCommentList(Long boardId, Pageable pageable) {
+    public List<CommentDTO> getCommentList(Long boardId) {
         return jpaQueryFactory
                 .select(Projections.constructor(CommentDTO.class,
                         comment.id,
@@ -37,12 +36,6 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                 .leftJoin(userCostume).on(user.costumeId.eq(userCostume.id))
                 .leftJoin(imageFile).on(userCostume.costumeId.eq(imageFile.entityId).and(imageFile.entityType.eq(EntityType.COSTUME)))
                 .where(comment.boardId.eq(boardId))
-                .orderBy(comment.createdAt.desc())
-                .offset(pageable.getOffset()).limit(pageable.getPageSize()).fetch();
-    }
-
-    @Override
-    public Long getCommentCount(Long boardId) {
-        return jpaQueryFactory.select(comment.count()).from(comment).where(comment.boardId.eq(boardId)).fetchOne();
+                .orderBy(comment.createdAt.desc()).fetch();
     }
 }

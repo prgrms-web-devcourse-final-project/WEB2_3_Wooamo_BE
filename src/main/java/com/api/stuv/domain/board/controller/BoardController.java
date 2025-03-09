@@ -80,16 +80,11 @@ public class BoardController {
 
     @Operation(summary = "코멘트 목록 조회 API", description = "코멘트 목록을 조회 합니다.")
     @GetMapping("/{boardId}/comment")
-    public ResponseEntity<ApiResponse<PageResponse<CommentResponse>>> getCommentList(
-            @PathVariable Long boardId,
-            @RequestParam(required = false, defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "10") int size
-    ) {
+    public ResponseEntity<ApiResponse<List<CommentResponse>>> getCommentList(@PathVariable Long boardId) {
         return ResponseEntity.ok()
-                .body(ApiResponse.success(boardService.getCommentList(boardId, PageRequest.of(page, size))));
+                .body(ApiResponse.success(boardService.getCommentList(boardId)));
     }
 
-    // TODO: 이후 알림 기능 추가
     @Operation(summary = "댓글 생성 API", description = "댓글을 생성합니다.")
     @PostMapping("/{boardId}/comment")
     public ResponseEntity<ApiResponse<Void>> createComment(@PathVariable Long boardId, @RequestBody CommentRequest request) {
