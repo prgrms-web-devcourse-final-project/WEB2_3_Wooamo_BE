@@ -71,10 +71,14 @@ public class PartyGroupRepositoryImpl implements PartyGroupRepositoryCustom {
                         Expressions.nullExpression(LocalDate.class),
                         pg.endDate))
                 .from(pg)
-                .join(gm).on(pg.id.eq(gm.groupId))
+                .leftJoin(gm).on(pg.id.eq(gm.groupId))
                 .where(pg.startDate.loe(LocalDate.now())
                         .and(pg.endDate.goe(LocalDate.now()))
-                        .and(gm.userId.eq(userId)))
+                        .and(pg.id.in(
+                                factory.select(gm.groupId)
+                                        .from(gm)
+                                        .where(gm.userId.eq(userId))
+                        )))
                 .orderBy(pg.endDate.asc(), pg.createdAt.asc())
                 .groupBy(pg.id, pg.name, pg.recruitCap, pg.endDate)
                 .fetch();
