@@ -76,11 +76,13 @@ dependencies {
     runtimeOnly 'com.h2database:h2'
     testRuntimeOnly 'com.h2database:h2'
 
-    // Prometheus
-    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
-
-    // Spring Actuator
+    // Observability
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'com.github.loki4j:loki-logback-appender:1.6.0'
+    implementation 'io.micrometer:micrometer-core'
+    implementation 'io.micrometer:micrometer-tracing-bridge-otel'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+    implementation 'net.ttddyy.observation:datasource-micrometer-spring-boot:1.0.1'
 
     // AWS
     implementation platform('software.amazon.awssdk:bom:2.27.21')
