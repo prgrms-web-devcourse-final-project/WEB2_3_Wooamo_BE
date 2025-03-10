@@ -76,5 +76,6 @@ jobs:
             sed -i "s/\${SERVER_IP}/${{ secrets.SERVER_IP }}/g" ./docker/proxy/conf.d/default.conf.template
             mv ./docker/proxy/conf.d/default.conf.template ./docker/proxy/conf.d/default.conf
             
+            sudo docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/stuv-app:latest
             chmod +x deploy.sh
             ./deploy.sh
