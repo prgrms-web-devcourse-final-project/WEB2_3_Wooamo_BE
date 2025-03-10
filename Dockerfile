@@ -5,7 +5,7 @@ FROM openjdk:17-alpine
 WORKDIR /app
 
 # copy .jar file to docker
-COPY ../build/libs/*SNAPSHOT.jar stuv.jar
+COPY ./build/libs/*SNAPSHOT.jar stuv.jar
 
 # expose the application port
 EXPOSE 8080

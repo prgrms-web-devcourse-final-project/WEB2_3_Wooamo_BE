@@ -24,7 +24,7 @@ services:
     environment:
       - TZ=Asia/Seoul
     build:
-      context: ./docker
+      context: .
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
@@ -41,7 +41,7 @@ services:
     environment:
       - TZ=Asia/Seoul
     build:
-      context: ./docker
+      context: .
       dockerfile: Dockerfile
     ports:
       - "8081:8080"
