@@ -80,3 +80,6 @@ jobs:
             
             sudo docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/stuv-app:latest
             sudo docker compose --env-file /home/ubuntu/env/.env up -d
+            --
+            chmod +x deploy.sh
+            source deploy.sh

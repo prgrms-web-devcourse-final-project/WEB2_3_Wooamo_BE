@@ -1,0 +1,50 @@
+services:
+  springboot-blue:
+    image: gpemvjtmxm/stuv-app:latest
+    container_name: stuv-app-blue
+    restart: always
+    env_file:
+      - /home/ubuntu/env/.env
+    environment:
+      - TZ=Asia/Seoul
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  springboot-green:
+    image: gpemvjtmxm/stuv-app:latest
+    container_name: stuv-app-green
+    restart: always
+    env_file:
+      - /home/ubuntu/env/.env
+    environment:
+      - TZ=Asia/Seoul
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8080"
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    hostname: redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli","ping" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+
+  # nginx 파일 필요
+
