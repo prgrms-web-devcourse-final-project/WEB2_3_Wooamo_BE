@@ -1,0 +1,38 @@
+server {
+    listen 80;
+    server_name ${SERVER_IP}.nip.io;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name ${SERVER_IP}.nip.io;
+
+    ssl_certificate /etc/letsencrypt/live/${SERVER_IP}.nip.io/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${SERVER_IP}.nip.io/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    location / {
+        proxy_pass http://backend;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /api/sse/connect {
+        proxy_pass http://localhost:8080/api/sse/connect;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # SSE 처리에 필요한 설정들
+        proxy_http_version 1.1;
+        proxy_set_header Connection 'keep-alive';
+        proxy_set_header Content-Type 'text/event-stream';
+        proxy_buffering off;
+        proxy_cache off;
+    }
+}
