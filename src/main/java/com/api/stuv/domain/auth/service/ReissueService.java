@@ -23,7 +23,7 @@ public class ReissueService {
         String role = jwtUtil.getRole(refreshToken);
         Long userId = jwtUtil.getUserId(refreshToken);
 
-        return jwtUtil.createJwt("access",userId, email, role, 600_000L); // 10분
+        return jwtUtil.createJwt("access",userId, email, role, 3600000L); // 1시간
     }
 
     public String reissueRefreshToken(String refreshToken) {
@@ -33,11 +33,11 @@ public class ReissueService {
         String role = jwtUtil.getRole(refreshToken);
         Long userId = jwtUtil.getUserId(refreshToken);
 
-        String newRefreshToken = jwtUtil.createJwt("refresh", userId, email, role, 86400000L);
+        String newRefreshToken = jwtUtil.createJwt("refresh", userId, email, role, 604800000L); //7일
         redisService.delete(refreshToken);
-        redisService.save(newRefreshToken, email, Duration.ofDays(1));
+        redisService.save(newRefreshToken, email, Duration.ofDays(7));
 
-        return  newRefreshToken;// 24시간
+        return  newRefreshToken;
     }
 
     private void validateRefreshToken(String refreshToken) {
