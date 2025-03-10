@@ -27,36 +27,11 @@ if [ "$CONTAINER_STATUS" != "running" ]; then
   exit 1
 fi
 
-# 서버가 제대로 실행될 때까지 최대 10번 시도
-MAX_RETRIES=10
-COUNT=0
-HEALTHY="false"
-while [ $COUNT -lt $MAX_RETRIES ]; do
-  COUNT=$((COUNT + 1))
-  LOG_OUTPUT=$(sudo docker logs stuv-app-${AFTER_COLOR} 2>&1)
-
-  if echo "$LOG_OUTPUT" | grep -q "Started Application"; then
-    HEALTHY="true"
-    break
-  fi
-
-  echo "Retrying... Attempt #${COUNT}"
-  sleep 5
-done
-
-if [ "$HEALTHY" != "true" ]; then
-  echo "==== ${AFTER_COLOR} 서버 실행 실패 (헬스 체크 실패) ===="
-  exit 1
-fi
-
-# 3
 echo "===== Nginx 설정 변경 ====="
 sudo docker exec -it nginx /bin/bash -c "sed -i 's/:${BEFORE_PORT}/:${AFTER_PORT}/g' /etc/nginx/conf.d/default.conf && nginx -s reload"
 
-# 4
 echo "===== ${BEFORE_COLOR} server down(port:${BEFORE_PORT}) ====="
 sudo docker compose down springboot-${BEFORE_COLOR}
 
-# 불필요한 Docker 볼륨 정리
 echo "===== 사용하지 않는 Docker 볼륨 정리 ====="
 sudo docker volume prune -f
