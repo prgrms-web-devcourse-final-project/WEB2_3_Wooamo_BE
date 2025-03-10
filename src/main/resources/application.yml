@@ -18,6 +18,12 @@ spring:
             enable: true
   config:
     import: optional:file:.env[.properties]
+
+  thymeleaf:
+    check-template-location: true
+    prefix: classpath:/templates/
+    suffix: .html
+
 server:
   shutdown: graceful
   servlet:
