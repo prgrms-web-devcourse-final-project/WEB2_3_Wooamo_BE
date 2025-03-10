@@ -85,7 +85,7 @@ public class RedisService {
             cursor.forEachRemaining(hash -> {
                 String key = hash.getKey().toString();
                 AlertExpireDTO dto = TemplateUtils.jsonParseToObject(hash.getValue().toString(), AlertExpireDTO.class);
-                if (dto.expiredAt().isBefore(LocalDateTime.now().plusDays(1))) {
+                if (dto.expiredAt().isBefore(LocalDateTime.now())) {
                     template.opsForHash().delete("alert:expire", key);
                     template.opsForHash().delete("alert:" + dto.userId(), key);
                     count.getAndIncrement();
