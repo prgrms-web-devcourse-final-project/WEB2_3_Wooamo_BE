@@ -72,11 +72,9 @@ jobs:
           script: |
             cd /home/ubuntu/WEB2_3_Wooamo_BE
             git pull origin develop
-            sudo docker compose down
-            sudo docker compose rm -f
-            sudo docker rmi ${{ secrets.DOCKER_HUB_USERNAME }}/stuv-app:latest
-            sudo docker system prune -a -f
-            sudo docker volume prune -f
             
-            sudo docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/stuv-app:latest
-            sudo docker compose --env-file /home/ubuntu/env/.env up -d
+            sed -i "s/\${SERVER_IP}/${{ secrets.SERVER_IP }}/g" ./docker/proxy/conf.d/default.conf.template
+            mv ./docker/proxy/conf.d/default.conf.template ./docker/proxy/conf.d/default.conf
+            
+            chmod +x deploy.sh
+            ./deploy.sh
