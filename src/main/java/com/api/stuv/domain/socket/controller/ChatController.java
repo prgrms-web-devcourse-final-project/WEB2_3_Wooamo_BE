@@ -40,7 +40,7 @@ public class ChatController {
     @GetMapping("/{roomId}/messages/until")
     public ResponseEntity<ApiResponse<List<ChatMessageResponse>>> getMessagesUntilLastChatId(
             @PathVariable String roomId,
-            @RequestParam String lastChatId) {
+            @RequestParam(required = false) String lastChatId) {
 
         List<ChatMessageResponse> messages = chatMessageService.getMessagesUntilLastChatId(roomId, lastChatId);
         return ResponseEntity.ok(ApiResponse.success(messages));

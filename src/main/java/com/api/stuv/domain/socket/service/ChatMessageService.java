@@ -56,16 +56,23 @@ public class ChatMessageService {
 
     //특정 메시지(lastChatId)까지 조회
     public List<ChatMessageResponse> getMessagesUntilLastChatId(String roomId, String lastChatId) {
+        if (lastChatId == null) {
+            return Collections.emptyList();
+        }
+
         List<ChatMessage> messages = chatMessageRepository.findMessagesUntilLastChatId(roomId, lastChatId);
+
+        if (messages.isEmpty()) {
+            return Collections.emptyList();
+        }
+
         int totalMembers = chatRoomMemberService.getRoomMemberCount(roomId);
         Collections.reverse(messages);
 
         return messages.stream()
                 .map(chatMessage -> {
                     Long senderId = chatMessage.getSenderId();
-
                     UserInfo userInfo = chatRoomMemberService.getUserInfo(senderId);
-
                     int readByCount = (chatMessage.getReadBy() != null) ? chatMessage.getReadBy().size() : 0;
 
                     return ChatMessageResponse.from(chatMessage, userInfo, totalMembers - readByCount);
