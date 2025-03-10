@@ -10,7 +10,9 @@ scrape_configs:
   - job_name: 'stuv-service'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['stuv-app:8080']
+      - targets:
+          - 'stuv-app-blue:8080'
+          - 'stuv-app-green:8081'
   - job_name: 'node-exporter'
     static_configs:
       - targets: [ 'node-exporter:9100' ]
