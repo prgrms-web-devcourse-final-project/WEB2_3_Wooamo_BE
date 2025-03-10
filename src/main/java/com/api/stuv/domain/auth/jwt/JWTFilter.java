@@ -3,12 +3,14 @@ package com.api.stuv.domain.auth.jwt;
 import com.api.stuv.domain.auth.dto.CustomUserDetails;
 import com.api.stuv.domain.user.entity.RoleType;
 import com.api.stuv.domain.user.entity.User;
+import com.api.stuv.global.service.RedisService;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,10 +19,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+@Slf4j
 @RequiredArgsConstructor
 public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
+    private final RedisService redisService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -38,6 +42,15 @@ public class JWTFilter extends OncePerRequestFilter {
             PrintWriter writer = response.getWriter();
             writer.print("access token expired");
 
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
+        if(redisService.exists(accessToken)){
+            PrintWriter writer = response.getWriter();
+            writer.print("access token expired");
+
+            log.error("access 토큰이 블랙리스트에 올라가있습니다.");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
