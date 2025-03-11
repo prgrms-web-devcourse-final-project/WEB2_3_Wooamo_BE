@@ -19,20 +19,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ChatMessageService {
     private final ChatMessageRepository chatMessageRepository;
-    private final ChatRoomRepository chatRoomRepository;
-    private final UserRepository userRepository;
-    private final S3ImageService s3ImageService;
-    private final ChatRoomMemberService chatRoomMemberService; // 총 멤버 정보를 관리하는 서비스
+    private final ChatRoomStatusService chatRoomStatusService;
+    private final ChatRoomMemberService chatRoomMemberService;
     
     //메세지 불러오기
     public List<ChatMessageResponse> getMessagesByRoomId(String roomId, String lastChatId, int limit) {
@@ -79,25 +74,24 @@ public class ChatMessageService {
                 })
                 .collect(Collectors.toList());
     }
+
     // 메시지 저장
     @Transactional
-    public ChatMessageResponse saveMessage(ChatMessageRequest request) {
-        chatRoomRepository.findByRoomId(request.roomId())
-                .orElseThrow(() -> new NotFoundException(ErrorCode.CHAT_ROOM_NOT_FOUND));
-        UserInfo userInfo = chatRoomMemberService.getUserInfo(request.userInfo().userId());
+    public ChatMessageResponse saveMessageWithReadBy(ChatMessageRequest request) {
+        Set<Long> usersInRoom = chatRoomStatusService.getUsersInRoom(request.roomId());
 
         ChatMessage savedMessage = chatMessageRepository.save(
                 ChatMessage.builder()
                         .roomId(request.roomId())
                         .senderId(request.userInfo().userId())
                         .message(request.message())
-                        .readBy(request.readBy())
+                        .readBy(new ArrayList<>(usersInRoom)) // 읽은 사람 처리
                         .createdAt(LocalDateTime.now())
                         .build()
         );
 
-        // 기본적으로 DB에 저장된 readByCount (읽은 인원 수)
-        int unreadCount = chatRoomMemberService.getRoomMemberCount(request.roomId()) - savedMessage.getReadBy().size();
+        UserInfo userInfo = chatRoomMemberService.getUserInfo(request.userInfo().userId());
+        int unreadCount = chatRoomMemberService.getRoomMemberCount(request.roomId()) - usersInRoom.size();
 
         return new ChatMessageResponse(
                 savedMessage.getId(),
