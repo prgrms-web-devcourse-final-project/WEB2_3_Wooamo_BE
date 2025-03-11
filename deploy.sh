@@ -28,7 +28,7 @@ if [ "$CONTAINER_STATUS" != "running" ]; then
 fi
 
 echo "===== Nginx 설정 변경 ====="
-sudo docker exec -it nginx /bin/sh -c "sed -i 's/:${BEFORE_PORT}/:${AFTER_PORT}/g' /etc/nginx/conf.d/default.conf && nginx -s reload"
+sudo docker exec -i nginx /bin/sh -c "sed -i 's/:${BEFORE_PORT}/:${AFTER_PORT}/g' /etc/nginx/conf.d/default.conf && nginx -s reload"
 
 echo "===== ${BEFORE_COLOR} server down(port:${BEFORE_PORT}) ====="
 sudo docker compose down springboot-${BEFORE_COLOR}
