@@ -9,7 +9,6 @@ import com.api.stuv.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -66,7 +65,8 @@ public class ChatController {
     @PostMapping("/group")
     public ResponseEntity<ApiResponse<String>> createGroupRoom(
             @RequestBody CreateGroupRoomRequest request) {
-        String roomId = chatRoomDetailService.createGroupChatRoom(String.valueOf(request.groupId()),request.groupName(), request.userId(), request.maxMembers());
+        String roomId = chatRoomDetailService.createGroupChatRoom(
+                String.valueOf(request.groupId()),request.groupName(), request.userId(), request.maxMembers());
         chatRoomMemberService.updateRoomMembers(String.valueOf(roomId));
         return ResponseEntity.ok(ApiResponse.success(roomId));
     }
