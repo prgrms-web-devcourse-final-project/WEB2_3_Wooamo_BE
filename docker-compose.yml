@@ -85,7 +85,7 @@ services:
     user: 10001:10001
     volumes:
       - ./docker/loki/config:/etc/loki
-      - ./docker/loki/volume:/loki
+      - /home/ubuntu/docker/loki:/loki
     ports:
       - 3100:3100
       - 9096:9096
@@ -96,7 +96,7 @@ services:
     user: 10001:10001
     volumes:
       - ./docker/prometheus/config:/etc/prometheus
-      - ./docker/prometheus/volume:/prometheus
+      - /home/ubuntu/docker/prometheus:/prometheus
     ports:
       - 9090:9090
     command:
@@ -122,7 +122,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./docker/grafana/volume:/var/lib/grafana
+      - /home/ubuntu/docker/grafana:/var/lib/grafana
       - ./docker/grafana/config/grafana.ini:/etc/grafana/grafana.ini:ro
 
   node:
