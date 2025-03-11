@@ -44,5 +44,6 @@ sudo docker exec -i nginx /bin/sh -c "sed -i 's/:${BEFORE_PORT}/:${AFTER_PORT}/g
 echo "===== ${BEFORE_COLOR} server down(port:${BEFORE_PORT}) ====="
 sudo docker compose down springboot-${BEFORE_COLOR}
 
-echo "===== 사용하지 않는 Docker 볼륨 정리 ====="
+echo "===== 사용하지 않는 Docker 정리 ====="
 sudo docker volume prune -f
+sudo docker image prune -f
