@@ -3,25 +3,15 @@ package com.api.stuv.domain.socket.controller;
 
 import com.api.stuv.domain.socket.dto.*;
 
-import com.api.stuv.domain.socket.service.ChatMessageService;
-import com.api.stuv.domain.socket.service.ChatRoomDetailService;
-import com.api.stuv.domain.socket.service.ChatRoomMemberService;
-import com.api.stuv.global.response.ApiResponse;
+import com.api.stuv.domain.socket.service.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
-
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 @Controller
 @RequiredArgsConstructor
@@ -30,107 +20,75 @@ public class ChatMessageController {
     private final ChatMessageService chatMessageService;
     private final ChatRoomDetailService chatRoomDetailService;
     private final ChatRoomMemberService chatRoomMemberService;
-    private final SimpMessagingTemplate messagingTemplate;
+    private final ChatRoomStatusService chatRoomStatusService;
+    private final ChatMessageSenderService chatMessageSenderService; // -> chatMessageSenderService
     private static final Logger logger = LoggerFactory.getLogger(ChatMessageController.class);
-    private final ConcurrentMap<String, Set<Long>> roomCache = new ConcurrentHashMap<>();
-    private final Set<Long> listPageSubscribers = ConcurrentHashMap.newKeySet();
 
+    /**
+     * 사용자 채팅방 입장 처리
+     * - /topic/users/{roomId}: 방 정보 업데이트
+     * - /topic/read/{roomId}: 읽음 처리 업데이트
+     */
     @Operation(summary = "채팅방 입장", description = "사용자가 채팅방에 입장할 때 등록합니다.")
     @MessageMapping("/chat/join")
-    public void addUserToRoom(@Payload ReadMessageRequest readMessageRequest) {
-        String roomId = readMessageRequest.roomId();
-        Long userId = readMessageRequest.userId();
+    public void addUserToRoom(@Payload ReadMessageRequest request) {
+        chatRoomMemberService.getUserInfo(request.userId());
+        chatRoomStatusService.userEnterRoom(request.roomId(), request.userId());
 
-        chatRoomMemberService.userJoinRoom(userId);
-        ChatRoomTypeInfoResponse chatRoomTypeInfoResponse  = chatRoomDetailService.getChatRoomInfoByRoomName(userId, roomId);
+        logger.info("{} 사용자가 채팅방 {}에 입장", request.userId(), request.roomId());
 
-        roomCache.computeIfAbsent(roomId, key -> ConcurrentHashMap.newKeySet()).add(userId);
-        logger.info("{} 사용자가 채팅방 {}에 참여", userId, roomId);
+        chatMessageService.markMessagesAsRead(request.roomId(), request.userId());
 
-        logger.info("현재 채팅방 사용자: {}", roomCache);
-
-        chatMessageService.markMessagesAsRead(roomId, userId);
-        messagingTemplate.convertAndSend("/topic/users/" + roomId, ApiResponse.success(chatRoomTypeInfoResponse));
-
-        Map<String, String> response = new HashMap<>();
-        response.put("userId", String.valueOf(userId));
-
-        messagingTemplate.convertAndSend("/topic/read/" + roomId, ApiResponse.success(response));
+        ChatRoomTypeInfoResponse typeInfoResponse = chatRoomDetailService.getChatRoomInfoByRoomName(request.userId(), request.roomId());
+        chatMessageSenderService.sendUserJoinedMessage(request.roomId(), typeInfoResponse, request.userId());
     }
 
+    /**
+     * 사용자 채팅방 퇴장 처리
+     * - 전송 URL 없음 (서버에서 사용자 상태만 제거)
+     */
     @Operation(summary = "채팅방 퇴장", description = "사용자가 채팅방에서 나갈 때 삭제합니다.")
     @MessageMapping("/chat/leave")
-    public void removeUserFromRoom(@Payload ReadMessageRequest readMessageRequest) {
-        String roomId = readMessageRequest.roomId();
-        Long userId = readMessageRequest.userId();
-
-        roomCache.computeIfPresent(roomId, (key, users) -> {
-            users.remove(userId);
-            if (users.isEmpty()) {
-                logger.info("채팅방 {}에 남은 사용자가 없어 삭제됩니다.", roomId);
-                return null;
-            }
-            return users;
-        });
-
-        logger.info("{} 사용자가 채팅방 {}에서 나감", userId, roomId);
-        logger.info("현재 채팅방 사용자: {}", roomCache);
+    public void removeUserFromRoom(@Payload ReadMessageRequest request) {
+        chatRoomStatusService.userExitRoom(request.roomId(), request.userId());
+        logger.info("{} 사용자가 채팅방 {}에서 나감", request.userId(), request.roomId());
     }
 
+    /**
+     * 사용자 채팅 목록 페이지 입장 처리
+     * - /topic/rooms/{userId}: 최신 채팅방 목록 갱신하여 전달
+     */
     @Operation(summary = "채팅 목록 페이지 입장", description = "사용자가 채팅 목록 페이지에 들어올 때 등록합니다.")
     @MessageMapping("/chat/list/join")
-    public void addUserToListPage(@Payload ReadMessageRequest readMessageRequest) {
-        Long userId = readMessageRequest.userId();
-        if (listPageSubscribers.add(userId)) {
-            logger.info("{} 사용자가 채팅방 목록 페이지에 입장했습니다.", userId);
-        } else {
-            logger.info("{} 사용자가 이미 채팅방 목록 페이지에 등록되어 있습니다.", userId);
-        }
-        logger.info("현재 목록 페이지 구독자: {}", listPageSubscribers);
-
-        List<ChatRoomResponse> roomList = chatRoomDetailService.getSortedRoomListBySenderId(
-                readMessageRequest.userId()
-        );
-        messagingTemplate.convertAndSend("/topic/rooms/" + userId, ApiResponse.success(roomList));
+    public void addUserToListPage(@Payload ReadMessageRequest request) {
+        chatRoomStatusService.subscribeListPage(request.userId());
+        chatMessageSenderService.sendUpdatedRoomList(request.userId());
     }
 
+    /**
+     * 사용자 채팅 목록 페이지 퇴장 처리
+     * - 전송 URL 없음 (서버에서 사용자 상태만 제거)
+     */
     @Operation(summary = "채팅 목록 페이지 퇴장", description = "사용자가 채팅 목록 페이지를 나갈 때 제거합니다.")
     @MessageMapping("/chat/list/leave")
-    public void removeUserFromListPage(@Payload ReadMessageRequest readMessageRequest) {
-        Long userId = readMessageRequest.userId();
-        listPageSubscribers.remove(userId);
-        logger.info("{} 사용자가 채팅방 목록 페이지에서 나갔습니다.", userId);
-        logger.info("현재 목록 페이지 구독자: {}", listPageSubscribers);
+    public void removeUserFromListPage(@Payload ReadMessageRequest request) {
+        logger.info("{} 사용자가 채팅방 목록 페이지에서 나갔습니다.", request.userId());
+        chatRoomStatusService.unsubscribeListPage(request.userId());
     }
 
+    /**
+     * 채팅방 메시지 전송 처리
+     * - /topic/messages/{roomId}: 메시지를 채팅방 구독자에게 전송
+     * - /topic/rooms/{userId}: 채팅 목록 구독자에게 최신 채팅방 목록 갱신하여 전달
+     */
     @Operation(summary = "메시지 전송", description = "채팅방에 메시지를 전송합니다.")
     @MessageMapping("/chat/send")
     public void sendMessage(@Payload ChatMessageRequest message) {
-        if (message.roomId() != null) { // roomId를 기준으로 메시지를 전송
-            logger.info("메시지 전송 [{} -> {}]: {}", message.userInfo().userId(), message.roomId(), message.message());
 
-            // 현재 방에 있는 모든 사용자 가져오기
-            Set<Long> usersInRoom = roomCache.getOrDefault(message.roomId(), Collections.emptySet());
-
-            ChatMessageResponse savedMessage = chatMessageService.saveMessage(
-                    new ChatMessageRequest(
-                            message.roomId(),
-                            message.userInfo(),
-                            message.message(),
-                            new ArrayList<>(usersInRoom)
-                    )
-            );
-
-            // 저장된 메시지를 채팅방 구독자에게 전송
-            messagingTemplate.convertAndSend("/topic/messages/" + message.roomId(), ApiResponse.success(savedMessage));
-            // 채팅 목록 페이지에 있는 모든 사용자에게 업데이트 전송
-            for (Long subscriberId : listPageSubscribers) {
-                List<ChatRoomResponse> roomList = chatRoomDetailService.getSortedRoomListBySenderId(
-                        subscriberId
-                );
-                messagingTemplate.convertAndSend("/topic/rooms/" + subscriberId, ApiResponse.success(roomList));
-            }
-        }
+        logger.info("메시지 전송 [{} -> {}]: {}", message.userInfo().userId(), message.roomId(), message.message());
+        ChatMessageResponse savedMessage = chatMessageService.saveMessageWithReadBy(message);
+        chatMessageSenderService.sendMessageToRoom(message.roomId(), savedMessage);
+        chatMessageSenderService.notifyRoomListSubscribers();
     }
 
 }
