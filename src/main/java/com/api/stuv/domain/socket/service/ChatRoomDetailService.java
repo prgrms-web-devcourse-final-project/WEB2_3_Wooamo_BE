@@ -1,13 +1,10 @@
 package com.api.stuv.domain.socket.service;
 
-import com.api.stuv.domain.image.entity.EntityType;
-import com.api.stuv.domain.image.service.S3ImageService;
 import com.api.stuv.domain.socket.dto.*;
 import com.api.stuv.domain.socket.entity.ChatMessage;
 import com.api.stuv.domain.socket.entity.ChatRoom;
 import com.api.stuv.domain.socket.repository.ChatMessageRepository;
 import com.api.stuv.domain.socket.repository.ChatRoomRepository;
-import com.api.stuv.domain.user.dto.ImageUrlDTO;
 import com.api.stuv.domain.user.repository.UserRepository;
 import com.api.stuv.global.exception.ErrorCode;
 import com.api.stuv.global.exception.NotFoundException;
@@ -24,7 +21,6 @@ public class ChatRoomDetailService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
-    private final S3ImageService s3ImageService;
     private final ChatRoomMemberService chatRoomMemberService;
 
     public String createPrivateChatRoom(Long userId1, Long userId2) {
@@ -117,9 +113,7 @@ public class ChatRoomDetailService {
                     int unreadCount = chatMessageRepository.countUnreadMessages(room.getRoomId(), senderId);
 
                     Long lastSenderId = (latestMessage != null) ? latestMessage.getSenderId() : null;
-
                     UserInfo lastUserInfo = chatRoomMemberService.getUserInfo(lastSenderId);
-
                     UserInfo userInfo = null;
                     GroupInfo groupInfo = null;
 

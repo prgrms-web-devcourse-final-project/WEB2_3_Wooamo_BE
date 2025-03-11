@@ -12,7 +12,6 @@ import com.api.stuv.global.exception.NotFoundException;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +19,6 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +31,7 @@ public class ChatRoomMemberService {
     @Autowired
     private final RedisTemplate<String, UserInfo> redisTemplate;
     private static final String USER_INFO_PREFIX = "user:info:";
+    private static final Duration USER_INFO_CACHE_DURATION = Duration.ofMinutes(60);
     // 방별 사용자 목록 저장
     private final ConcurrentMap<String, Set<Long>> roomMembersCache = new ConcurrentHashMap<>();
 
@@ -57,29 +56,13 @@ public class ChatRoomMemberService {
         return roomMembersCache.getOrDefault(roomId, Collections.emptySet()).size();
     }
 
-
-    // 사용자가 방에 입장하면 정보 추가
-    public void userJoinRoom(Long userId) {
-
-        String userKey = USER_INFO_PREFIX + userId;
-        UserInfo userInfo = redisTemplate.opsForValue().get(userKey);
-        if (userInfo == null) {
-            userInfo = loadUserInfoFromDB(userId);
-            redisTemplate.opsForValue().set(userKey, userInfo, Duration.ofMinutes(60));
-        } else {
-            redisTemplate.expire(userKey, Duration.ofMinutes(60));
-        }
-    }
-
-    // 사용자 정보 반환
+    // 사용자 정보 반환 및 정보 추가
     public UserInfo getUserInfo(Long userId) {
         String userKey = USER_INFO_PREFIX + userId;
-
         UserInfo userInfo = redisTemplate.opsForValue().get(userKey);
-
         if (userInfo == null) {
             userInfo = loadUserInfoFromDB(userId);
-            redisTemplate.opsForValue().set(userKey, userInfo, Duration.ofMinutes(60));
+            redisTemplate.opsForValue().set(userKey, userInfo, USER_INFO_CACHE_DURATION);
         }
         return userInfo;
     }
@@ -87,7 +70,6 @@ public class ChatRoomMemberService {
     // DB에서 사용자 정보 불러와 Redis에 저장
     private UserInfo loadUserInfoFromDB(Long userId) {
         String nickname = (userId != null) ? userRepository.findNicknameByUserId(userId) : "";
-
         ImageUrlDTO response = (userId != null) ? userRepository.getCostumeInfoByUserId(userId) : null;
         String profileUrl = (response != null) ? s3ImageService.generateImageFile(EntityType.COSTUME, response.entityId(), response.newFileName()) : null;
 
@@ -100,7 +82,7 @@ public class ChatRoomMemberService {
         UserInfo userInfo = redisTemplate.opsForValue().get(userKey);
         if (userInfo != null) {
             UserInfo updatedUserInfo = new UserInfo(userId, userInfo.nickname(), newProfileUrl);
-            redisTemplate.opsForValue().set(userKey, updatedUserInfo, Duration.ofMinutes(60));
+            redisTemplate.opsForValue().set(userKey, updatedUserInfo, USER_INFO_CACHE_DURATION);
         }
     }
 

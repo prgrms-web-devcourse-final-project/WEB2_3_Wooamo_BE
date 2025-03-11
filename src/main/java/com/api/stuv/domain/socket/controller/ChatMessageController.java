@@ -27,7 +27,7 @@ public class ChatMessageController {
     @Operation(summary = "채팅방 입장", description = "사용자가 채팅방에 입장할 때 등록합니다.")
     @MessageMapping("/chat/join")
     public void addUserToRoom(@Payload ReadMessageRequest request) {
-        chatRoomMemberService.userJoinRoom(request.userId());
+        chatRoomMemberService.getUserInfo(request.userId());
         chatRoomStatusService.userEnterRoom(request.roomId(), request.userId());
 
         logger.info("{} 사용자가 채팅방 {}에 입장", request.userId(), request.roomId());
