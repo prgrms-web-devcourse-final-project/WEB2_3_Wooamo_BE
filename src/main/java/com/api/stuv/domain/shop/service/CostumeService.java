@@ -48,16 +48,16 @@ public class CostumeService {
     private final PointHistoryRepository pointHistoryRepository;
 
     @Transactional(readOnly = true)
-    public PageResponse<CostumeResponse> getCostumeList(Pageable pageable) {
-        PageResponse<CostumeDTO> responsePage = costumeRepository.getCostumeList(pageable);
-        List<CostumeResponse> costumeResponses = responsePage.getContents().stream()
+    public List<CostumeResponse> getCostumeList() {
+        List<CostumeDTO> responsePage = costumeRepository.getCostumeList();
+        List<CostumeResponse> costumeResponses = responsePage.stream()
                 .map(response -> new CostumeResponse(
                         response.costumeId(),
                         s3ImageService.generateImageFile(EntityType.COSTUME, response.costumeId(), response.imageName()),
                         response.costumeName(),
                         response.point()
                 )).toList();
-        return PageResponse.of(new PageImpl<>(costumeResponses, pageable, responsePage.getTotalElements()));
+        return costumeResponses;
     }
 
     @Transactional(readOnly = true)

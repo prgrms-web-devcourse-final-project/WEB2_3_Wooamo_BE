@@ -19,6 +19,17 @@ fi
 
 echo "===== ${AFTER_COLOR} server up(port:${AFTER_PORT}) ====="
 
+# 서버가 완전히 실행될 때까지 대기
+for i in {1..40}; do
+  HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}" http://localhost:${AFTER_PORT})
+  if [ "$HTTP_STATUS" -eq 200 ]; then
+    echo "===== ${AFTER_COLOR} 서버가 정상적으로 실행됨 (HTTP 200) ====="
+    break
+  fi
+  echo "===== ${AFTER_COLOR} 서버가 준비되지 않음... 재시도 ($i) ====="
+  sleep 1
+done
+
 # 컨테이너 상태 확인
 CONTAINER_STATUS=$(sudo docker inspect -f '{{.State.Status}}' stuv-app-${AFTER_COLOR})
 
@@ -28,7 +39,7 @@ if [ "$CONTAINER_STATUS" != "running" ]; then
 fi
 
 echo "===== Nginx 설정 변경 ====="
-sudo docker exec -it nginx /bin/sh -c "sed -i 's/:${BEFORE_PORT}/:${AFTER_PORT}/g' /etc/nginx/conf.d/default.conf && nginx -s reload"
+sudo docker exec -i nginx /bin/sh -c "sed -i 's/:${BEFORE_PORT}/:${AFTER_PORT}/g' /etc/nginx/conf.d/default.conf && nginx -t && nginx -s reload"
 
 echo "===== ${BEFORE_COLOR} server down(port:${BEFORE_PORT}) ====="
 sudo docker compose down springboot-${BEFORE_COLOR}

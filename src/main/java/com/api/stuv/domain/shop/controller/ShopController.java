@@ -10,14 +10,13 @@ import com.api.stuv.domain.shop.dto.payments.PaymentResponse;
 import com.api.stuv.domain.shop.service.CostumeService;
 import com.api.stuv.domain.shop.service.PaymentService;
 import com.api.stuv.global.response.ApiResponse;
-import com.api.stuv.global.response.PageResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -28,12 +27,9 @@ public class ShopController {
     private final PaymentService paymentService;
 
     @GetMapping(value = "/costume")
-    public ResponseEntity<ApiResponse<PageResponse<CostumeResponse>>> listCostumes (
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
+    public ResponseEntity<ApiResponse<List<CostumeResponse>>> listCostumes () {
         return ResponseEntity.ok().body(ApiResponse.success(
-                costumeService.getCostumeList(PageRequest.of(page, size))));
+                costumeService.getCostumeList()));
     }
 
     @GetMapping(value = "/costume/{costumeId}")
