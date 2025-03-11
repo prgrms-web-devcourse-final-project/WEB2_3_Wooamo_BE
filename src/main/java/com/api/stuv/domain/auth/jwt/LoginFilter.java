@@ -99,11 +99,11 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         }
 
         //토큰 생성
-        String access = jwtUtil.createJwt("access", userId, email, role, 86400000L);
-        String refresh = jwtUtil.createJwt("refresh", userId, email, role, 86400000L);
+        String access = jwtUtil.createJwt("access", userId, email, role, 3600000L); //1시간
+        String refresh = jwtUtil.createJwt("refresh", userId, email, role, 604800000L); //7일
 
         //refresh 토큰 저장
-        redisService.save(refresh, email, Duration.ofDays(1));
+        redisService.save(refresh, email, Duration.ofDays(7));
 
         //응답 설정
         response.setHeader("access", access);

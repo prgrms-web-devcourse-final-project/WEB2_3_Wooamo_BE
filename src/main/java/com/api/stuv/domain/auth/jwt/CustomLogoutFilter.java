@@ -18,6 +18,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.util.Date;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -82,15 +84,18 @@ public class CustomLogoutFilter extends GenericFilterBean {
             return;
         }
 
-        //DB에 저장되어 있는지 확인
-//        String isExist = redisService.find(refresh, String.class);
-//        if (isExist == null) {
-//            log.error("refresh 토큰이 redis에 없습니다.");
-//            System.out.println(isExist);
-//            //response status code
-//            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-//            return;
-//        }
+        //유효기간이 남아있는 access 토큰 남아있는 기간만큼 redis에 저장
+        try {
+            if (!jwtUtil.isExpired(request.getHeader("access"))) {
+                String accessToken = request.getHeader("access");
+                Date expiration = jwtUtil.getExpiration(accessToken);
+                Date now = new Date();
+                Duration duration = Duration.between(now.toInstant(), expiration.toInstant());
+                redisService.save(accessToken, "access", duration);
+            }
+        } catch (ExpiredJwtException e) {
+            log.info("access 토큰 만료");
+        }
 
         //로그아웃 진행
         //Refresh 토큰 DB에서 제거
