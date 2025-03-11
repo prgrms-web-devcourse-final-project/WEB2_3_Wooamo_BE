@@ -24,6 +24,11 @@ public class ChatMessageController {
     private final ChatMessageSenderService chatMessageSenderService; // -> chatMessageSenderService
     private static final Logger logger = LoggerFactory.getLogger(ChatMessageController.class);
 
+    /**
+     * 사용자 채팅방 입장 처리
+     * - /topic/users/{roomId}: 방 정보 업데이트
+     * - /topic/read/{roomId}: 읽음 처리 업데이트
+     */
     @Operation(summary = "채팅방 입장", description = "사용자가 채팅방에 입장할 때 등록합니다.")
     @MessageMapping("/chat/join")
     public void addUserToRoom(@Payload ReadMessageRequest request) {
@@ -38,6 +43,10 @@ public class ChatMessageController {
         chatMessageSenderService.sendUserJoinedMessage(request.roomId(), typeInfoResponse, request.userId());
     }
 
+    /**
+     * 사용자 채팅방 퇴장 처리
+     * - 전송 URL 없음 (서버에서 사용자 상태만 제거)
+     */
     @Operation(summary = "채팅방 퇴장", description = "사용자가 채팅방에서 나갈 때 삭제합니다.")
     @MessageMapping("/chat/leave")
     public void removeUserFromRoom(@Payload ReadMessageRequest request) {
@@ -45,6 +54,10 @@ public class ChatMessageController {
         logger.info("{} 사용자가 채팅방 {}에서 나감", request.userId(), request.roomId());
     }
 
+    /**
+     * 사용자 채팅 목록 페이지 입장 처리
+     * - /topic/rooms/{userId}: 최신 채팅방 목록 갱신하여 전달
+     */
     @Operation(summary = "채팅 목록 페이지 입장", description = "사용자가 채팅 목록 페이지에 들어올 때 등록합니다.")
     @MessageMapping("/chat/list/join")
     public void addUserToListPage(@Payload ReadMessageRequest request) {
@@ -52,6 +65,10 @@ public class ChatMessageController {
         chatMessageSenderService.sendUpdatedRoomList(request.userId());
     }
 
+    /**
+     * 사용자 채팅 목록 페이지 퇴장 처리
+     * - 전송 URL 없음 (서버에서 사용자 상태만 제거)
+     */
     @Operation(summary = "채팅 목록 페이지 퇴장", description = "사용자가 채팅 목록 페이지를 나갈 때 제거합니다.")
     @MessageMapping("/chat/list/leave")
     public void removeUserFromListPage(@Payload ReadMessageRequest request) {
@@ -59,6 +76,11 @@ public class ChatMessageController {
         chatRoomStatusService.unsubscribeListPage(request.userId());
     }
 
+    /**
+     * 채팅방 메시지 전송 처리
+     * - /topic/messages/{roomId}: 메시지를 채팅방 구독자에게 전송
+     * - /topic/rooms/{userId}: 채팅 목록 구독자에게 최신 채팅방 목록 갱신하여 전달
+     */
     @Operation(summary = "메시지 전송", description = "채팅방에 메시지를 전송합니다.")
     @MessageMapping("/chat/send")
     public void sendMessage(@Payload ChatMessageRequest message) {
