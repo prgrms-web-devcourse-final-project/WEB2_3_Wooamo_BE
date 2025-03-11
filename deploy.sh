@@ -19,8 +19,8 @@ fi
 
 echo "===== ${AFTER_COLOR} server up(port:${AFTER_PORT}) ====="
 
-# 서버가 완전히 실행될 때까지 대기 (최대 30초)
-for i in {1..30}; do
+# 서버가 완전히 실행될 때까지 대기
+for i in {1..40}; do
   HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}" http://localhost:${AFTER_PORT})
   if [ "$HTTP_STATUS" -eq 200 ]; then
     echo "===== ${AFTER_COLOR} 서버가 정상적으로 실행됨 (HTTP 200) ====="
