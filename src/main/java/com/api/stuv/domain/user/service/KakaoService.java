@@ -179,7 +179,7 @@ public class KakaoService {
 
         Optional<User> user = userRepository.findBySocialId(kakaoUser.socialId());
 
-        if (user == null) {
+        if (user.isEmpty()) {
             userService.registerKakaoUser(kakaoUser);
             user = Optional.of(userRepository.findByEmail(kakaoUser.email()));
         }
