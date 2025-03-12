@@ -181,6 +181,7 @@ public class KakaoService {
 
         if (user == null) {
             userService.registerKakaoUser(kakaoUser);
+            user = Optional.of(userRepository.findByEmail(kakaoUser.email()));
         }
 
         login(kakaoUser, response, request);
