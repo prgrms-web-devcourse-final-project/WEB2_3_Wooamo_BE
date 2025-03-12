@@ -32,6 +32,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -176,20 +177,14 @@ public class KakaoService {
         String accessToken = getKakaoAccessToken(kakaoCodeRequest.code());
         KakaoUserRequest kakaoUser = getKakaoUser(accessToken);
 
-        User user = userRepository.findBySocialId(kakaoUser.socialId());
+        Optional<User> user = userRepository.findBySocialId(kakaoUser.socialId());
 
-        if(user != null){
-            login(kakaoUser, response, request);
-            RoleType role = user.getRole();
-            return new LoginResponse(role.getText());
-        }
-        else{
+        if (user == null) {
             userService.registerKakaoUser(kakaoUser);
-            login(kakaoUser, response, request);
-            User loginUser = userRepository.findBySocialId(kakaoUser.socialId());
-            RoleType role = loginUser.getRole();
-            return new LoginResponse(role.getText());
         }
+
+        login(kakaoUser, response, request);
+        return new LoginResponse(user.getRole().getText());
     }
 
     private Cookie createCookie(String key, String value) {
