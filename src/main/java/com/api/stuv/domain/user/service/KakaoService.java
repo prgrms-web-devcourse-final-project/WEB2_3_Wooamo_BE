@@ -177,15 +177,17 @@ public class KakaoService {
         KakaoUserRequest kakaoUser = getKakaoUser(accessToken);
 
         User user = userRepository.findBySocialId(kakaoUser.socialId());
-        RoleType role = user.getRole();
 
         if(user != null){
             login(kakaoUser, response, request);
+            RoleType role = user.getRole();
             return new LoginResponse(role.getText());
         }
         else{
             userService.registerKakaoUser(kakaoUser);
             login(kakaoUser, response, request);
+            User loginUser = userRepository.findBySocialId(kakaoUser.socialId());
+            RoleType role = loginUser.getRole();
             return new LoginResponse(role.getText());
         }
     }
