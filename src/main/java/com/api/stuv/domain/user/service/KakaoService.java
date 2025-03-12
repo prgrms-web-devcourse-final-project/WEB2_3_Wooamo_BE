@@ -179,14 +179,18 @@ public class KakaoService {
 
         Optional<User> user = userRepository.findBySocialId(kakaoUser.socialId());
 
-        if (user == null) {
-            userService.registerKakaoUser(kakaoUser);
-            user = Optional.of(userRepository.findByEmail(kakaoUser.email()));
+        if(user != null){
+            login(kakaoUser, response, request);
+            RoleType role = user.get().getRole();
+            return new LoginResponse(role.getText());
         }
-
-        login(kakaoUser, response, request);
-        RoleType role = user.get().getRole();
-        return new LoginResponse(role.getText());
+        else{
+            userService.registerKakaoUser(kakaoUser);
+            login(kakaoUser, response, request);
+            Optional<User> loginUser = userRepository.findBySocialId(kakaoUser.socialId());
+            RoleType role = loginUser.get().getRole();
+            return new LoginResponse(role.getText());
+        }
     }
 
     private Cookie createCookie(String key, String value) {
