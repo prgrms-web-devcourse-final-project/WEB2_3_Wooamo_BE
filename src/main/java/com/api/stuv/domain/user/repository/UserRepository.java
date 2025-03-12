@@ -22,7 +22,7 @@ public interface UserRepository extends JpaRepository<User, Long>, UserRepositor
 
     User findByEmail(String email);
 
-    User findBySocialId(Long socialId);
+    Optional<User> findBySocialId(Long socialId);
 
     Optional<User> findById(Long userId);
 
