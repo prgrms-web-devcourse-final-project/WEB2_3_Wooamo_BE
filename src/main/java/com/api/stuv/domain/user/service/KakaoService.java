@@ -53,10 +53,10 @@ public class KakaoService {
     private String redirectUri;
 
     //카카오 회원 정보가 있을 시 로그인
-    public String login(KakaoUserRequest kakaoUserRequest, HttpServletResponse response, HttpServletRequest request) {
-        String email = kakaoUserRequest.email();
-        Long userId = userRepository.findByEmail(email).getId();
-        String role = "회원";
+    public String login(User user, HttpServletResponse response, HttpServletRequest request) {
+        String email = user.getEmail();
+        Long userId = user.getId();
+        String role = RoleType.USER.getText();
 
         String login = null;
         Cookie[] cookies = request.getCookies();
@@ -184,7 +184,7 @@ public class KakaoService {
             user = Optional.of(userRepository.findByEmail(kakaoUser.email()));
         }
 
-        login(kakaoUser, response, request);
+        login(user.get(), response, request);
         RoleType role = user.get().getRole();
         return new LoginResponse(role.getText());
     }
