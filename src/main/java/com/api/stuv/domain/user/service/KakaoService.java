@@ -184,7 +184,8 @@ public class KakaoService {
         }
 
         login(kakaoUser, response, request);
-        return new LoginResponse(user.getRole().getText());
+        RoleType role = user.get().getRole();
+        return new LoginResponse(role.getText());
     }
 
     private Cookie createCookie(String key, String value) {
