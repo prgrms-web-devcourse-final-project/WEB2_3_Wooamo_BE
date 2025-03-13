@@ -80,7 +80,11 @@ public class UserService {
         Boolean isExist = userRepository.existsByEmail(email);
 
         if(isExist){
-            throw new NotFoundException(ErrorCode.USER_ALREADY_EXIST);
+            User user = userRepository.findByEmail(email);
+            user.setSocialId(socialId);
+            userRepository.save(user);
+
+            return;
         }
 
         User user = kakaoUserRequest.kakaoFrom(kakaoUserRequest, socialId,  bCryptPasswordEncoder);

@@ -76,4 +76,6 @@ public class User extends BaseTimeEntity {
     public void changeUserCostume(Long costumeId) {
         this.costumeId = costumeId;
     }
+
+    public void setSocialId(Long socialId) {this.socialId = socialId;}
 }
