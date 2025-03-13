@@ -15,7 +15,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class ImageService {
 
-    private static final Set<String> approveExtensions = Set.of("jpg", "jpeg", "png", "gif");
+    private static final Set<String> approveExtensions = Set.of("jpg", "jpeg", "png", "gif", "webp");
     private final S3ImageService s3ImageService;
     private final ImageFileRepository imageFileRepository;
 
