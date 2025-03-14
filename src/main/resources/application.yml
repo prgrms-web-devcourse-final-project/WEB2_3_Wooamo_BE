@@ -1,0 +1,181 @@
+frontend:
+  server: ${FE_BASE:http://localhost:3000}
+spring:
+  application:
+    name: stuv
+  profiles:
+    active: local
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_EMAIL}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  config:
+    import: optional:file:.env[.properties]
+
+  thymeleaf:
+    check-template-location: true
+    prefix: classpath:/templates/
+    suffix: .html
+
+  servlet:
+    multipart:
+      max-file-size: 10MB        # 단일 파일 최대 크기
+      max-request-size: 50MB     # 요청당 전체 파일 크기
+
+server:
+  shutdown: graceful
+  servlet:
+    session:
+      timeout: 0
+
+info:
+  app:
+    name: STUV
+    company: 우리들은 아무것도 모른다
+
+management:
+  info:
+    java:
+      enabled: true
+    os:
+      enabled: true
+    env:
+      enabled: true
+  observations:
+    key-values:
+      application: stuv-service
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: "health, info, loggers, metrics, prometheus"
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http:
+          server:
+            requests=true:
+    enable:
+      redis: true
+  tracing:
+    propagation:
+      type: w3c
+    enabled: true
+    sampling:
+      probability: 1.0
+logging:
+  level:
+    root: info
+  config: classpath:logback-spring.xml
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource: # MariaDB
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: ${MARIA_URL}
+    username: ${MARIA_USER}
+    password: ${MARIA_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+    open-in-view: false
+  data:
+    redis:
+      port: ${REDIS_PORT}
+      host: ${REDIS_HOST}
+    mongodb:
+      uri: ${MONGO_URI}
+      auto-index-creation: true
+cloud:
+  aws:
+    s3:
+      bucket: ${AWS_S3_BUCKET}
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+    region:
+      static: ap-northeast-2
+payment:
+  toss:
+    test_secret_api_key: ${TOSS_TEST_SECRET_KEY}
+jwt:
+  secret-key: ${JWT_SECRET_KEY}
+kakao:
+  api-key: ${KAKAO_API_KEY}
+  client-secret: ${KAKAO_CLIENT_SECRET}
+  redirect-uri: ${FE_BASE}/signin
+  authentication:
+    method: POST
+    grant-type: authorization_code
+---
+spring:
+  config:
+    activate:
+      on-profile: test
+  datasource: # H2DB
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:stuv;MODE=MySQL
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+  data:
+    redis:
+      port: 6379
+      host: localhost
+    mongodb:
+      uri: mongodb://localhost:27017/test
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+cloud:
+  aws:
+    s3:
+      bucket: test
+    credentials:
+      access-key: test
+      secret-key: test
+    region:
+      static: ap-northeast-2
+
+payment:
+  toss:
+    test_secret_api_key: ${TOSS_TEST_SECRET_KEY}
+jwt:
+  secret-key: test
+kakao:
+  api-key: test
+  client-secret: test
+  redirect-uri: http://localhost:3000/signin
+  authentication:
+    method: client_secret_post
+    grant-type: authorization_code
+---

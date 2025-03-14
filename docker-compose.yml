@@ -1,0 +1,132 @@
+services:
+
+  nginx:
+    image: nginx:1.15-alpine
+    container_name: nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/proxy/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/proxy/conf.d:/etc/nginx/conf.d
+      - /etc/letsencrypt:/etc/letsencrypt
+    depends_on:
+      - springboot-blue
+      - springboot-green
+
+  springboot-blue:
+    image: gpemvjtmxm/stuv-app:latest
+    container_name: stuv-app-blue
+    restart: always
+    env_file:
+      - /home/ubuntu/env/.env
+    environment:
+      - TZ=Asia/Seoul
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  springboot-green:
+    image: gpemvjtmxm/stuv-app:latest
+    container_name: stuv-app-green
+    restart: always
+    env_file:
+      - /home/ubuntu/env/.env
+    environment:
+      - TZ=Asia/Seoul
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8080"
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    hostname: redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli","ping" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+
+  tempo:
+    container_name: tempo
+    image: grafana/tempo:latest
+    command:
+      [
+        "-config.file=/etc/tempo/config/tempo.yaml",
+        "--auth.enabled=false"
+      ]
+    volumes:
+      - ./docker/tempo/config:/etc/tempo/config
+      - ./docker/tempo/volume:/var
+    ports:
+      - "3200:3200" # tempo
+      - "9095:9095" # tempo grpc
+      - "4317:4317" # otlp grpc
+      - "4318:4318" # otlp http
+
+  loki:
+    container_name: loki
+    image: grafana/loki:latest
+    user: 10001:10001
+    volumes:
+      - ./docker/loki/config:/etc/loki
+      - /home/ubuntu/docker/loki:/loki
+    ports:
+      - 3100:3100
+      - 9096:9096
+
+  prometheus:
+    image: prom/prometheus:main
+    container_name: prometheus
+    user: 10001:10001
+    volumes:
+      - ./docker/prometheus/config:/etc/prometheus
+      - /home/ubuntu/docker/prometheus:/prometheus
+    ports:
+      - 9090:9090
+    command:
+      - '--web.enable-lifecycle'
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--web.enable-remote-write-receiver'
+      - '--enable-feature=exemplar-storage'
+      - '--storage.tsdb.retention.time=7d'
+    environment:
+      - TZ=Asia/Seoul
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "8m"
+        max-file: "10"
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    user: 472:472
+    environment:
+      - TZ=Asia/Seoul
+    ports:
+      - "3000:3000"
+    volumes:
+      - /home/ubuntu/docker/grafana:/var/lib/grafana
+      - ./docker/grafana/config/grafana.ini:/etc/grafana/grafana.ini:ro
+
+  node:
+    image: prom/node-exporter
+    container_name: node-exporter
+    ports:
+      - "9100:9100"
