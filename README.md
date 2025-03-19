@@ -47,7 +47,7 @@
 
 ## ⚒️ 개발 환경
 ### 📜 Project Docs 
-[![Figma](https://img.shields.io/badge/Figma-F24E1E?style=for-the-badge&logo=figma&logoColor=white)](https://www.figma.com/design/zaPwvGTyXmiWPWCydbRmIR/2%EC%B0%A8%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8?node-id=0-1&t=yebkxSL4q1VBDs6r-1) [![Notion](https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=notion&logoColor=white)](https://www.notion.so/Team02-1964873f28dd807285b0e332df1b646b) [![Db Diagram](https://img.shields.io/badge/DBDiagram-4169E1?style=for-the-badge&logo=databricks&logoColor=white)](https://dbdiagram.io/d/675aa7f746c15ed47925f072)
+[![Figma](https://img.shields.io/badge/Figma-F24E1E?style=for-the-badge&logo=figma&logoColor=white)](https://www.figma.com/design/zzNC1QlABzTLm4uaFhrCza/%EC%B5%9C%EC%A2%85%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8?node-id=0-1&t=VBQrCS9g2YtZ8nEE-1) [![Notion](https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=notion&logoColor=white)](https://www.notion.so/Team02-1964873f28dd807285b0e332df1b646b) [![Db Diagram](https://img.shields.io/badge/DBDiagram-4169E1?style=for-the-badge&logo=databricks&logoColor=white)](https://dbdiagram.io/d/4%EC%B0%A8-%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-67aa42ec263d6cf9a0aa4d62)
 
 ### 🖥 **System Architecture**
 <img src="https://raw.githubusercontent.com/DevPumpkin0113/Devpumpkin0113/refs/heads/main/images/STUV_Architecture2.png">
